@@ -19,7 +19,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'TipInvest',
   description: 'Invest wisely with TipInvest',
-  viewport: 'width=device-width, initial-scale=1',
+  
 };
 
 
