@@ -5,7 +5,6 @@ export default function Example() {
   return (
     <div className="py-24 sm:py-32">
       <div className="mx-auto px-4 lg:max-w-7xl w-full lg:px-0 lg:w-2/3">
-        <h2 className="text-center text-base font-semibold text-lime-600">Deploy faster</h2>
         <p className="mx-auto mt-6 text-center text-3xl font-semibold tracking-tight text-gray-950 sm:text-5xl">
           Fonctionnalités Clés de TipInvest
         </p>
