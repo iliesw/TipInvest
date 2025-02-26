@@ -29,3 +29,6 @@ body {
 h1{
   font-family: Milk;
 }
+html, body {
+  overflow-x: hidden;
+}
