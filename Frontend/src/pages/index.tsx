@@ -14,6 +14,15 @@ import Intro from "@/components/Home/Intro";
 import Bento from "@/components/Home/Bento";
 import Navbar from "@/components/Home/Navbar";
 
+import { Metadata } from 'next';
+ 
+export const metadata: Metadata = {
+  title: 'TipInvest',
+  description: 'Invest wisely with TipInvest',
+  viewport: 'width=device-width, initial-scale=1',
+};
+
+
 export default function Home() {
   return (
     <div className="">
