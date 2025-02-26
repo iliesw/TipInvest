@@ -20,13 +20,16 @@ export default function Chatbot() {
     }
   }, [messages, isOpen]);
 
-  const Ai = async(prompt:string) => {
+  const Ai = async (prompt: string) => {
     const genAI = new GoogleGenerativeAI("AIzaSyCKQzob4du2lWW_10YelhHfpsM45YthEq0");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" ,systemInstruction:`
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: `
       You are the AI assistant for TipInvest, an investment platform that helps users discover and evaluate investment opportunities. Your goal is to provide accurate, relevant, and professional responses while maintaining a friendly tone. You can answer questions about TipInvest’s services, assist with navigation, provide insights on investment strategies without giving financial advice, and help troubleshoot technical issues. Keep responses clear and concise, avoid financial recommendations, and direct users to support when needed. Encourage engagement by suggesting actions within the platform.
 
-      `});
+      `,
+    });
     const result = await model.generateContent(prompt);
     return result.response.text();
   };
@@ -38,7 +41,7 @@ export default function Chatbot() {
     setInput("");
 
     // Simulate AI response (Replace this with Gemini AI response)
-    setTimeout( async() => {
+    setTimeout(async () => {
       const response = await Ai(input);
       const botResponse = { text: response, sender: "bot" };
       setMessages((prev) => [...prev, botResponse]);
@@ -46,7 +49,7 @@ export default function Chatbot() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 flex flex-col items-end w-[500px] z-50">
+    <div className="fixed bottom-6 right-6 flex flex-col items-end w-[80vw] max-w-md md:max-w-lg lg:max-w-xl z-50">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -59,7 +62,7 @@ export default function Chatbot() {
               <span className="font-semibold">AI Assistant</span>
               <X className="cursor-pointer" onClick={() => setIsOpen(false)} />
             </div>
-            <div ref={chatRef} className="p-4 h-64 overflow-y-auto space-y-3">
+            <div ref={chatRef} className="p-4 h-64 md:h-80 lg:h-96 overflow-y-auto space-y-3">
               {messages.map((msg, index) => (
                 <motion.div
                   key={index}

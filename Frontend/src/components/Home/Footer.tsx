@@ -33,7 +33,7 @@ const sections = [
 
 const Footer = () => {
   return (
-    <section className="py-16 flex justify-center pt-48 ">
+    <section className="py-16 flex justify-center pt-16 mt-10">
       <div className="container w-2/3">
         <footer className="w-full">
           <div className="flex flex-col items-center justify-between gap-10 text-center lg:flex-row lg:text-left">
