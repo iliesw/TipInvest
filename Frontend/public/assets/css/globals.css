@@ -20,6 +20,8 @@ body {
   background: var(--background);
   font-family: Figtree, Helvetica, sans-serif;
   position: relative;
+  overflow-x: hidden;
+  width: 100vw !important;
 
 }
 

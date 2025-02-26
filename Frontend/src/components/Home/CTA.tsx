@@ -1,7 +1,7 @@
 export default function Cta() {
   return (
     <div className="w-full flex justify-center mx-auto px-4">
-      <div className="w-full bg-lime-50 max-w-7xl rounded-2xl p-6 md:p-10 flex flex-col md:flex-row items-center justify-between">
+      <div className=" bg-lime-50 w-full lg:w-2/3 rounded-2xl p-6 md:p-10 flex flex-col md:flex-row items-center justify-between">
         <div className="mb-4 md:mb-0 md:mr-6 text-center md:text-left">
           <h1 className="text-xl md:text-2xl font-bold" style={{fontFamily:"Figtree"}}>Rejoignez Tips Invest dès aujourd’hui !</h1>
           <p className="mt-2">

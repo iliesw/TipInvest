@@ -48,7 +48,7 @@ export default () => {
                     <ul className="grid gap-x-12 divide-y [&>.feature-1]:pl-0 sm:grid-cols-2 sm:gap-y-8 sm:divide-y-0 lg:divide-x lg:grid-cols-3 lg:gap-x-0">
                         {
                             features.map((item, idx) => (
-                                <li key={idx} className={`feature-${idx + 1} space-y-3 py-8 lg:px-12 sm:py-0`}>
+                                <li key={idx} className={`feature-${idx + 1} space-y-3 py-8 lg:px-4 sm:py-0`}>
                                     <div className="w-12 h-12 border text-lime-600 rounded-full flex items-center justify-center">
                                         {item.icon}
                                     </div>

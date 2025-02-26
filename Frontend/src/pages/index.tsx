@@ -3,7 +3,7 @@ import "../../public/assets/css/fonts.css";
 import "../../public/assets/css/globals.css";
 import Hero from "@/components/Home/Hero";
 import Cta from "@/components/Home/CTA";
-import Brands from "@/components/Home/Brands";
+// import Brands from "@/components/Home/Brands";
 import Faq from "@/components/Home/Faq";
 import Features from "@/components/Home/Features";
 import { Footer } from "@/components/Home/Footer";
@@ -25,13 +25,13 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="">
+    <div className="bg-[#fcfcfc]">
       <Navbar />
       <Hero />
       <Intro />
       <Features />
       <Bento />
-      <Brands />
+      {/* <Brands /> */}
       <Stats />
       <ChatbotPopup />
       <Proof />

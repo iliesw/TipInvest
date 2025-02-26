@@ -16,7 +16,7 @@ export default function Example() {
             className="relative left-[calc(50%-11rem)] aspect-1155/678 w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
           />
         </div>
-        <div className="mx-auto max-w-1xl py-24">
+        <div className="mx-auto max-w-1xl py-10">
           <div className="hidden sm:mb-8 sm:flex sm:justify-center">
             <div className="relative rounded-full px-3 py-1 text-sm/6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
             Présentation rapide de Tips Invest et de ses avantages.{' '}
@@ -27,7 +27,7 @@ export default function Example() {
             </div>
           </div>
           <div className="text-center">
-            <h1 className="text-5xl font-semibold tracking-tight text-balance text-gray-900 sm:text-7xl z-50 relative">
+            <h1 className="text-5xl font-semibold tracking-tight text-balance text-gray-900 sm:text-6xl z-50 relative" style={{filter:"drop-shadow(0px 0px 5px white)"}}>
             Investissez dans l’immobilier<br /> de demain, dès aujourd’hui!
             </h1>
             <p className="mt-8 text-md font-medium text-pretty text-gray-500">

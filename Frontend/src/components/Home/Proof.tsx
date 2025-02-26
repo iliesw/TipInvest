@@ -40,7 +40,7 @@ export default () => {
     return (
         <section className="py-14">
             <div className="max-w-screen-xl mx-auto px-4 md:px-8">
-                <div className="max-w-5xl mx-auto text-center">
+                <div className="max-w-5xl mx-auto text-center mb-32 lg:mb-0">
                     <h3 className="text-lime-600 font-semibold pb-6">Ce que disent les gens</h3>
                     <div className="relative h-48">
                         <AnimatePresence mode="wait">
@@ -70,7 +70,7 @@ export default () => {
                         </AnimatePresence>
                     </div>
                 </div>
-                <div className="mt-12">
+                <div className="mt-12 hidden lg:block">
                     <ul className="flex gap-x-3 justify-center">
                         {testimonials.map((_, idx) => (
                             <li key={idx}>

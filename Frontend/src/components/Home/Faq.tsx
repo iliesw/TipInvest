@@ -31,8 +31,8 @@ export default function FAQSection() {
   };
 
   return (
-  <section className="py-12 md:py-24">
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  <section className="py-12 md:py-24 px-4">
+    <div className="mx-auto w-full lg:w-2/3 ">
     <div className="mb-8 md:mb-16 text-center">
       <h6 className="text-lime-600 font-semibold pb-4 md:pb-6">FAQs</h6>
       <h2 className="text-2xl md:text-4xl font-manrope font-bold text-gray-900 leading-8 md:leading-[3.25rem]">

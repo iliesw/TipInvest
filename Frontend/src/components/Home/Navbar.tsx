@@ -14,7 +14,7 @@ const Navbar = () =>{
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     return (
         <header className=" justify-center flex">
-        <nav aria-label="Global" className="flex items-center justify-between p-6 w-2/3 lg:px-8">
+        <nav aria-label="Global" className="flex items-center justify-between p-10 w-full lg:w-2/3 lg:px-8">
           <div className="flex lg:flex-1">
             <a href="#" className="-m-1.5 p-1.5">
               <span className="sr-only">Your Company</span>

@@ -34,7 +34,7 @@ const sections = [
 const Footer = () => {
   return (
     <section className="py-16 flex justify-center pt-16 mt-10">
-      <div className="container w-2/3">
+      <div className="container w-full lg:w-4/6">
         <footer className="w-full">
           <div className="flex flex-col items-center justify-between gap-10 text-center lg:flex-row lg:text-left">
             <div className="flex w-full max-w-96 shrink flex-col items-center justify-between gap-6 lg:items-start">
