@@ -5,9 +5,9 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Logo from '../Shared/Logo'
 
 const navigation = [
-    { name: 'Home', href: '#' },
-    { name: 'Contact', href: '#' },
-    { name: 'Pricing', href: '#' },
+    { name: 'Home', href: '/' },
+    { name: 'Contact', href: '/contact' },
+    { name: 'Pricing', href: '/pricing' },
   ]
 
 const Navbar = () =>{
