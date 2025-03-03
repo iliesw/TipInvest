@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages */
 
 
 export default function Example() {
@@ -20,7 +21,7 @@ export default function Example() {
           <div className="hidden sm:mb-8 sm:flex sm:justify-center">
             <div className="relative rounded-full px-3 py-1 text-sm/6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
             Présentation rapide de Tips Invest et de ses avantages.{' '}
-              <a href="#" className="font-semibold text-cyan">
+              <a href="/service" className="font-semibold text-cyan">
                 <span aria-hidden="true" className="absolute inset-0" />
                 Read more <span aria-hidden="true">&rarr;</span>
               </a>

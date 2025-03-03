@@ -1,4 +1,4 @@
-import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter, FaYoutube } from "react-icons/fa";
 import Logo from "../Shared/Logo";
 
 const sections = [
@@ -31,6 +31,12 @@ const sections = [
   },
 ];
 
+const socialMediaLinks = [
+  { name: "Instagram", href: "#", icon: FaInstagram, bgColor: "bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500" },
+  { name: "Facebook", href: "#", icon: FaFacebook, bgColor: "bg-blue-600" },
+  { name: "Youtube", href: "#", icon: FaYoutube, bgColor: "bg-red-500" },
+];
+
 const Footer = () => {
   return (
     <section className="py-16 flex justify-center pt-16 mt-10">
@@ -46,27 +52,15 @@ const Footer = () => {
                   Restez en tête du jeu immobilier avec TipInvest. Obtenez des analyses et des informations d&apos;experts sur les marchés immobiliers mondiaux.
                 </p>
               </div>
-              <ul className="flex items-center space-x-6 text-muted-foreground">
-                <li className="font-medium hover:text-primary">
-                  <a href="#">
-                    <FaInstagram className="size-6" />
-                  </a>
-                </li>
-                <li className="font-medium hover:text-primary">
-                  <a href="#">
-                    <FaFacebook className="size-6" />
-                  </a>
-                </li>
-                <li className="font-medium hover:text-primary">
-                  <a href="#">
-                    <FaTwitter className="size-6" />
-                  </a>
-                </li>
-                <li className="font-medium hover:text-primary">
-                  <a href="#">
-                    <FaLinkedin className="size-6" />
-                  </a>
-                </li>
+              <ul className="flex items-center space-x-3 text-muted-foreground">
+                {socialMediaLinks.map((link, idx) => (
+                  <li key={idx} className="font-medium text-sm items-center flex gap-2 text-white rounded-full hover:text-primary">
+                    <a href={link.href} aria-label={link.name} className={`flex items-center gap-2 ${link.bgColor} px-2 py-1 rounded-full`}>
+                      <link.icon className="size-4" /> 
+                    <p>{link.name}</p>
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
             <div className="grid grid-cols-3 gap-6 lg:gap-20">

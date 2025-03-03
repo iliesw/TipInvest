@@ -1,3 +1,5 @@
+import { DoorOpen, PencilRuler, Sparkles } from "lucide-react";
+
 const pricingData = {
     title: "Investissez avec confiance, maximisez vos rendements",
     description:
@@ -5,6 +7,7 @@ const pricingData = {
     plans: [
         {
             name: "Essentiel",
+            icon:DoorOpen,
             price: "$29",
             period: "/month",
             description:
@@ -20,6 +23,7 @@ const pricingData = {
         {
             name: "Avancé ",
             price: "$149",
+            icon:PencilRuler,
             period: "/month",
             description:
                 "Pour les investisseurs expérimentés cherchant à affiner leur stratégie.",
@@ -33,6 +37,7 @@ const pricingData = {
         },
         {
             name: "Élite",
+            icon:Sparkles,
             price: "$599",
             period: "/month",
             description:
@@ -47,38 +52,48 @@ const pricingData = {
         },
     ],
 };
-
 export default function Prices() {
     return (
-        <section className="bg-white">
-            <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-                <div className="mx-auto max-w-screen-lg text-center mb-8 lg:mb-12">
-                    <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 ">
+        <section className="py-16">
+            <div className="px-4 mx-auto max-w-screen-xl">
+                <div className="mx-auto max-w-screen-lg text-center mb-12">
+                    
+                    <h2 className="mb-4 text-4xl font-extrabold text-gray-900">
                         {pricingData.title}
                     </h2>
-                    <p className="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">
+                    <p className="text-lg text-gray-600">
                         {pricingData.description}
                     </p>
                 </div>
-                <div className="space-y-8  lg:grid lg:grid-cols-3 sm:gap-3 xl:gap-5 lg:space-y-0">
+                <div className="grid lg:grid-cols-3 gap-6">
                     {pricingData.plans.map((plan, index) => (
                         <div
                             key={index}
-                            className="flex flex-col p-6 mx-auto max-w-lg text-center bg-white rounded-3xl border border-gray-100 shadow xl:p-8 "
+                            className={`relative flex flex-col justify-between p-8 bg-white rounded-3xl border border-gray-200 shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-2 ${
+                                plan.name === "Élite" ? "border-black" : ""
+                            }`}
                         >
-                            <h3 className="mb-4 text-2xl font-semibold">{plan.name}</h3>
-                            <p className="font-light text-gray-500 sm:text-lg ">
-                                {plan.description}
-                            </p>
-                            <div className="flex justify-center items-baseline my-8">
-                                <span className="mr-2 text-5xl font-extrabold">{plan.price}</span>
-                                <span className="text-gray-500 ">{plan.period}</span>
+                            {plan.name === "Élite" && (
+                                <span className="absolute top-4 right-4 bg-black text-white text-xs font-semibold px-3 py-1 rounded-full">
+                                    Le plus populaire
+                                </span>
+                            )}
+                            <div>
+                            
+                            <plan.icon />
+                            <h3 className="mb-4 mt-4 text-2xl font-bold text-gray-900">{plan.name}</h3>
+                            <p className="text-gray-600 text-sm mb-6">{plan.description}</p>
+                            <div className="flex justify-center items-baseline my-6">
+                                <span className="text-5xl font-extrabold text-gray-900">
+                                    {plan.price}
+                                </span>
+                                <span className="text-gray-500 ml-1">{plan.period}</span>
                             </div>
-                            <ul role="list" className="mb-8 space-y-4 text-left">
+                            <ul className="mb-6 space-y-3 text-left">
                                 {plan.features.map((feature, featureIndex) => (
-                                    <li key={featureIndex} className="flex items-center space-x-3 text-sm">
+                                    <li key={featureIndex} className="flex items-center text-gray-700 text-sm">
                                         <svg
-                                            className="flex-shrink-0 w-5 h-5 text-green-500 dark:text-green-400"
+                                            className="w-5 h-5 text-green-500 mr-2"
                                             fill="currentColor"
                                             viewBox="0 0 20 20"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -89,13 +104,14 @@ export default function Prices() {
                                                 clipRule="evenodd"
                                             ></path>
                                         </svg>
-                                        <span>{feature}</span>
+                                        {feature}
                                     </li>
                                 ))}
-                            </ul>
+                            </ul>    
+                            </div>
                             <a
                                 href="#"
-                                className="text-white bg-black hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+                                className="text-white bg-gray-900 hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-3 text-center transition-all"
                             >
                                 Commencer
                             </a>

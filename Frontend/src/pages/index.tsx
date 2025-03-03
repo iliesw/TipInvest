@@ -3,7 +3,7 @@ import "../../public/assets/css/globals.css";
 import Proof from "@/components/Home/Proof";
 import Hero from "@/components/Home/Hero";
 import Cta from "@/components/Home/CTA";
-// import Brands from "@/components/Home/Brands";
+import Brands from "@/components/Home/Brands";
 import Faq from "@/components/Home/Faq";
 import Features from "@/components/Home/Features";
 import { Footer } from "@/components/Home/Footer";
@@ -15,6 +15,7 @@ import Bento from "@/components/Home/Bento";
 import Navbar from "@/components/Home/Navbar";
 
 import { Metadata } from 'next';
+import Prices from "@/components/Pricing/Prices";
  
 export const metadata: Metadata = {
   title: 'TipInvest',
@@ -26,15 +27,16 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="bg-[#fcfcfc]">
+      <ChatbotPopup />
       <Navbar />
       <Hero />
       <Intro />
       <Features />
       <Bento />
-      {/* <Brands /> */}
       <Stats />
-      <ChatbotPopup />
       <Proof />
+      <Prices />
+      <Brands />
       <Faq />
       <Cta />
       <Footer />

@@ -32,3 +32,8 @@ h1{
 html, body {
   overflow-x: hidden;
 }
+
+/* Maps */
+.place-card.place-card-large{
+  display: none;
+}

@@ -3,11 +3,14 @@ import { useState } from 'react'
 import { Dialog, DialogPanel } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Logo from '../Shared/Logo'
+import LoginPage from '../Shared/login'
+import { isShowing } from "@/stores/isAuthVisible"
 
 const navigation = [
     { name: 'Home', href: '/' },
-    { name: 'Contact', href: '/contact' },
+    { name: 'Service', href: '/service' },
     { name: 'Pricing', href: '/pricing' },
+    { name: 'Contact', href: '/contact' },
   ]
 
 const Navbar = () =>{
@@ -39,9 +42,9 @@ const Navbar = () =>{
             ))}
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <a href="#" className="text-sm/6 font-semibold text-gray-900">
+            <button onClick={()=>{isShowing.set(true);isShowing.notify()}}  className="text-sm/6 font-semibold text-gray-900">
               Log in <span aria-hidden="true">&rarr;</span>
-            </a>
+            </button>
           </div>
         </nav>
         <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="lg:hidden">
@@ -75,17 +78,17 @@ const Navbar = () =>{
                   ))}
                 </div>
                 <div className="py-6">
-                  <a
-                    href="#"
+                  <button
                     className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
                   >
                     Log in
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
           </DialogPanel>
         </Dialog>
+        <LoginPage />
       </header>
     )
 }
