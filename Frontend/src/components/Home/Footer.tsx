@@ -1,4 +1,4 @@
-import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter, FaYoutube } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaYoutube } from "react-icons/fa";
 import Logo from "../Shared/Logo";
 
 const sections = [

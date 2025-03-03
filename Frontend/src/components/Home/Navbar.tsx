@@ -4,7 +4,7 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Logo from "../Shared/Logo";
 import LoginPage from "../Shared/login";
 import { isShowing } from "@/stores/isAuthVisible";
-import { DefaultLang } from "@/stores/lang";
+// import { DefaultLang } from "@/stores/lang";
 
 const navigation = [
   { name: "Home", href: "/" },
