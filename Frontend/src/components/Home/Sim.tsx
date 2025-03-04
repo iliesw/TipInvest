@@ -1,6 +1,33 @@
-import { useState } from "react";
+import { SelectedLang } from "@/stores/lang";
+import { useEffect, useState } from "react";
 
 export default function InvestmentCalculator() {
+  const [userLang, setUserLang] = useState<string>(SelectedLang.get());
+  useEffect(() => {
+    SelectedLang.subscribe((n) => {
+      setUserLang(n);
+    });
+  }, []);
+
+  const content = {
+    fr: {
+      title: "Évaluez votre rendement potentiel",
+      text: "Que ce soit en construisant un revenu passif grâce à des biens locatifs ou en tirant parti de l'appréciation des propriétés.",
+      button: "Savoir plus",
+      capital: "Capital à Investir",
+      downPayment: "Acompte",
+      monthlyPayment: "Paiement Mensuel",
+    },
+    us: {
+      title: "Evaluate your potential return",
+      text: "Whether building passive income through rental properties or leveraging property appreciation.",
+      button: "Learn more",
+      capital: "Capital to Invest",
+      downPayment: "Down Payment",
+      monthlyPayment: "Monthly Payment",
+    },
+  };
+
   const [investment, setInvestment] = useState(20000);
   const downPayment = (investment * 0.2).toFixed(0);
   const monthlyPayment = (investment * 0.012).toFixed(0);
@@ -11,21 +38,20 @@ export default function InvestmentCalculator() {
         <div className="w-full lg:w-1/2 pr-0 lg:pr-10 flex flex-col justify-between max-h-full">
           <div>
             <h2 className="text-4xl font-bold text-black">
-              Évaluez votre rendement potentiel
+              {content[userLang].title}
             </h2>
             <p className="text-gray-700 mt-4">
-              Que ce soit en construisant un revenu passif grâce à des biens
-              locatifs ou en tirant parti de l&apos;appréciation des propriétés.
+              {content[userLang].text}
             </p>
           </div>
           <button className="mt-6 w-full lg:w-1/2 rounded-xl bg-black px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-gray-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
-            Savoir plus
+            {content[userLang].button}
           </button>
         </div>
         <div className="w-full lg:w-1/2 bg-white rounded-xl flex flex-col gap-2 mt-6 lg:mt-0">
           <div className="mb-4">
             <label className="block text-gray-700 font-medium flex items-center justify-between">
-              Capital à Investir
+              {content[userLang].capital}
               <span className="block text-right text-black font-semibold">
                 € {investment}
               </span>
@@ -64,14 +90,16 @@ export default function InvestmentCalculator() {
             `}</style>
           </div>
           <div className="mb-4 flex w-full items-center justify-between">
-            <label className="block text-gray-700 font-medium">Acompte</label>
+            <label className="block text-gray-700 font-medium">
+              {content[userLang].downPayment}
+            </label>
             <span className="block text-3xl font-bold text-black">
               € {downPayment}
             </span>
           </div>
           <div className="flex w-full items-center justify-between">
             <label className="block text-gray-700 font-medium">
-              Paiement Mensuel
+              {content[userLang].monthlyPayment}
             </label>
             <span className="block text-xl font-semibold text-black">
               € {monthlyPayment}

@@ -1,20 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Logo from "../Shared/Logo";
 import LoginPage from "../Shared/login";
 import { isShowing } from "@/stores/isAuthVisible";
-// import { DefaultLang } from "@/stores/lang";
+import { SelectedLang, Next } from "@/stores/lang";
 
-const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Service", href: "/service" },
-  { name: "Pricing", href: "/pricing" },
-  { name: "Contact", href: "/contact" },
-];
+type NavigationType = {
+  [key: string]: { name: string; href: string }[];
+};
+
+const navigation: NavigationType = {
+  fr: [
+    { name: "Accueil", href: "/" },
+    { name: "Service", href: "/service" },
+    { name: "Tarification", href: "/pricing" },
+    { name: "Contact", href: "/contact" },
+  ],
+  us: [
+    { name: "Home", href: "/" },
+    { name: "Service", href: "/service" },
+    { name: "Pricing", href: "/pricing" },
+    { name: "Contact", href: "/contact" },
+  ],
+};
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userLang, setUserLang] = useState<string>(SelectedLang.get());
+  useEffect(() => {
+    SelectedLang.subscribe((n) => {
+      setUserLang(n);
+    });
+  }, []);
 
   return (
     <header className=" justify-center flex">
@@ -39,7 +57,7 @@ const Navbar = () => {
           </button>
         </div>
         <div className="hidden lg:flex lg:gap-x-12">
-          {navigation.map((item) => (
+          {navigation[userLang].map((item) => (
             <a
               key={item.name}
               href={item.href}
@@ -49,13 +67,16 @@ const Navbar = () => {
             </a>
           ))}
         </div>
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          {/* <button className="rounded-full overflow-hidden w-[30px] h-[30px] mr-5 border shadow">
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end items-center">
+          <button
+            className="rounded-full overflow-hidden w-[30px] h-[30px] mr-5 border shadow"
+            onClick={Next}
+          >
             <img
-              src={`https://flagsapi.com/${DefaultLang.toLocaleUpperCase()}/flat/64.png`}
+              src={`https://flagsapi.com/${userLang.toLocaleUpperCase()}/flat/64.png`}
               className="scale-150 object-contain"
             />
-          </button> */}
+          </button>
           <button
             onClick={() => {
               isShowing.set(true);
@@ -91,7 +112,7 @@ const Navbar = () => {
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
-                {navigation.map((item) => (
+                {navigation[userLang].map((item) => (
                   <a
                     key={item.name}
                     href={item.href}

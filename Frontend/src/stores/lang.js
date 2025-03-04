@@ -1,6 +1,12 @@
 import { atom } from 'nanostores'
 
-export const SupportedLangs = atom(["fr","en"])
-export const DefaultLang = SupportedLangs.get().at(0) // fr
+export const SupportedLangs = ["fr","us"]
+export const SelectedLang = atom("fr")
 
 
+export function Next(){
+    const currentIndex = SupportedLangs.indexOf(SelectedLang.get())
+    const nextIndex = (currentIndex + 1) % SupportedLangs.length
+    SelectedLang.set(SupportedLangs[nextIndex])
+    SelectedLang.notify()
+}

@@ -1,31 +1,64 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { SelectedLang } from "@/stores/lang";
 
 const content = {
-  title: "Contactez-nous",
-  heading: "PRENEZ CONTACT AVEC NOUS",
-  description:
-    "Vous avez des questions ou souhaitez en savoir plus sur TipInvest ? Notre équipe est là pour vous aider. Contactez-nous et nous vous répondrons dans les plus brefs délais.",
-  contactInfo: [
-    {
-      label: "Our Location",
-      value: "99 S.t Tunis , Tunisia",
-      icon: "location",
-    },
-    {
-      label: "Phone Number",
-      value: "(+216) 98 765 432",
-      icon: "phone",
-    },
-    {
-      label: "Email Address",
-      value: "contact@tipinvest.com",
-      icon: "email",
-    },
-  ],
+  fr: {
+    title: "Contactez-nous",
+    heading: "PRENEZ CONTACT AVEC NOUS",
+    description:
+      "Vous avez des questions ou souhaitez en savoir plus sur TipInvest ? Notre équipe est là pour vous aider. Contactez-nous et nous vous répondrons dans les plus brefs délais.",
+    contactInfo: [
+      {
+        label: "Notre emplacement",
+        value: "99 S.t Tunis , Tunisia",
+        icon: "location",
+      },
+      {
+        label: "Numéro de téléphone",
+        value: "(+216) 98 765 432",
+        icon: "phone",
+      },
+      {
+        label: "Adresse e-mail",
+        value: "contact@tipinvest.com",
+        icon: "email",
+      },
+    ],
+  },
+  us: {
+    title: "Contact Us",
+    heading: "GET IN TOUCH WITH US",
+    description:
+      "Do you have questions or want to learn more about TipInvest? Our team is here to help. Contact us and we will get back to you as soon as possible.",
+    contactInfo: [
+      {
+        label: "Our Location",
+        value: "99 S.t Tunis , Tunisia",
+        icon: "location",
+      },
+      {
+        label: "Phone Number",
+        value: "(+216) 98 765 432",
+        icon: "phone",
+      },
+      {
+        label: "Email Address",
+        value: "contact@tipinvest.com",
+        icon: "email",
+      },
+    ],
+  },
 };
 
 const Contact = () => {
-  const renderIcon = (icon:string) => {
+  const [userLang, setUserLang] = useState<string>(SelectedLang.get());
+  useEffect(() => {
+    SelectedLang.subscribe((n) => {
+      setUserLang(n);
+    });
+  }, []);
+
+  const renderIcon = (icon: string) => {
     switch (icon) {
       case "location":
         return "📍";
@@ -44,19 +77,23 @@ const Contact = () => {
         <div className="flex gap-2">
           <div className="mb-12 w-full lg:mb-0 p-4">
             <span className="mb-4 block text-base font-semibold text-primary">
-              {content.title}
+              {content[userLang].title}
             </span>
             <h2 className="mb-6 text-[32px] font-bold uppercase text-dark sm:text-[40px] lg:text-[36px] xl:text-[40px]">
-              {content.heading}
+              {content[userLang].heading}
             </h2>
-            <p className="mb-9 text-base leading-relaxed text-body-color ">{content.description}</p>
-            {content.contactInfo.map((info, index) => (
+            <p className="mb-9 text-base leading-relaxed text-body-color ">
+              {content[userLang].description}
+            </p>
+            {content[userLang].contactInfo.map((info, index) => (
               <div key={index} className="mb-8 flex w-full max-w-[370px]">
                 <div className="mr-6 flex h-[60px] w-full max-w-[60px] items-center justify-center overflow-hidden rounded bg-primary/5 text-primary sm:h-[70px] sm:max-w-[70px]">
                   <span className="text-2xl">{renderIcon(info.icon)}</span>
                 </div>
                 <div className="w-full">
-                  <h4 className="mb-1 text-xl font-bold text-dark ">{info.label}</h4>
+                  <h4 className="mb-1 text-xl font-bold text-dark ">
+                    {info.label}
+                  </h4>
                   <p className="text-base text-body-color ">{info.value}</p>
                 </div>
               </div>

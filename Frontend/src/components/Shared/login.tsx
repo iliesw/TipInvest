@@ -5,16 +5,22 @@ import Input from "./ui/Input";
 import InputPhone from "./ui/InputPhone";
 import { CircleDashedIcon } from "lucide-react";
 import { isShowing } from "@/stores/isAuthVisible";
+import { SelectedLang } from "@/stores/lang";
 
 const LoginPage: React.FC = () => {
   const [authshow, setAuthShow] = useState(isShowing.get());
+  const [userLang, setUserLang] = useState<string>(SelectedLang.get());
 
   useEffect(() => {
     const subscription = isShowing.subscribe((val) => {
       setAuthShow(val);
     });
+    SelectedLang.subscribe((n) => {
+      setUserLang(n);
+    });
     return;
   }, []);
+
   const [pos, setPos] = useState(0);
   const [isLogin, setIsLogin] = useState(true);
   const [loginFetching, setLoginFetching] = useState(false);
@@ -25,20 +31,61 @@ const LoginPage: React.FC = () => {
     phone: "",
   });
 
-  const [uiData, setUiData] = useState([
-    {
-      h1: "Bon retour !",
-      p: "Entrez vos identifiants pour vous connecter",
-      username: false,
-      button: "Se connecter",
+  const uiData = {
+    fr: [
+      {
+        h1: "Bon retour !",
+        p: "Entrez vos identifiants pour vous connecter",
+        username: false,
+        button: "Se connecter",
+      },
+      {
+        h1: "Créer un compte !",
+        p: "Entrez vos informations pour vous inscrire",
+        username: true,
+        button: "S'inscrire",
+      },
+    ],
+    us: [
+      {
+        h1: "Welcome back!",
+        p: "Enter your credentials to log in",
+        username: false,
+        button: "Log in",
+      },
+      {
+        h1: "Create an account!",
+        p: "Enter your information to sign up",
+        username: true,
+        button: "Sign up",
+      },
+    ],
+  };
+
+  const welcomeContent = {
+    fr: {
+      welcome: "Bienvenue sur TipInvest !",
+      chooseOption: "Choisissez une option pour continuer",
+      continueWithEmail: "Continuer avec Email",
+      or: "OU",
+      loginToAccount: "Se connecter à votre compte",
+      privacyPolicy: "Politique de confidentialité",
+      termsOfUse: "Conditions d'utilisation",
+      confirmText:
+        "En choisissant une méthode de connexion, je confirme avoir lu et compris la",
     },
-    {
-      h1: "Créer un compte !",
-      p: "Entrez vos informations pour vous inscrire",
-      username: true,
-      button: "S'inscrire",
+    us: {
+      welcome: "Welcome to TipInvest!",
+      chooseOption: "Choose an option to continue",
+      continueWithEmail: "Continue with Email",
+      or: "OR",
+      loginToAccount: "Log in to your account",
+      privacyPolicy: "Privacy Policy",
+      termsOfUse: "Terms of Use",
+      confirmText:
+        "By choosing a login method, I confirm that I have read and understood the",
     },
-  ]);
+  };
 
   const next = () => {
     setPos((prev) => (prev + 1 > 1 ? 1 : prev + 1));
@@ -101,30 +148,33 @@ const LoginPage: React.FC = () => {
       }}
     >
       <div className="panel" onClick={stopPropagation}>
-        {/* <div className="bg"></div> */}
         <div
           className="content"
           style={{ "--pos": pos } as React.CSSProperties}
         >
           <div className="welcome">
-            <h1>Bienvenue sur TipInvest !</h1>
-            <p>Choisissez une option pour continuer</p>
+            <h1>{welcomeContent[userLang].welcome}</h1>
+            <p>{welcomeContent[userLang].chooseOption}</p>
 
-            <button onClick={toSignup}>Continuer avec Email</button>
-            <div className="po">OU</div>
-            <button onClick={toLogin}>Se connecter à votre compte</button>
+            <button onClick={toSignup}>
+              {welcomeContent[userLang].continueWithEmail}
+            </button>
+            <div className="po">{welcomeContent[userLang].or}</div>
+            <button onClick={toLogin}>
+              {welcomeContent[userLang].loginToAccount}
+            </button>
             <div className="law">
-              En choisissant une méthode de connexion, je confirme avoir lu et
-              compris la <a href="/">Politique de confidentialité</a> ainsi que
-              les <a href="/">Conditions d&apos;utilisation</a>
+              {welcomeContent[userLang].confirmText}{" "}
+              <a href="/">{welcomeContent[userLang].privacyPolicy}</a> ainsi que
+              les <a href="/">{welcomeContent[userLang].termsOfUse}</a>
             </div>
           </div>
           <div className="inputs">
             <div className="back" onClick={back}>
               ← Back
             </div>
-            <h1>{isLogin ? uiData[0].h1 : uiData[1].h1}</h1>
-            <p>{isLogin ? uiData[0].p : uiData[1].p}</p>
+            <h1>{isLogin ? uiData[userLang][0].h1 : uiData[userLang][1].h1}</h1>
+            <p>{isLogin ? uiData[userLang][0].p : uiData[userLang][1].p}</p>
             <Input
               type="email"
               placeholder="Email"
@@ -133,7 +183,7 @@ const LoginPage: React.FC = () => {
                 setData({ ...data, email: e.target.value })
               }
             />
-            {(isLogin ? uiData[0].username : uiData[1].username) && (
+            {(isLogin ? uiData[userLang][0].username : uiData[userLang][1].username) && (
               <div
                 style={{
                   display: "flex",
@@ -169,9 +219,9 @@ const LoginPage: React.FC = () => {
             <button style={{ marginTop: "10px" }} onClick={submit}>
               {!loginFetching ? (
                 isLogin ? (
-                  uiData[0].button
+                  uiData[userLang][0].button
                 ) : (
-                  uiData[1].button
+                  uiData[userLang][1].button
                 )
               ) : (
                 <span style={{ animation: "spin 1s linear infinite" }}>

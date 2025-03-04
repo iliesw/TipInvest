@@ -32,10 +32,10 @@ export default function Home() {
       <Hero />
       <Intro />
       <Features />
-      <Bento />
+      <Bento  />
       <Stats />
       <Proof />
-      <Prices />
+      <Prices              />
       <Brands />
       <Faq />
       <Cta />
