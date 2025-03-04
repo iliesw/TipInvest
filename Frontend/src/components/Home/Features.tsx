@@ -1,16 +1,14 @@
-/* eslint-disable import/no-anonymous-default-export */
-// eslint-disable-next-line react/display-name
 import { SelectedLang } from "@/stores/lang";
 import { useEffect, useState } from "react";
+type Lang = 'fr' | 'us';
 
 function FF() {
-  const [userLang, setUserLang] = useState(SelectedLang.get());
-  useEffect(() => {
-    const unsubscribe = SelectedLang.subscribe((n) => {
-      setUserLang(n);
-    });
-    return () => unsubscribe();
-  }, []);
+  const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
+        useEffect(() => {
+          SelectedLang.subscribe((n) => {
+            setUserLang(n as Lang);
+          });
+        }, []);
 
   const features = {
     fr: [

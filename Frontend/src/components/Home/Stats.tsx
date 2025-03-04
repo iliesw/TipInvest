@@ -1,5 +1,6 @@
 import { SelectedLang } from "@/stores/lang";
 import { useEffect, useState } from "react";
+type Lang = 'fr' | 'us';
 
 const statsContent = {
   fr: {
@@ -43,12 +44,12 @@ const statsContent = {
 };
 
 const Stats = () => {
-  const [userLang, setUserLang] = useState<string>(SelectedLang.get());
-      useEffect(() => {
-        SelectedLang.subscribe((n) => {
-          setUserLang(n);
-        });
-      }, []);
+  const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
+            useEffect(() => {
+              SelectedLang.subscribe((n) => {
+                setUserLang(n as Lang);
+              });
+            }, []);
   return (
     <div className="w-full flex justify-center px-4">
       <div className="bg-white block w-full lg:w-2/3  my-[150px] rounded-[20px] outline-2 outline-dashed outline-[rgba(0,0,0,0.153)] p-[55px] box-border">

@@ -82,14 +82,15 @@ const socialMediaLinks = [
   { name: "@tipinvest", href: "#", icon: FaFacebook, bgColor: "bg-blue-600" },
   { name: "@tipinvest", href: "#", icon: FaYoutube, bgColor: "bg-red-500" },
 ];
+type Lang = 'fr' | 'us';
 
 const Footer = () => {
-  const [userLang, setUserLang] = useState<string>(SelectedLang.get());
-    useEffect(() => {
-      SelectedLang.subscribe((n) => {
-        setUserLang(n);
-      });
-    }, []);
+  const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
+            useEffect(() => {
+              SelectedLang.subscribe((n) => {
+                setUserLang(n as Lang);
+              });
+            }, []);
   return (
     <section className="py-16 flex justify-center pt-16 mt-10">
       <div className="container w-full lg:w-4/6">

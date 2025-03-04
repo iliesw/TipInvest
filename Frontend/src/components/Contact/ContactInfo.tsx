@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { SelectedLang } from "@/stores/lang";
 
-const content = {
+type Lang = 'fr' | 'us';
+
+const content: Record<Lang, {
+  title: string;
+  heading: string;
+  description: string;
+  contactInfo: { label: string; value: string; icon: string; }[];
+}> = {
   fr: {
     title: "Contactez-nous",
     heading: "PRENEZ CONTACT AVEC NOUS",
@@ -51,10 +58,10 @@ const content = {
 };
 
 const Contact = () => {
-  const [userLang, setUserLang] = useState<string>(SelectedLang.get());
+  const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
   useEffect(() => {
     SelectedLang.subscribe((n) => {
-      setUserLang(n);
+      setUserLang(n as Lang);
     });
   }, []);
 
@@ -85,7 +92,7 @@ const Contact = () => {
             <p className="mb-9 text-base leading-relaxed text-body-color ">
               {content[userLang].description}
             </p>
-            {content[userLang].contactInfo.map((info, index) => (
+            {content[userLang].contactInfo.map((info: { label: string; value: string; icon: string; }, index: number) => (
               <div key={index} className="mb-8 flex w-full max-w-[370px]">
                 <div className="mr-6 flex h-[60px] w-full max-w-[60px] items-center justify-center overflow-hidden rounded bg-primary/5 text-primary sm:h-[70px] sm:max-w-[70px]">
                   <span className="text-2xl">{renderIcon(info.icon)}</span>

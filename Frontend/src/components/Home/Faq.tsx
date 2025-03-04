@@ -1,5 +1,6 @@
 import { SelectedLang } from "@/stores/lang";
 import { useEffect, useState } from "react";
+type Lang = 'fr' | 'us';
 
 const faqs = {
   fr: {
@@ -57,12 +58,12 @@ const faqs = {
 };
 
 export default function FAQSection() {
-  const [userLang, setUserLang] = useState<string>(SelectedLang.get());
-      useEffect(() => {
-        SelectedLang.subscribe((n) => {
-          setUserLang(n);
-        });
-      }, []);
+  const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
+            useEffect(() => {
+              SelectedLang.subscribe((n) => {
+                setUserLang(n as Lang);
+              });
+            }, []);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const toggleFAQ = (index: number) => {
@@ -75,7 +76,7 @@ export default function FAQSection() {
         <div className="mb-8 md:mb-16 text-center">
           <h6 className="text-lime-600 font-semibold pb-4 md:pb-6">FAQs</h6>
           <h2 className="text-2xl md:text-4xl font-manrope font-bold text-gray-900 leading-8 md:leading-[3.25rem]">
-            {faqs[userLang].text}
+            {faqs[userLang].txt}
           </h2>
         </div>
         <div>

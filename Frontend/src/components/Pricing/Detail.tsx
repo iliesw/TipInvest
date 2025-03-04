@@ -56,14 +56,15 @@ const Options = {
     },
   },
 };
+type Lang = 'fr' | 'us';
 
 export default function Detail() {
-  const [userLang, setUserLang] = useState<string>(SelectedLang.get());
-  useEffect(() => {
-    SelectedLang.subscribe((n) => {
-      setUserLang(n);
-    });
-  }, []);
+  const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
+          useEffect(() => {
+            SelectedLang.subscribe((n) => {
+              setUserLang(n as Lang);
+            });
+          }, []);
 
   return (
     <div className="px-4 py-8">

@@ -6,20 +6,16 @@ import InputPhone from "./ui/InputPhone";
 import { CircleDashedIcon } from "lucide-react";
 import { isShowing } from "@/stores/isAuthVisible";
 import { SelectedLang } from "@/stores/lang";
+type Lang = 'fr' | 'us';
 
 const LoginPage: React.FC = () => {
   const [authshow, setAuthShow] = useState(isShowing.get());
-  const [userLang, setUserLang] = useState<string>(SelectedLang.get());
-
-  useEffect(() => {
-    const subscription = isShowing.subscribe((val) => {
-      setAuthShow(val);
-    });
-    SelectedLang.subscribe((n) => {
-      setUserLang(n);
-    });
-    return;
-  }, []);
+  const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
+        useEffect(() => {
+          SelectedLang.subscribe((n) => {
+            setUserLang(n as Lang);
+          });
+        }, []);
 
   const [pos, setPos] = useState(0);
   const [isLogin, setIsLogin] = useState(true);
@@ -125,14 +121,7 @@ const LoginPage: React.FC = () => {
       })
       .catch((err) => {
         setLoginFetching(false);
-        setUiData((prev) => {
-          const newData = [...prev];
-          newData[isLogin ? 0 : 1] = {
-            ...newData[isLogin ? 0 : 1],
-            button: "Erreur , réessayer !",
-          };
-          return newData;
-        });
+        //
         console.error("Error:", err);
       });
   };

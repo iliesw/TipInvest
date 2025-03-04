@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SelectedLang } from "@/stores/lang";
+type Lang = 'fr' | 'us';
 
 // eslint-disable-next-line react/display-name
 export default () => {
@@ -57,18 +58,18 @@ export default () => {
   };
 
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const [userLang, setUserLang] = useState<string>(SelectedLang.get());
-  useEffect(() => {
-    SelectedLang.subscribe((n) => {
-      setUserLang(n);
-    });
-  }, []);
+  const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
+            useEffect(() => {
+              SelectedLang.subscribe((n) => {
+                setUserLang(n as Lang);
+              });
+            }, []);
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.fr.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, [testimonials.length]);
+  }, [testimonials.fr.length]);
 
   return (
     <section className="py-14">
