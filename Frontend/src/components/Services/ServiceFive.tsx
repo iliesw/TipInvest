@@ -21,11 +21,11 @@ export default function Features() {
   ];
 
   return (
-    <section className="py-16 text-center w-full px-4 mx-auto sm:w-2/3">
+    <section className="py-16 text-center w-full px-0 mx-auto sm:w-2/3">
       <h3 className="text-lime-600 font-semibold">Sécurisation des Transactions</h3>
       <h2 className="text-3xl font-bold text-gray-900 mt-2">Notre Accompagnement Juridique</h2>
       <p className="text-gray-600 max-w-2xl mx-auto mt-2">
-        Nous offrons un accompagnement complet pour assurer la sécurité et la transparence des transactions immobilières.
+      Construisez intelligemment, gérez efficacement
       </p>
       <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 px-6 md:px-0">
         {features.map((feature, index) => (

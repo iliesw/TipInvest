@@ -23,7 +23,7 @@ export default function Cta() {
     },
   };
   return (
-    <div className="w-full flex justify-center mx-auto ">
+    <div className="w-full flex justify-center mx-auto p-3 sm:p-0">
       <div className=" bg-lime-50 w-full lg:w-2/3 rounded-2xl p-6 md:p-10 flex flex-col md:flex-row items-center justify-between">
         <div className="mb-4 md:mb-0 md:mr-6 text-center md:text-left">
           <h1

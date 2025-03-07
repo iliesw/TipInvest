@@ -86,9 +86,9 @@ export function ServiceOne() {
   }, []);
 
   return (
-    <div className="overflow-hidden bg-white py-24 sm:py-16">
-      <div className="mx-auto w-full sm:w-2/3 p-8 lg:p-12 xl:p-20">
-        <div className="mx-auto flex max-w-2xl lg:max-w-screen-lg lg:mx-0">
+    <div className="overflow-hidden px-4 bg-white py-24 sm:py-16">
+      <div className="mx-auto w-full sm:w-2/3 ">
+        <div className="mx-auto flex lg:mx-0">
           <div className="lg:pr-8 lg:pt-4 w-full">
             <div className="lg:max-w-lg">
               <h2 className="font-semibold text-white bg-lime-400 text-sm w-fit rounded-full px-4 py-1 mb-5">

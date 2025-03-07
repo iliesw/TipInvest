@@ -1,6 +1,123 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { SelectedLang } from "@/stores/lang";
-import { useEffect, useState } from "react";
+import { JSX, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
+// import CircularProgress from "@mui/joy/CircularProgress";
+import { HouseIcon } from "lucide-react";
 type Lang = "fr" | "us";
+
+// function Stat(props: any) {
+//   return (
+//     <>
+//       <div className="stat">
+//         <CircularProgress
+//           variant="plain"
+//           color="neutral"
+//           sx={{
+//             "--CircularProgress-size": "75px",
+//             "--CircularProgress-trackThickness": "8px",
+//             "--CircularProgress-progressThickness": "8px",
+//           }}
+//           className="progress"
+//           determinate={true}
+//           value={props.value}
+//         >
+//           <div>
+//             <p className="stat-name">{props.name}</p>
+//             <p>{props.value}</p>
+//           </div>
+//         </CircularProgress>
+//       </div>
+//       <style>{`
+//       .stat {
+//               padding: 1.5rem;
+//               border-radius: 10px;
+//               display: flex;
+//               flex-direction: column;
+//               justify-content: space-between;
+//               align-items: center;
+
+//               div{
+//                 display: flex;
+//                 justify-content: space-between;
+//                 flex-direction: column;
+//                 align-items: center;
+//               }
+//               p{
+//               font-family: 'Figtree';
+//               font-weight: bold;
+//               font-size: 1.5rem;
+//               }
+//               .stat-name{
+//                 font-size: .7rem;
+//                 text-align: center;
+//               }
+//               svg {
+//                 scale: 1.3;
+//                 filter:blur(.4px); 
+//               }
+//             }
+//       `}</style>
+//     </>
+//   );
+// }
+
+interface ServiceOptionItem {
+  icon: JSX.Element;
+  name: string;
+}
+
+function Options(props: { options: ServiceOptionItem[]; }) {
+  return (
+    <>
+      <div className="options">
+        {props.options.map((item, index) => (
+          <div key={index} className="option-item"> 
+          {/* @ts-ignore */}        
+            <item.icon size={16}></item.icon>
+            <span>{item.name}</span>
+          </div>
+        ))}
+      </div>
+      <style jsx>{`
+        .options {
+          display: flex;
+          gap: 5px;
+          align-items: center;
+          width: 50%;
+
+          .option-item {
+            width: fit-content;
+            display: flex;
+            flex-direction: row;
+
+            align-items: center;
+            gap: 0.5em;
+            border-radius: 6px;
+            padding: 0.3rem 0.6em;
+
+            border: 1px solid #ccc;
+
+            span {
+              font-size: 0.8rem;
+            }
+          }
+        }
+      `}</style>
+    </>
+  );
+}
+interface ServiceOptionProps {
+  options: ServiceOptionItem[];
+  name: string;
+}
+
+const ServiceOption = ({ options, name }: ServiceOptionProps) => (
+  <div className="sim-option flex justify-between items-center mb-2">
+    <h2>{name}</h2>
+    <Options options={options} />
+  </div>
+);
 
 export default function InvestmentCalculator() {
   const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
@@ -29,64 +146,80 @@ export default function InvestmentCalculator() {
     },
   };
 
-  const [investment, setInvestment] = useState(20000);
-  const downPayment = (investment * 0.2).toFixed(0);
-  const monthlyPayment = (investment * 0.012).toFixed(0);
+  const PropertyTypes = [
+    {
+      name: "Apartment",
+      icon: HouseIcon,
+    },
+    {
+      name: "Villa",
+      icon: HouseIcon,
+    },
+    {
+      name: "Land",
+      icon: HouseIcon,
+    },
+  ];
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row bg-white mt-4 p-10 w-full  mx-auto border-gray-200 border rounded-[20px]">
-        <div className="w-full lg:w-2/3 pr-0 lg:pr-10 flex flex-col justify-between">
-          <div>
-            <h2 className="text-4xl font-bold text-black">
-              {content[userLang].title}
-            </h2>
-            <p className="text-gray-700 mt-4">{content[userLang].text}</p>
-          </div>
-          <button className="mt-6 w-full lg:w-1/2 rounded-xl bg-black px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-gray-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
-            {content[userLang].button}
-          </button>
+      <div id="SimPlus" className="w-full ">
+        <div>
+          <h1>Advanced Finatial Calculator</h1>
+          <p className="mb-2">some discription to be ditermined later</p>
+          <br />
+          {/* @ts-ignore */}        
+
+          <ServiceOption name={"Property Type"} options={PropertyTypes} />
+          {/* @ts-ignore */}        
+
+          <ServiceOption name={"SimPlus"} options={PropertyTypes} />
+          {/* @ts-ignore */}        
+
+          <ServiceOption name={"SimPlus"} options={PropertyTypes} />
+          {/* @ts-ignore */}        
+
+          <ServiceOption name={"SimPlus"} options={PropertyTypes} />
         </div>
-        <div className="w-full lg:w-1/2 bg-white rounded-xl flex flex-col gap-2 mt-6 lg:mt-0">
-          <div className="mb-4">
-            <label className="text-gray-700 font-medium flex items-center justify-between">
-              {content[userLang].capital}
-              <span className="block text-right text-black font-semibold">
-                € {investment}
-              </span>
-            </label>
-            <input
-              type="range"
-              min="5000"
-              max="50000"
-              value={investment}
-              onChange={(e) => setInvestment(Number(e.target.value))}
-              className="w-full mt-6 appearance-none h-6 bg-gray-200 rounded-full"
-              style={{
-                WebkitAppearance: "none",
-                appearance: "none",
-              }}
-            />
-          </div>
-          <div className="mb-4 flex w-full items-center justify-between">
-            <label className="block text-gray-700 font-medium">
-              {content[userLang].downPayment}
-            </label>
-            <span className="block text-3xl font-bold text-black">
-              € {downPayment}
-            </span>
-          </div>
-          <div className="flex w-full items-center justify-between">
-            <label className="block text-gray-700 font-medium">
-              {content[userLang].monthlyPayment}
-            </label>
-            <span className="block text-xl font-semibold text-black">
-              € {monthlyPayment}
-            </span>
-          </div>
-        </div>
+        <div className="stat-container"></div>
       </div>
       <style jsx>{`
+        #SimPlus {
+          border-radius: 30px;
+          padding: 40px;
+          display: flex;
+          border: 1px solid #e0e0e0;
+          height: 35rem;
+          display: flex;
+
+          h1 {
+            font-size: 1.5rem;
+            font-family: "Figtree";
+            font-weight: bold;
+          }
+
+          h2 {
+            font-size: 0.9rem;
+          }
+
+          p {
+            font-size: 0.8rem;
+          }
+
+          > div {
+            width: 100%;
+            height: 100%;
+          }
+
+          
+
+          .stat-container {
+            width: 80%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
         input[type="range"]::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;

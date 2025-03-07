@@ -59,11 +59,20 @@ export function ServiceThree() {
       setUserLang(n as Lang);
     });
   }, []);
+
+  const [currentStep, setCurrentStep] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentStep((prev) => (prev + 1)% 3);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <div className="overflow-hidden bg-white py-24 sm:py-16">
       <div className="mx-auto w-full p-6 sm:w-2/3 bg-white text-bleck rounded-2xl ">
-        <div className="mx-auto flex max-w-2xl lg:mx-0 lg:max-w-none">
-          <div className="lg:pr-8 lg:pt-2 w-full">
+        <div className="mx-auto flex max-w-2xl lg:mx-0 relative lg:max-w-none">
+          <div className=" w-full z-10">
             <div className="w-full sm:w-1/2">
               <h2 className=" font-semibold text-white bg-lime-400 text-sm w-fit rounded-full px-4 py-1 mb-5">
                 {Content[userLang].small}
@@ -78,12 +87,12 @@ export function ServiceThree() {
                 {Content[userLang].featured.map((item, index) => (
                   <div
                     key={index}
-                    className="flex justify-start items-center gap-5 "
+                    className="flex justify-start items-center gap-5 transition-all delay-300 "
                     style={{
                     //   filter: index == 0 ? "none" : "blur(1px)",
-                      opacity: index == 0 ? "1" : "0.5",
+                      opacity: index == currentStep ? "1" : "0.5",
 
-                      fontSize: index == 0 ? "22px" : "14px",
+                      fontSize: index == currentStep ? "22px" : "14px",
                     }}
                   >
                     <item.icon size={18}></item.icon>
@@ -96,6 +105,17 @@ export function ServiceThree() {
               Visit Market Place ↗
             </button>
           </div>
+          <div className=" h-full w-full hidden lg:block absolute rounded-2xl"
+            style={{
+              background:"url(/assets/images/Rmarket.png)",
+              backgroundRepeat: "no-repeat",
+              backgroundSize:"contain",
+              backgroundPosition: " 100% 0",
+              // rotate: "16deg",
+
+            }}
+          ></div>
+          
         </div>
       </div>
     </div>
