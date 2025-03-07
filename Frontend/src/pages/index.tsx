@@ -35,7 +35,7 @@ export default function Home() {
       <Bento  />
       <Stats />
       <Proof />
-      <Prices              />
+      <Prices />
       <Brands />
       <Faq />
       <Cta />
