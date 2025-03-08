@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { useState } from "react";
 import { Mail, KeyRound, User, Check, Eye, EyeOff } from "lucide-react";
@@ -69,7 +71,8 @@ type InputProps = {
   placeholder?: string;
   passwordStrength?: boolean;
   value?: string;
-  onChange?: (value: React.ChangeEvent<HTMLInputElement>) => void;
+  // @ts-ignore
+  onChange?: any;
 };
 
 export default function Input({
@@ -77,6 +80,7 @@ export default function Input({
   placeholder = "Your Password",
   passwordStrength = true,
   value = "",
+  onChange
 }: InputProps) {
   const [input, setInput] = useState<string>(value);
   const [hidden, setHidden] = useState<boolean>(true);
@@ -90,6 +94,7 @@ export default function Input({
         ).length
       : 0;
 
+  
   return (
     <div
       className={`ainput ${type === "password" ? "password" : ""}`}
@@ -104,7 +109,7 @@ export default function Input({
         <input
           type={type === "password" ? (hidden ? "password" : "text") : type}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => (setInput(e.target.value),onChange(e.target.value))}
           data-empty={input === ""}
         />
         <p>{placeholder}</p>

@@ -101,7 +101,7 @@ export function ServiceThree() {
                 ))}
               </div>
             </div>
-            <button className="mt-12 bg-black rounded-lg text-white w-fit px-4 py-1">
+            <button className="mt-12 bg-black rounded-full text-white w-fit px-4 py-1">
               Visit Market Place ↗
             </button>
           </div>

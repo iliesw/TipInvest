@@ -1,5 +1,5 @@
 import "../../public/assets/css/fonts.css";
-import "../../public/assets/css/globals.css";
+import "./../globals.css";
 import Proof from "@/components/Home/Proof";
 import Hero from "@/components/Home/Hero";
 import Cta from "@/components/Home/CTA";

@@ -1,79 +1,96 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { SelectedLang } from "@/stores/lang";
-import { JSX, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
-// import CircularProgress from "@mui/joy/CircularProgress";
-import { HouseIcon } from "lucide-react";
+import {
+  JSX,
+  JSXElementConstructor,
+  Key,
+  ReactElement,
+  ReactNode,
+  ReactPortal,
+  useEffect,
+  useState,
+} from "react";
+import CircularProgress from "@mui/joy/CircularProgress";
+import {
+  Building,
+  DollarSign,
+  HouseIcon,
+  LandPlot,
+  Wallet,
+} from "lucide-react";
+import { Chart } from "./Chart";
 type Lang = "fr" | "us";
 
-// function Stat(props: any) {
-//   return (
-//     <>
-//       <div className="stat">
-//         <CircularProgress
-//           variant="plain"
-//           color="neutral"
-//           sx={{
-//             "--CircularProgress-size": "75px",
-//             "--CircularProgress-trackThickness": "8px",
-//             "--CircularProgress-progressThickness": "8px",
-//           }}
-//           className="progress"
-//           determinate={true}
-//           value={props.value}
-//         >
-//           <div>
-//             <p className="stat-name">{props.name}</p>
-//             <p>{props.value}</p>
-//           </div>
-//         </CircularProgress>
-//       </div>
-//       <style>{`
-//       .stat {
-//               padding: 1.5rem;
-//               border-radius: 10px;
-//               display: flex;
-//               flex-direction: column;
-//               justify-content: space-between;
-//               align-items: center;
+function Stat(props: any) {
+  return (
+    <>
+      <div className="stat">
+        <CircularProgress
+          variant="plain"
+          color="primary"
+          sx={{
+            "--CircularProgress-size": "75px",
+            "--CircularProgress-trackThickness": "8px",
+            "--CircularProgress-progressThickness": "8px",
+          }}
+          className="progress "
+          determinate={true}
+          value={props.value}
+        >
+          <div>
+            <p className="stat-name">{props.name}</p>
+            <p>{props.value}%</p>
+          </div>
+        </CircularProgress>
+      </div>
+      <style>{`
+      .stat {
+              padding: 1.5rem;
+              border-radius: 10px;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              align-items: center;
 
-//               div{
-//                 display: flex;
-//                 justify-content: space-between;
-//                 flex-direction: column;
-//                 align-items: center;
-//               }
-//               p{
-//               font-family: 'Figtree';
-//               font-weight: bold;
-//               font-size: 1.5rem;
-//               }
-//               .stat-name{
-//                 font-size: .7rem;
-//                 text-align: center;
-//               }
-//               svg {
-//                 scale: 1.3;
-//                 filter:blur(.4px); 
-//               }
-//             }
-//       `}</style>
-//     </>
-//   );
-// }
+              div{
+                display: flex;
+                justify-content: space-between;
+                flex-direction: column;
+                align-items: center;
+              }
+              p{
+              font-family: 'Figtree';
+              font-weight: bold;
+              color:black;
+              font-size: 1.5rem;
+              }
+              .stat-name{
+                font-size: .7rem;
+                text-align: center;
+              }
+              svg {
+                scale: 1.3;
+                filter:saturate(0) contrast(10)
+              }
+            }
+      `}</style>
+    </>
+  );
+}
 
 interface ServiceOptionItem {
   icon: JSX.Element;
   name: string;
 }
 
-function Options(props: { options: ServiceOptionItem[]; }) {
+function Options(props: { options: ServiceOptionItem[] }) {
   return (
     <>
       <div className="options">
         {props.options.map((item, index) => (
-          <div key={index} className="option-item"> 
-          {/* @ts-ignore */}        
+          <div key={index} className="option-item">
+            {/* @ts-ignore */}
             <item.icon size={16}></item.icon>
             <span>{item.name}</span>
           </div>
@@ -84,7 +101,7 @@ function Options(props: { options: ServiceOptionItem[]; }) {
           display: flex;
           gap: 5px;
           align-items: center;
-          width: 50%;
+          width: fit-content;
 
           .option-item {
             width: fit-content;
@@ -93,10 +110,15 @@ function Options(props: { options: ServiceOptionItem[]; }) {
 
             align-items: center;
             gap: 0.5em;
-            border-radius: 6px;
+            border-radius: 60px;
             padding: 0.3rem 0.6em;
-
             border: 1px solid #ccc;
+            transition: 0.2s ease;
+            cursor: pointer;
+
+            &:hover {
+              background: #eee;
+            }
 
             span {
               font-size: 0.8rem;
@@ -149,7 +171,7 @@ export default function InvestmentCalculator() {
   const PropertyTypes = [
     {
       name: "Apartment",
-      icon: HouseIcon,
+      icon: Building,
     },
     {
       name: "Villa",
@@ -157,39 +179,88 @@ export default function InvestmentCalculator() {
     },
     {
       name: "Land",
-      icon: HouseIcon,
+      icon: LandPlot,
     },
   ];
 
+  const InvestmentTypes = [
+    {
+      name: "Rental",
+      icon: DollarSign,
+    },
+    {
+      name: "Selling",
+      icon: Wallet,
+    },
+  ];
+
+  function remap(
+    value: number,
+    low1: number,
+    high1: number,
+    low2: number,
+    high2: number,
+  ) {
+    return low2 + ((value - low1) * (high2 - low2)) / (high1 - low1);
+  }
+
+  const [InvestAmmount, setInvestAmmount] = useState(202300);
+
   return (
     <>
-      <div id="SimPlus" className="w-full ">
-        <div>
-          <h1>Advanced Finatial Calculator</h1>
-          <p className="mb-2">some discription to be ditermined later</p>
+      <div id="SimPlus" className="w-full py-16 flex-col sm:flex-row">
+        <div className="flex flex-col justify-between ">
+          <h1>Calculatrice financière avancée</h1>
+
           <br />
-          {/* @ts-ignore */}        
+          {/* @ts-ignore */}
+          <ServiceOption name={"Propriété"} options={PropertyTypes} />
+          {/* @ts-ignore */}
 
-          <ServiceOption name={"Property Type"} options={PropertyTypes} />
-          {/* @ts-ignore */}        
-
-          <ServiceOption name={"SimPlus"} options={PropertyTypes} />
-          {/* @ts-ignore */}        
-
-          <ServiceOption name={"SimPlus"} options={PropertyTypes} />
-          {/* @ts-ignore */}        
-
-          <ServiceOption name={"SimPlus"} options={PropertyTypes} />
+          <ServiceOption name={"Investissement"} options={InvestmentTypes} />
+          <br />
+          <div className="flex justify-between w-full">
+            <h1>Capital a investir</h1> <h1>{InvestAmmount} $</h1>
+          </div>
+          <input
+            className="w-full my-6"
+            type="range"
+            min="1000"
+            max="500000"
+            step="100"
+            onChange={(e) => setInvestAmmount(parseInt(e.target.value))}
+          />
+          <div className="flex justify-between w-full">
+            <h1>Apport initial</h1> <h1>{InvestAmmount * 0.13} $</h1>
+          </div>
+          <div className="flex justify-between w-full">
+            <h1>Payement mensuel</h1>{" "}
+            <h1>{Math.floor(InvestAmmount * 0.13 * 0.03)} $</h1>
+          </div>
+          <div className="flex justify-between w-full">
+            <h1>Durée</h1>{" "}
+            <h1>
+              {Math.floor(remap(InvestAmmount, 1000, 500000, 6, 180))} Mois
+            </h1>
+          </div>
         </div>
-        <div className="stat-container"></div>
+        <div className="flex flex-col items-center">
+          <div className="flex hidden sm:block">
+            <Stat name={"Invest"} value={84} />
+            <Stat name={"Cost"} value={60} />
+            <Stat name={"ROI"} value={76} />
+            <Stat name={"Risk"} value={23} />
+          </div>
+          <Chart />
+        </div>
       </div>
       <style jsx>{`
         #SimPlus {
-          border-radius: 30px;
+          pointer-events: none;
+          border-radius: 20px;
           padding: 40px;
           display: flex;
           border: 1px solid #e0e0e0;
-          height: 35rem;
           display: flex;
 
           h1 {
@@ -211,8 +282,6 @@ export default function InvestmentCalculator() {
             height: 100%;
           }
 
-          
-
           .stat-container {
             width: 80%;
             display: grid;
@@ -225,7 +294,7 @@ export default function InvestmentCalculator() {
           appearance: none;
           width: 48px;
           height: 48px;
-          background: rgb(0, 0, 0);
+          background: rgb(0, 0, 0) !important;
           cursor: pointer;
           border-radius: 50%;
           transform: translateY(-12px);

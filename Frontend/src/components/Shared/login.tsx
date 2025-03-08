@@ -6,6 +6,9 @@ import InputPhone from "./ui/InputPhone";
 import { CircleDashedIcon } from "lucide-react";
 import { isShowing } from "@/stores/isAuthVisible";
 import { SelectedLang } from "@/stores/lang";
+import useFetch from "./../../lib/fetch";
+
+
 type Lang = 'fr' | 'us';
 
 const LoginPage: React.FC = () => {
@@ -16,16 +19,22 @@ const LoginPage: React.FC = () => {
             setUserLang(n as Lang);
           });
         }, []);
-
+        useEffect(() => {
+          isShowing.subscribe((n) => {
+            setAuthShow(n);
+          });
+        }, []);
+  
   const [pos, setPos] = useState(0);
   const [isLogin, setIsLogin] = useState(true);
   const [loginFetching, setLoginFetching] = useState(false);
-  const [data, setData] = useState({
-    email: "",
-    username: "",
-    password: "",
-    phone: "",
-  });
+
+
+  const [email,setEmail] = useState("");
+  const [username,setUsername] = useState("")
+  const [password,setPassword] = useState("")
+  const [phone,setPhone] = useState("")
+
 
   const uiData = {
     fr: [
@@ -102,11 +111,13 @@ const LoginPage: React.FC = () => {
   };
 
   const submit = () => {
+    
+    const data = isLogin? {email,password}:{email,username,password,phone};
+
+    console.log(data);
     setLoginFetching(true);
-    fetch("/auth" + (isLogin ? "/login" : "/register"), {
-      method: "POST",
-      body: JSON.stringify(data),
-    })
+
+    useFetch.post("/auth" + (isLogin ? "/login" : "/register"),data)
       .then((res) => {
         if (res.ok) {
           return res.json();
@@ -121,7 +132,6 @@ const LoginPage: React.FC = () => {
       })
       .catch((err) => {
         setLoginFetching(false);
-        //
         console.error("Error:", err);
       });
   };
@@ -167,10 +177,8 @@ const LoginPage: React.FC = () => {
             <Input
               type="email"
               placeholder="Email"
-              value={data.email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setData({ ...data, email: e.target.value })
-              }
+              value={email}
+              onChange={setEmail}
             />
             {(isLogin ? uiData[userLang][0].username : uiData[userLang][1].username) && (
               <div
@@ -183,27 +191,21 @@ const LoginPage: React.FC = () => {
                 <Input
                   type="username"
                   placeholder="Nom d'utilisateur"
-                  value={data.username}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setData({ ...data, username: e.target.value })
-                  }
+                  value={username}
+                  onChange={setUsername}
                 />
                 <InputPhone
                   placeholder="Téléphone"
-                  value={data.phone}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setData({ ...data, phone: e.target.value })
-                  }
+                  value={phone}
+                  onChange={setPhone}
                 />
               </div>
             )}
             <Input
               type="password"
               placeholder="Mot de passe"
-              value={data.password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setData({ ...data, password: e.target.value })
-              }
+              value={password}
+              onChange={setPassword}
             />
             <button style={{ marginTop: "10px" }} onClick={submit}>
               {!loginFetching ? (

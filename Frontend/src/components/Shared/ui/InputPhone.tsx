@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { useState } from "react";
 import { Phone } from "lucide-react";
@@ -5,13 +6,14 @@ import { Phone } from "lucide-react";
 type InputProps = {
   placeholder?: string;
   value?: string;
-  onChange?: (value: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?:any;
 };
 
 
 export default function InputPhone({
   placeholder = "Your Phone Number",
   value = "",
+  onChange,
 }:InputProps) {
   const [input, setInput] = useState<string>(value);
 
@@ -25,7 +27,7 @@ export default function InputPhone({
         </div>
         <input
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => (setInput(e.target.value), onChange(e.target.value))}
           data-empty={input === ""}
         />
         <p>{placeholder}</p>
