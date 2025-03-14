@@ -32,7 +32,8 @@
     "recharts": "^2.15.1",
     "styled-components": "^6.1.15",
     "tailwind-merge": "^3.0.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "tailwindcss-animated": "^2.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

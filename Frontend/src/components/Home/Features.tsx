@@ -1,5 +1,6 @@
 import { SelectedLang } from "@/stores/lang";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 type Lang = 'fr' | 'us';
 
 function FF() {
@@ -138,41 +139,68 @@ function FF() {
   };
 
   return (
-    <section className="py-14">
-      <div className="w-2/3 mx-auto px-4 text-gray-600 md:px-8">
+    <motion.section
+      className="py-14"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8 }}
+      viewport={{ once: true }}
+    >
+      <div className="w-full sm:w-2/3 mx-auto px-8 text-gray-600 md:px-8">
         <div className="max-w-7xl space-y-3">
-          <h3 className="text-lime-600 font-semibold">Features</h3>
-          <p className="text-gray-800 text-3xl font-semibold sm:text-4xl ">
+          <motion.h3
+            className="text-lime-600 font-semibold"
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Features
+          </motion.h3>
+          <motion.p
+            className="text-gray-800 text-3xl font-semibold sm:text-4xl"
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
             {userLang === "fr"
               ? "Réinventons l’Investissement Immobilier"
               : "Reinventing Real Estate Investment"}
-          </p>
-          <p className="max-w-xl">
+          </motion.p>
+          <motion.p
+            className="max-w-xl"
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
             {userLang === "fr"
               ? "Tips Invest transforme l’immobilier avec l’IA, la 3D et des outils financiers de pointe pour des décisions plus rapides et éclairées."
               : "Tips Invest revolutionizes real estate with AI, 3D, and cutting-edge financial tools for faster and smarter decisions."}
-          </p>
+          </motion.p>
         </div>
         <div className="mt-12">
           <ul className="grid gap-x-12 divide-y [&>.feature-1]:pl-0 sm:grid-cols-2 sm:gap-y-8 sm:divide-y-0 lg:divide-x lg:grid-cols-3 lg:gap-x-0">
             {features[userLang].map((item, idx) => (
-              <li
+              <motion.li
                 key={idx}
                 className={`feature-${idx + 1} space-y-3 py-8 lg:px-4 sm:py-0`}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: idx * 0.2 }}
+                viewport={{ once: true }}
               >
-                <div className="w-12 h-12 border text-lime-600 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 border text-lime-600 rounded-full flex items-center justify-center text-2xl">
                   {item.icon}
                 </div>
                 <h4 className="text-lg text-gray-800 font-semibold">
                   {item.title}
                 </h4>
                 <p>{item.desc}</p>
-              </li>
+              </motion.li>
             ))}
           </ul>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
 

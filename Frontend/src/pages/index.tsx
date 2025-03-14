@@ -16,6 +16,7 @@ import Navbar from "@/components/Home/Navbar";
 
 import { Metadata } from 'next';
 import Prices from "@/components/Pricing/Prices";
+// import Add from "@/components/Shared/Add";
  
 export const metadata: Metadata = {
   title: 'TipInvest',
@@ -28,6 +29,7 @@ export default function Home() {
   return (
     <div className="bg-[#fcfcfc]">
       <ChatbotPopup />
+      {/* <Add /> */}
       <Navbar />
       <Hero />
       <Intro />

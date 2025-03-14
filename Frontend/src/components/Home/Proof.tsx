@@ -6,8 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SelectedLang } from "@/stores/lang";
 type Lang = 'fr' | 'us';
 
-// eslint-disable-next-line react/display-name
-export default () => {
+export default function Proof(){
   const testimonials = {
     fr: [
       {
@@ -59,24 +58,26 @@ export default () => {
 
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
-            useEffect(() => {
-              SelectedLang.subscribe((n) => {
-                setUserLang(n as Lang);
-              });
-            }, []);
+  
+  useEffect(() => {
+    SelectedLang.subscribe((n) => {
+      setUserLang(n as Lang);
+    });
+  }, []);
+  
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.fr.length);
+      setCurrentTestimonial((prev) => (prev + 1) % testimonials[userLang].length);
     }, 6000);
     return () => clearInterval(interval);
-  }, [testimonials.fr.length]);
+  }, [testimonials, userLang]);
 
   return (
     <section className="py-14">
       <div className="max-w-screen-xl mx-auto px-4 md:px-8">
         <div className="max-w-5xl mx-auto text-center mb-32 lg:mb-0">
           <h3 className="text-lime-600 font-semibold pb-6">
-            Ce que disent les gens
+            {userLang === 'fr' ? 'Ce que disent les gens' : 'What people are saying'}
           </h3>
           <div className="relative h-48">
             <AnimatePresence mode="wait">
@@ -115,7 +116,7 @@ export default () => {
         </div>
         <div className="mt-12 hidden lg:block">
           <ul className="flex gap-x-3 justify-center">
-            {testimonials.fr.map((_, idx) => (
+            {testimonials[userLang].map((_, idx) => (
               <li key={idx}>
                 <button
                   className={`w-2.5 h-2.5 rounded-full duration-150 ring-offset-2 ring-lime-600 focus:ring ${

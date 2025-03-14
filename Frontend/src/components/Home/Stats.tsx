@@ -1,5 +1,7 @@
 import { SelectedLang } from "@/stores/lang";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+
 type Lang = 'fr' | 'us';
 
 const statsContent = {
@@ -45,15 +47,29 @@ const statsContent = {
 
 const Stats = () => {
   const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
-            useEffect(() => {
-              SelectedLang.subscribe((n) => {
-                setUserLang(n as Lang);
-              });
-            }, []);
+  
+  useEffect(() => {
+    SelectedLang.subscribe((n) => {
+      setUserLang(n as Lang);
+    });
+  }, []);
+
   return (
-    <div className="w-full flex justify-center px-4">
-      <div className="bg-white block w-full lg:w-2/3  my-[150px] rounded-[20px] outline-2 outline-dashed outline-[rgba(0,0,0,0.153)] p-[55px] box-border">
-        <div className="flex flex-col lg:flex-row gap-[40px] lg:gap-[80px] pt-[15px] items-center">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7 }}
+      viewport={{ once: true }}
+      className="w-full flex justify-center px-4"
+    >
+      <div className="bg-white block w-full lg:w-2/3 my-[150px] rounded-[20px] outline-2 outline-dashed outline-[rgba(0,0,0,0.153)] p-[55px] box-border">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="flex flex-col lg:flex-row gap-[40px] lg:gap-[80px] pt-[15px] items-center"
+        >
           <div className="w-full lg:w-[150%]">
             <span className="bg-[rgb(247,255,233)] px-[20px] py-[10px] rounded-[50px] text-[15px] font-rubik text-black">
               {statsContent[userLang].partnerMessage}
@@ -65,20 +81,29 @@ const Stats = () => {
           <p className="w-full lg:w-[120%] h-full text-start opacity-50 font-versel text-[14px]">
             {statsContent[userLang].description}
           </p>
-        </div>
+        </motion.div>
+        
         <div className="my-[30px] mb-[40px] w-full h-[1px] bg-gradient-to-r from-[rgba(0,0,0,0.253)] to-white bg-[length:5px]"></div>
+        
         <div className="flex flex-col md:flex-row gap-[40px]">
           {statsContent[userLang].stats.map((stat, index) => (
-            <div key={index} className="w-full flex flex-col gap-[20px] items-center">
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: index * 0.2 }}
+              viewport={{ once: true }}
+              className="w-full flex flex-col gap-[20px] items-center"
+            >
               <h1 className="text-[65px] font-figtree m-0">{stat.value}</h1>
               <p className="text-center m-0 font-versel opacity-50 text-[14px]">
                 {stat.description}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

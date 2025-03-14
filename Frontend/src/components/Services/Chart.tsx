@@ -37,7 +37,7 @@ const chartConfig = {
 
 export function Chart() {
   return (
-    <Card className="border-none shadow-none p-0 w-full pl-0  sm:pl-16">
+    <Card className="border-none shadow-none p-0 w-full pl-0  sm:pl-4">
       <CardHeader className="px-0">
         <CardTitle>Valeur de Marché</CardTitle>
         <CardDescription>

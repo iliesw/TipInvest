@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { SelectedLang } from "@/stores/lang";
@@ -168,7 +169,7 @@ export default function InvestmentCalculator() {
     },
   };
 
-  const PropertyTypes = [
+  const PropertyTypes:object[] = [
     {
       name: "Apartment",
       icon: Building,
@@ -186,11 +187,11 @@ export default function InvestmentCalculator() {
   const InvestmentTypes = [
     {
       name: "Rental",
-      icon: DollarSign,
+      icon: Wallet,
     },
     {
       name: "Selling",
-      icon: Wallet,
+      icon: DollarSign,
     },
   ];
 
@@ -208,7 +209,7 @@ export default function InvestmentCalculator() {
 
   return (
     <>
-      <div id="SimPlus" className="w-full py-16 flex-col sm:flex-row">
+      <div id="SimPlus" className="w-full py-16 flex-col sm:flex-row gap-4">
         <div className="flex flex-col justify-between ">
           <h1>Calculatrice financière avancée</h1>
 
@@ -244,8 +245,8 @@ export default function InvestmentCalculator() {
             </h1>
           </div>
         </div>
-        <div className="flex flex-col items-center">
-          <div className="flex hidden sm:block">
+        <div className="flex flex-col justify-center items-center">
+          <div className="flex flex-row">
             <Stat name={"Invest"} value={84} />
             <Stat name={"Cost"} value={60} />
             <Stat name={"ROI"} value={76} />
@@ -256,7 +257,6 @@ export default function InvestmentCalculator() {
       </div>
       <style jsx>{`
         #SimPlus {
-          pointer-events: none;
           border-radius: 20px;
           padding: 40px;
           display: flex;
