@@ -47,6 +47,50 @@ const pricingData = {
       },
     ],
   },
+  us: {
+    title: "Invest with confidence, maximize your returns",
+    description:
+      "At TipInvest, we put the power of data and AI in your hands to help you make smart and profitable investment decisions.",
+    plans: [
+      {
+        name: "Essential",
+        icon: DoorOpen,
+        price: "$29",
+        period: "/month",
+        description: "Perfect for investors who want reliable tools without complexity.",
+        features: [
+          "Real-time market trend analysis",
+          "Access to key financial data",
+          "Intuitive dashboard to track your investments",
+        ],
+      },
+      {
+        name: "Advanced",
+        icon: PencilRuler,
+        price: "$149",
+        period: "/month",
+        description: "For experienced investors looking to refine their strategy.",
+        features: [
+          "All features of the Essential plan",
+          "AI predictions to anticipate trends",
+          "Advanced reports and interactive dashboards",
+        ],
+      },
+      {
+        name: "Elite",
+        icon: Sparkles,
+        price: "$599",
+        period: "/month",
+        description: "Designed for investment funds, institutions, and expert traders.",
+        features: [
+          "Everything included in the Advanced plan",
+          "AI-powered custom investment strategies",
+          "Access to exclusive data and in-depth analyses",
+        ],
+      },
+    ],
+  },
+
 };
 
 type Lang = 'fr';

@@ -7,6 +7,8 @@ import { CircleDashedIcon } from "lucide-react";
 import { isShowing } from "@/stores/isAuthVisible";
 import { SelectedLang } from "@/stores/lang";
 import useFetch from "./../../lib/fetch";
+import { useRouter } from "next/router";
+import { saveToken } from "@/pages/api/set-cookie"
 
 
 type Lang = 'fr' | 'us';
@@ -109,10 +111,10 @@ const LoginPage: React.FC = () => {
     setIsLogin(false);
     next();
   };
-
+  const router = useRouter();
   const submit = () => {
     
-    const data = isLogin? {email,password}:{email,username,password,phone};
+    const data = isLogin? {email,password}:{email,"name":username,password,phone};
 
     console.log(data);
     setLoginFetching(true);
@@ -126,9 +128,10 @@ const LoginPage: React.FC = () => {
         }
       })
       .then((respData) => {
-        console.log("Success:", respData);
-        isShowing.set(false);
         setLoginFetching(false);
+        console.log("Success:", respData);
+        saveToken(respData.token);
+        router.push("/client");
       })
       .catch((err) => {
         setLoginFetching(false);

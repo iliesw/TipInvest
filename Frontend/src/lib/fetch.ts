@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const Server = "https://tipinvest-production.up.railway.app";
+//const Server = "https://tipinvest-production.up.railway.app";
+const Server = "http://localhost:3001";
 
 function Fetch(url: string, method = "GET", body = {}, params = {}) {
   return fetch(Server + url, {
@@ -20,4 +21,9 @@ export default class useFetch {
     Fetch(url, "GET", undefined, { ...params });
   static post = (url: any, body: any, params: any = {}) =>
     Fetch(url, "POST", body, { ...params });
+}
+
+export function Logout(){
+  localStorage.removeItem("TOKENAUTH");
+  window.location.href="/";
 }

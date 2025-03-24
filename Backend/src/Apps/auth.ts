@@ -8,7 +8,7 @@ import { GetVersion } from "../../lib";
 
 const auth = new Hono();
 
-auth.get("/", (c) => c.json({ status: "Auth alive"+GetVersion() }));
+auth.get("/", (c) => c.json({ status: "Auth alive "+GetVersion() }));
 
 /**
  * Registers a new user.
@@ -19,8 +19,9 @@ auth.get("/", (c) => c.json({ status: "Auth alive"+GetVersion() }));
  */
 auth.post("/register", async (c) => {
   // Parse the request body
-  const { name, email, password } = await c.req.parseBody() as { name: string, email: string, password: string };
+  const { name, email, password } = await c.req.json() as { name: string, email: string, password: string };
 
+  console.log(name, email, password)
   // Hash the password before storing it in the database
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -43,7 +44,7 @@ auth.post("/register", async (c) => {
  */
 auth.post("/login", async (c) => {
   // Parse the request body
-  const { email, password } = await c.req.parseBody() as { email: string, password: string };
+  const { email, password } = await c.req.json() as { email: string, password: string };
 
   // Find the user in the database by email
   const user = await db
@@ -61,7 +62,7 @@ auth.post("/login", async (c) => {
   const token = jwt.sign(
     { id: user[0].id, role: user[0].role },
     process.env.JWT_SECRET!,
-    { expiresIn: "1h" }
+    { expiresIn: "7d"}
   );
 
   return c.json({ token });
@@ -102,7 +103,7 @@ auth.get("/check-email", async (c) => {
  */
 auth.post("/forgot-password", async (c) => {
   // Parse the request body
-  const { email } = await c.req.parseBody() as { email: string };
+  const { email } = await c.req.json() as { email: string };
 
   // Check if the user exists in the database
   const user = await db
@@ -135,7 +136,7 @@ auth.post("/forgot-password", async (c) => {
  */
 auth.post("/reset-password", async (c) => {
   // Parse the request body
-  const { token, newPassword } = await c.req.parseBody() as { token: string, newPassword: string };
+  const { token, newPassword } = await c.req.json() as { token: string, newPassword: string };
 
   // Verify the reset token
   let payload;

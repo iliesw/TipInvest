@@ -5,6 +5,7 @@ import Logo from "../Shared/Logo";
 import LoginPage from "../Shared/login";
 import { isShowing } from "@/stores/isAuthVisible";
 import { SelectedLang, Next } from "@/stores/lang";
+import Link from "next/link";
 
 type NavigationType = {
   [key: string]: { name: string; href: string }[];
@@ -113,17 +114,21 @@ const Navbar = () => {
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
                 {navigation[userLang].map((item) => (
-                  <a
+                  <Link
                     key={item.name}
                     href={item.href}
                     className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 cursor-pointer"
                   >
                     {item.name}
-                  </a>
+                  </Link>
                 ))}
               </div>
               <div className="py-6">
-                <button className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">
+                <button className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50" onClick={() => {
+                  setMobileMenuOpen(false);
+              isShowing.set(true);
+              isShowing.notify();
+            }}> 
                   Log in
                 </button>
               </div>

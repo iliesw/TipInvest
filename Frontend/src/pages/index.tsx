@@ -1,5 +1,4 @@
-import "../../public/assets/css/fonts.css";
-import "./../globals.css";
+
 import Proof from "@/components/Home/Proof";
 import Hero from "@/components/Home/Hero";
 import Cta from "@/components/Home/CTA";
@@ -24,9 +23,12 @@ export const metadata: Metadata = {
   
 };
 
+import Layout from '../components/layout';
+
 
 export default function Home() {
   return (
+    <Layout>
     <div className="bg-[#fcfcfc]">
       <ChatbotPopup />
       {/* <Add /> */}
@@ -43,5 +45,6 @@ export default function Home() {
       <Cta />
       <Footer />
     </div>
+    </Layout>
   );
 }

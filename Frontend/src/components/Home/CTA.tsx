@@ -15,7 +15,7 @@ export default function Cta() {
 
   const content = {
     fr: {
-      title: "Rejoignez Tips Invest dès aujourd’hui !",
+      title: "Rejoignez Tips Invest dès aujourd hui !",
       text: "Rejoignez Tips Invest et accédez aux meilleurs outils pour optimiser vos investissements immobiliers.",
       button: "Créer un compte gratuitement",
     },
