@@ -477,7 +477,7 @@ function PropertyDiv({ data }: { data: any }) {
 
   // Rest of the component remains the same...
   return (
-    <div className="rounded-lg hover:bg-gray-200 transition w-full min-w-1/3  bg-gray-100 gap-16 relative overflow-hidden flex flex-col items-start p-6 m-0 justify-between border">
+    <div className="rounded-lg hover:bg-gray-200 transition w-full min-w-1/3  bg-gray-100 gap-16 relative overflow-hidden flex flex-col items-start p-6 m-0 justify-between border" style={{borderRadius:"10px"}}>
       {/* Rest of the JSX remains unchanged */}
       <div
         className="w-full absolute h-full top-0 left-0 opacity-35"
@@ -739,13 +739,13 @@ function PropertiesSection() {
           // @ts-expect-error
           Properties.set([...$P, PS]);
         }}
-        className="rounded-lg cursor-pointer hover:bg-gray-200 transition w-96 h-fit bg-gray-100 relative overflow-hidden flex flex-col items-start p-6 justify-between border"
+        className="rounded-lg cursor-pointer hover:bg-gray-200 transition w-96 h-fit bg-gray-100 relative overflow-hidden flex flex-col items-start p-6 justify-between border" style={{borderRadius:"10px"}}
       >
         <div className="absolute top-0 left-0 w-full h-full"></div>
         <div className="flex relative w-full z-10 justify-end">
           <ArrowRight></ArrowRight>
         </div>
-        <div className="z-10 relative h-40 flex flex-col justify-end">
+        <div className="z-10 relative h-40 flex flex-col justify-end" style={{borderRadius:"10px"}}>
           <h1 className="text-3xl">Add Property</h1>
           <p className="text-gray-500 text-sm ">
             Add a property to see market trends
