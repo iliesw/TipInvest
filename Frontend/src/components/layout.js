@@ -1,5 +1,3 @@
-import "../../public/assets/css/fonts.css";
-import "./../globals.css";
 import Head from 'next/head';
 
 export default function Layout({ children }) {
