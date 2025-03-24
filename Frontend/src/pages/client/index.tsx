@@ -11,8 +11,6 @@ import { Home, SquareTerminal, Store, LifeBuoy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-import "../../../public/assets/css/fonts.css";
-import "../../../public/assets/css/globals.css";
 export default function ClientView() {
   const [userName, setUserName] = useState("Client");
 
