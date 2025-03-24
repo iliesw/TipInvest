@@ -1,7 +1,6 @@
 "use client";
 import Layout from "@/components/layout";
-import "../../../public/assets/css/fonts.css";
-import "../../../public/assets/css/globals.css";
+
 
 import { AppSidebar } from "@/components/app-sidebar";
 

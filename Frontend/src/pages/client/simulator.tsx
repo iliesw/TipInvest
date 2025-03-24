@@ -1,6 +1,7 @@
 import LayoutC from "./layout";
 import InvestorSim from "@/components/Simulators/Investor";
-
+import "../../../public/assets/css/fonts.css";
+import "../../../public/assets/css/globals.css";
 export default function Simulator() {
   return (
     <LayoutC>
