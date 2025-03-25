@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const Server = "https://tipinvest-production-76d3.up.railway.app";
-//const Server = "http://localhost:3001";
+// const Server = "http://localhost:3001";
 
 function Fetch(url: string, method = "GET", body = {}, params = {}) {
   return fetch(Server + url, {

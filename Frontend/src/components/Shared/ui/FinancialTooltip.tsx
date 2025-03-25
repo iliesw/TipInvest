@@ -31,7 +31,6 @@ export default function FinancialTooltip({ term, children, className = '' }: Fin
         <TooltipTrigger asChild>
           <span className={`inline-flex items-center gap-1 ${className}`}>
             {children}
-            
           </span>
         </TooltipTrigger>
         <TooltipContent className="max-w-xs p-2 text-xs">

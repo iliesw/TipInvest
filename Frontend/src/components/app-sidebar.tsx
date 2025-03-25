@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useEffect } from "react";
 import LogoSM from "./Shared/LogoSM";
+import useFetch from "@/lib/fetch";
 
 const data = {
   navMain: [
@@ -64,7 +65,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     const T = localStorage.getItem("TOKENAUTH");
-    fetch("http://localhost:3001/user/me", {
+    useFetch.get("/user/me", {
       headers: {
         Authorization: `Bearer ${T}`,
         "Content-Type": "application/json",

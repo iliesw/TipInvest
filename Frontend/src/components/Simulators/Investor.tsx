@@ -11,6 +11,7 @@ import {
   ChartColumnDecreasing,
   DollarSign,
   Dot,
+  Download,
   Ellipsis,
   RotateCcw,
   Sparkle,
@@ -76,7 +77,7 @@ const chartData = [
 const chartConfig = (_label: string) => ({
   desktop: {
     label: _label,
-    color: "hsl(var(--chart-1))",
+    color: "orangered",
   },
 });
 
@@ -250,7 +251,7 @@ function MetricSerction() {
   }, [Data]);
 
   return (
-    <div className="flex gap-[10px] mt-5">
+    <div className="flex gap-[10px] mt-5 flex-row w-full">
       {chartData.map((item, index) => (
         <Metric key={index} data={item} />
       ))}
@@ -274,7 +275,7 @@ function Metric({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
-      className="rounded-xl bg-gray-100 border hover:bg-gray-200 transition cursor-pointer gap-10 flex flex-col justify-between items-start p-6 overflow-hidden h-[250px] max-h-[250px] min-w-[500px] w-full"
+      className="rounded-xl bg-gray-100 border hover:bg-gray-200 transition cursor-pointer gap-10 flex flex-col justify-between items-start p-6 overflow-hidden  w-full"
     >
       <div className="flex w-full justify-between">
         <div className="flex flex-col relative">
@@ -336,7 +337,7 @@ function Chart({ values, label }: { values: any[]; label: string }) {
     </div>
   );
 }
-
+import { marked } from "marked";
 function PropertyDiv({ data }: { data: any }) {
   const $D = useStore(data);
   const [IntrestRate, SetIntrestRate] = useState($D.IntrestRate);
@@ -346,7 +347,7 @@ function PropertyDiv({ data }: { data: any }) {
   const [riskScore, setRiskScore] = useState($D.Risk);
   const [qualityScore, setQualityScore] = useState($D.Quality);
   const [Monthly, SetMonthly] = useState($D.Monthly);
-
+  const [OverviewData, SetOverviewData] = useState($D.Rapport);
   // Update the store whenever any property value changes
   useEffect(() => {
     const currentData = {
@@ -357,6 +358,7 @@ function PropertyDiv({ data }: { data: any }) {
       Risk: riskScore,
       Quality: qualityScore,
       Monthly: Monthly,
+      Rapport: marked.parse(OverviewData),
     };
 
     data.set(currentData);
@@ -368,6 +370,7 @@ function PropertyDiv({ data }: { data: any }) {
     riskScore,
     qualityScore,
     Monthly,
+    OverviewData,
   ]);
 
   const propertyTypes = [
@@ -452,7 +455,6 @@ function PropertyDiv({ data }: { data: any }) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [OverviewData, SetOverviewData] = useState("");
 
   const Overview = async () => {
     const Data = {
@@ -463,6 +465,7 @@ function PropertyDiv({ data }: { data: any }) {
       Risk: riskScore,
       Quality: qualityScore,
       Monthly: Monthly,
+      Rapport: OverviewData,
     };
 
     setIsLoading(true);
@@ -477,7 +480,10 @@ function PropertyDiv({ data }: { data: any }) {
 
   // Rest of the component remains the same...
   return (
-    <div className="rounded-lg hover:bg-gray-200 transition w-full min-w-1/3  bg-gray-100 gap-16 relative overflow-hidden flex flex-col items-start p-6 m-0 justify-between border" style={{borderRadius:"10px"}}>
+    <div
+      className="rounded-lg hover:bg-gray-200 transition w-full min-w-1/3  bg-gray-100 gap-16 relative overflow-hidden flex flex-col items-start p-6 m-0 justify-between border"
+      style={{ borderRadius: "10px" }}
+    >
       {/* Rest of the JSX remains unchanged */}
       <div
         className="w-full absolute h-full top-0 left-0 opacity-35"
@@ -716,6 +722,7 @@ function PropertiesSection() {
 
   return (
     <div
+      id="printable"
       className={`w-full gap-3 h-full ${
         $P.length == 0
           ? "items-center justify-center flex flex-col"
@@ -735,17 +742,22 @@ function PropertiesSection() {
             Risk: 1,
             Quality: 1,
             Monthly: 1000,
+            Rapport: "",
           });
           // @ts-expect-error
           Properties.set([...$P, PS]);
         }}
-        className="rounded-lg cursor-pointer hover:bg-gray-200 transition w-96 h-fit bg-gray-100 relative overflow-hidden flex flex-col items-start p-6 justify-between border" style={{borderRadius:"10px"}}
+        className="rounded-lg cursor-pointer hover:bg-gray-200 transition w-96 h-fit bg-gray-100 relative overflow-hidden flex flex-col items-start p-6 justify-between border"
+        style={{ borderRadius: "10px" }}
       >
         <div className="absolute top-0 left-0 w-full h-full"></div>
         <div className="flex relative w-full z-10 justify-end">
           <ArrowRight></ArrowRight>
         </div>
-        <div className="z-10 relative h-40 flex flex-col justify-end" style={{borderRadius:"10px"}}>
+        <div
+          className="z-10 relative h-40 flex flex-col justify-end"
+          style={{ borderRadius: "10px" }}
+        >
           <h1 className="text-3xl">Add Property</h1>
           <p className="text-gray-500 text-sm ">
             Add a property to see market trends
@@ -760,15 +772,111 @@ function PropertiesSection() {
 export default function InvestorSim() {
   const $P = useStore(Properties);
 
+  const Page = (i: { PropertyType: string; Rapport: string; Capital: string; Duration: string; IntrestRate: string; Risk: string; Quality: string; Monthly: string; }) => {
+    return (
+      "<house><h1>" +
+      i.PropertyType +
+      " Property</h1><h2 style='margin-top:10px;margin-bottom:10px'>Ai Rapport :</h2><p>" +
+      i.Rapport +
+      "</p><h2 style='margin-top:10px;margin-bottom:10px'>Investissement :</h2>" +
+      "<div>" +
+      "<p class='stat'><b>Capital:</b> $" +
+      i.Capital +
+      "</p>" +
+      "<p class='stat'><b>Duration:</b> " +
+      i.Duration +
+      " months</p>" +
+      "<p class='stat'><b>Interest Rate:</b> " +
+      i.IntrestRate +
+      "%</p>" +
+      "<p class='stat'><b>Property Type:</b> " +
+      i.PropertyType +
+      "</p>" +
+      "<p class='stat'><b>Risk Score:</b> " +
+      i.Risk +
+      "/10</p>" +
+      "<p class='stat'><b>Quality Score:</b> " +
+      i.Quality +
+      "/10</p>" +
+      "<p class='stat'><b>Monthly Payment:</b> $" +
+      i.Monthly +
+      "</p>" +
+      "</div>" +
+      "</house>"
+    );
+  };
+
+  const PrintPage = () => {
+    const w = window.open("", "", "width=500");
+    const P = $P.map((item) => {
+      //@ts-ignore
+      return Page(item.value);
+    });
+    w?.document.write(
+      `<html><head>
+      <link rel="stylesheet" href="/assets/css/fonts.css">
+      <link rel="stylesheet" href="/assets/css/globals.css">
+      <title>Ai Report</title></head><body>${P}
+      <script>
+      setTimeout(() => {
+print({orientation: 'portrait'})
+      },500)
+
+      </script>
+      <style>
+      *{
+      margin:0;
+      box-sizing: border-box;
+      }
+      body{
+        padding: 16px;
+      }
+
+      house{
+        display: flex;
+        flex-direction: column;
+        background: #f7f7f7;
+        border-radius: 10px;
+        padding: 16px;
+        width: 100%;
+        
+      }
+        .stat{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0 25px;
+        font-family: 'Milk';
+        font-size:20px;
+
+        b{
+        font-size:18px;
+        font-family:'Figtree';
+        }
+        }
+      </style>
+      </body></html>`
+    );
+  };
+
   return (
     <>
       {/* <button className="py-4" onClick={OnBack}>
         ← Back
       </button> */}
-      <h1 className="text-4xl">Investor Simulator</h1>
-      <p className="text-sm opacity-70">
-        Overview the market trends and analyze the best properties to invest in.
-      </p>
+      <div className="flex flex-row justify-between items-center w-full">
+        <div className="flex flex-col">
+          <h1 className="text-4xl">Investor Simulator</h1>
+          <p className="text-sm opacity-70">
+            Overview the market trends and analyze the best properties to invest
+            in.
+          </p>
+        </div>
+        <Button onClick={PrintPage} className="border">
+          Downoad Reports <Download />
+        </Button>
+      </div>
 
       {$P.length == 0 ? <div></div> : <MetricSerction />}
       <br />
