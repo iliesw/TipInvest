@@ -1,0 +1,82 @@
+"use client";
+
+import * as React from "react";
+import {
+  LayoutDashboard,
+  Building,
+  BarChart,
+  Users,
+  Settings,
+} from "lucide-react";
+
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+} from "@/components/ui/sidebar";
+import LogoSM from "./Shared/LogoSM";
+
+const adminNavItems = [
+  {
+    title: "Dashboard",
+    url: "/admin",
+    icon: LayoutDashboard,
+    isActive: true,
+  },
+  {
+    title: "Properties",
+    url: "/admin/properties",
+    icon: Building,
+  },
+  {
+    title: "Analytics",
+    url: "/admin/analytics",
+    icon: BarChart,
+  },
+  {
+    title: "Users",
+    url: "/admin/users",
+    icon: Users,
+  },
+  {
+    title: "Settings",
+    url: "/admin/settings",
+    icon: Settings,
+  },
+];
+
+export function AdminSidebar() {
+    const u = {
+        name: "John Doe",
+        email: "test@gmail.com"
+    }
+  return (
+    <Sidebar>
+      <SidebarHeader>
+      <SidebarMenuButton size="lg" asChild>
+              <a href="#">
+                <LogoSM />
+                <div className="ml-2 grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">TipInvest</span>
+                  <span className="truncate text-xs">Admin</span>
+                </div>
+              </a>
+            </SidebarMenuButton>
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={adminNavItems} />
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          
+        </SidebarMenu>
+        <NavUser user={u} />
+      </SidebarFooter>
+    </Sidebar>
+  );
+}

@@ -39,7 +39,7 @@ export default function InputO({
                 className={`${
                   selected == index
                     ? "text-black"
-                    : "text-black blur-[1px] opacity-50"
+                    : "text-black opacity-50"
                 } gap-2 h-8 px-3 rounded-full flex items-center justify-center text-sm transition hover:blur-none hover:opacity-100 duration-200`}
               >
                 <item.icon size={14} />

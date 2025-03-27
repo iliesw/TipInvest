@@ -10,25 +10,21 @@ import {
   Calendar,
   ChartColumnDecreasing,
   DollarSign,
-  Dot,
   Download,
   Ellipsis,
   RotateCcw,
-  Sparkle,
 } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { use, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import InputR from "../Shared/ui/InputR";
 import InputO from "../Shared/ui/InputO";
 import AnimatedNumber from "../Shared/ui/AnimatedNumber";
-import TypeWriter from "../Shared/ui/TypeWriter";
 import Spinner from "../Shared/ui/Spinner";
 import MarkdownRenderer from "../Shared/ui/MarkdownRenderer";
 import FinancialTooltip from "../Shared/ui/FinancialTooltip";
@@ -42,7 +38,7 @@ async function Chat(prompt: string, onChunk?: (chunk: string) => void) {
   );
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-pro-exp-02-05",
+    model: "gemini-2.0-flash-lite",
     systemInstruction: `You are an expert real estate investment analyst. Based on the provided investment data, give specific actionable advice to maximize returns and minimize risks. Focus on concrete steps the investor should take, potential pitfalls to avoid, and strategic opportunities to explore. Include numerical targets and timing recommendations where relevant. Keep your response focused on practical guidance, limited to 4 key action points,your responce should be vry consise,max 4 sentances`,
   });
 
@@ -358,6 +354,7 @@ function PropertyDiv({ data }: { data: any }) {
       Risk: riskScore,
       Quality: qualityScore,
       Monthly: Monthly,
+      Gain : gain,
       Rapport: marked.parse(OverviewData),
     };
 
@@ -432,7 +429,7 @@ function PropertyDiv({ data }: { data: any }) {
   }, [propertyTypes, PropertyType, Duration, IntrestRate, Capital]);
 
   useEffect(() => {
-    const monthlyInterestRate = IntrestRate / 100 / 12;
+    const monthlyInterestRate = parseFloat(IntrestRate) / 100.0 / 12.0;
     const numberOfPayments = Duration;
 
     // Base PMT formula:
@@ -450,6 +447,14 @@ function PropertyDiv({ data }: { data: any }) {
     SetMonthly(Math.floor(baseMonthlyPayment * multiplier));
   }, [IntrestRate, Duration, Capital, propertyTypes, PropertyType]);
 
+  const [gain,setGain] = useState(0);
+useEffect(() => {
+  // Prevent division by zero by using a default value when Capital is 0
+  const f = Capital > 0 ? (Monthly * 12.0 / Capital * 100.0) : 0;
+  console.log(f);
+  setGain(f);
+}, [Monthly, Capital]);
+
   const qualityColor = `hsl(${qualityScore * 12}, 100%, 40%)`;
   const riskColor = `hsl(${(10 - riskScore) * 12}, 100%, 40%)`;
 
@@ -465,6 +470,7 @@ function PropertyDiv({ data }: { data: any }) {
       Risk: riskScore,
       Quality: qualityScore,
       Monthly: Monthly,
+      Gain: gain,
       Rapport: OverviewData,
     };
 
@@ -612,7 +618,7 @@ function PropertyDiv({ data }: { data: any }) {
           )}
           <InputO onChange={SetPropertyType} />
           <div className="flex items-center gap-2">
-            <InputR
+            {/* <InputR
               title={"Period"}
               min={6}
               max={120}
@@ -621,7 +627,8 @@ function PropertyDiv({ data }: { data: any }) {
               Icon={Calendar}
               initialValue={Duration}
               onChange={SetDuration}
-            />
+            /> */}
+            <InputN placeholder="Period" value={Duration} onChange={SetDuration}/>
             <div className="relative" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={(e) => {
@@ -662,7 +669,7 @@ function PropertyDiv({ data }: { data: any }) {
             </div>
           </div>
           <FinancialTooltip term="Capital" className="w-full">
-            <InputR
+            {/* <InputR
               title={"Investment"}
               min={5000}
               max={100000}
@@ -670,7 +677,8 @@ function PropertyDiv({ data }: { data: any }) {
               initialValue={Capital}
               Icon={DollarSign}
               onChange={SetCapital}
-            />
+            /> */}
+            <InputN placeholder="Investment" value={Capital} onChange={SetCapital} type="email"/>
           </FinancialTooltip>
         </div>
         <div className="flex flex-col items-end gap-2">
@@ -697,7 +705,22 @@ function PropertyDiv({ data }: { data: any }) {
               />
             </FinancialTooltip>
           </h3>
-          <p className="text-sm text-gray-500">Estimated Total Price</p>
+          <p className="text-sm text-gray-500">Rentabilite Brute</p>
+
+          <h1  className="text-5xl font-bold mb-2">
+            <FinancialTooltip term="Monthly Payment">
+              <AnimatedNumber
+                value={gain}
+                prefix="$"
+                duration={0.5}
+                formatOptions={{
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }}
+              />
+            </FinancialTooltip>
+          </h1>
+          <p className="text-sm text-gray-500">Estimated Total</p>
           <FinancialTooltip term="Total Price">
             <h1 className="text-5xl font-bold">
               <AnimatedNumber
@@ -716,6 +739,8 @@ function PropertyDiv({ data }: { data: any }) {
 import { useStore } from "@nanostores/react";
 import { atom } from "nanostores";
 import { Properties } from "@/stores/Sim";
+import Input from "../Shared/ui/Input";
+import InputN from "../Shared/ui/InputN";
 
 function PropertiesSection() {
   const $P = useStore(Properties);
@@ -742,6 +767,7 @@ function PropertiesSection() {
             Risk: 1,
             Quality: 1,
             Monthly: 1000,
+            Gain: 0,
             Rapport: "",
           });
           // @ts-expect-error
@@ -772,7 +798,7 @@ function PropertiesSection() {
 export default function InvestorSim() {
   const $P = useStore(Properties);
 
-  const Page = (i: { PropertyType: string; Rapport: string; Capital: string; Duration: string; IntrestRate: string; Risk: string; Quality: string; Monthly: string; }) => {
+  const Page = (i: { PropertyType: string; Rapport: string; Capital: string; Duration: string; IntrestRate: string; Risk: string; Quality: string; Monthly: string; Gain:number }) => {
     return (
       "<house><h1>" +
       i.PropertyType +
@@ -801,6 +827,8 @@ export default function InvestorSim() {
       "<p class='stat'><b>Monthly Payment:</b> $" +
       i.Monthly +
       "</p>" +
+      "<p class='stat'><b>Gain:</b> $" +
+      Math.floor(i.Gain) +
       "</div>" +
       "</house>"
     );
@@ -873,9 +901,9 @@ print({orientation: 'portrait'})
             in.
           </p>
         </div>
-        <Button onClick={PrintPage} className="border">
+        {$P.length == 0? <div></div> : <Button onClick={PrintPage} className="border">
           Downoad Reports <Download />
-        </Button>
+        </Button>}
       </div>
 
       {$P.length == 0 ? <div></div> : <MetricSerction />}

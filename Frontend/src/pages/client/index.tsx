@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { SquareTerminal, Store, LifeBuoy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Server } from "@/lib/fetch";
 
 export default function ClientView() {
   const [userName, setUserName] = useState("Client");
@@ -17,7 +18,7 @@ export default function ClientView() {
     // Fetch user data when component mounts
     const token = localStorage.getItem("TOKENAUTH");
     if (token) {
-      fetch("http://localhost:3001/user/me", {
+      fetch(Server+"/user/me", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

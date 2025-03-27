@@ -17,12 +17,12 @@ const content: Record<Lang, {
     contactInfo: [
       {
         label: "Notre emplacement",
-        value: "99 S.t Tunis , Tunisia",
+        value: "",
         icon: "location",
       },
       {
         label: "Numéro de téléphone",
-        value: "(+216) 98 765 432",
+        value: "",
         icon: "phone",
       },
       {
@@ -40,12 +40,12 @@ const content: Record<Lang, {
     contactInfo: [
       {
         label: "Our Location",
-        value: "99 S.t Tunis , Tunisia",
+        value: "",
         icon: "location",
       },
       {
         label: "Phone Number",
-        value: "(+216) 98 765 432",
+        value: "",
         icon: "phone",
       },
       {

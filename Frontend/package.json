@@ -33,6 +33,7 @@
     "flag-icons": "^7.3.2",
     "framer-motion": "^12.4.7",
     "js-cookie": "^3.0.5",
+    "leaflet": "^1.9.4",
     "libphonenumber-js": "^1.12.4",
     "lucide-react": "^0.482.0",
     "marked": "^15.0.7",
@@ -41,6 +42,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
+    "react-leaflet": "^5.0.0",
     "recharts": "^2.15.1",
     "styled-components": "^6.1.15",
     "tailwind-merge": "^3.0.2",
@@ -49,6 +51,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/leaflet": "^1.9.17",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
