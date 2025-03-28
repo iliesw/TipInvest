@@ -99,6 +99,7 @@ export default function Input({
     <div
       className={`ainput ${type === "password" ? "password" : ""}`}
       data-valid={valid}
+      data-strength={passwordStrength}
     >
       <div style={{ position: "relative" }}>
         <div className="icon">
@@ -125,36 +126,37 @@ export default function Input({
           </div>
         )}
       </div>
-
-      {type === "password" && (
-        <div className={passwordStrength ? "passwordStrength dive" : "dive"}>
-          <article>
-            <progress value={strengthLvl > 0 ? 10 : 0} max="10"></progress>
-            <progress value={strengthLvl > 1 ? 10 : 0} max="10"></progress>
-            <progress value={strengthLvl > 2 ? 10 : 0} max="10"></progress>
-          </article>
-          <div className="rules">
-            <div className="r" data-done={strengthLvl > 0 ? 10 : 0}>
-              <span className="i">
-                <Check size={12} />
-              </span>
-              At least one upper letter
-            </div>
-            <div className="r" data-done={strengthLvl > 1 ? 10 : 0}>
-              <span className="i">
-                <Check size={12} />
-              </span>
-              At least one number
-            </div>
-            <div className="r" data-done={strengthLvl > 2 ? 10 : 0}>
-              <span className="i">
-                <Check size={12} />
-              </span>
-              At least 8 letters
+        {passwordStrength && type === "password" ? (
+          <div className={passwordStrength ? "passwordStrength dive" : "dive"}>
+            <article>
+              <progress value={strengthLvl > 0 ? 10 : 0} max="10"></progress>
+              <progress value={strengthLvl > 1 ? 10 : 0} max="10"></progress>
+              <progress value={strengthLvl > 2 ? 10 : 0} max="10"></progress>
+            </article>
+            <div className="rules">
+              <div className="r" data-done={strengthLvl > 0 ? 10 : 0}>
+                <span className="i">
+                  <Check size={12} />
+                </span>
+                At least one upper letter
+              </div>
+              <div className="r" data-done={strengthLvl > 1 ? 10 : 0}>
+                <span className="i">
+                  <Check size={12} />
+                </span>
+                At least one number
+              </div>
+              <div className="r" data-done={strengthLvl > 2 ? 10 : 0}>
+                <span className="i">
+                  <Check size={12} />
+                </span>
+                At least 8 letters
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div></div>
+        )}
 
       <style jsx>{`
         .ainput {
@@ -176,7 +178,6 @@ export default function Input({
             padding: 0 4px;
             pointer-events: none;
             background: none;
-            /* scale: font; */
             transition: 0.3s ease all;
           }
 
@@ -219,8 +220,6 @@ export default function Input({
             font-size: 12px;
             left: 12px;
           }
-
-        
         }
 
         .dive {
@@ -303,8 +302,8 @@ export default function Input({
             }
           }
         }
-        .password:has(input:focus),
-        .password[valid="false"]:has(input[empty="false"]) {
+        .password[data-strength="true"]:has(input:focus),
+        .password[data-strength="true"][valid="false"]:has(input[empty="false"]) {
           height: 135px;
           opacity: 1;
           
@@ -315,6 +314,11 @@ export default function Input({
           .dive {
             opacity: 1;
           }
+        }
+
+        .password:not([data-strength="true"]):has(input:focus) .toggle,
+        .password:not([data-strength="true"])[valid="false"]:has(input[empty="false"]) .toggle {
+          opacity: 1;
         }
       `}</style>
     </div>

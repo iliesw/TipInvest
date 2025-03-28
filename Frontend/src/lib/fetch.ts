@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const Server = "https://tipinvest-production-76d3.up.railway.app";
-// const Server = "http://localhost:3001";
+//export const Server = "http://localhost:3001";
 
 function Fetch(url: string, method = "GET", body = {}, params = {}) {
   return fetch(Server + url, {

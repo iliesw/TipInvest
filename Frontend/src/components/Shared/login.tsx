@@ -16,16 +16,19 @@ type Lang = 'fr' | 'us';
 const LoginPage: React.FC = () => {
   const [authshow, setAuthShow] = useState(isShowing.get());
   const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
-        useEffect(() => {
-          SelectedLang.subscribe((n) => {
-            setUserLang(n as Lang);
-          });
-        }, []);
-        useEffect(() => {
-          isShowing.subscribe((n) => {
-            setAuthShow(n);
-          });
-        }, []);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  
+  useEffect(() => {
+    SelectedLang.subscribe((n) => {
+      setUserLang(n as Lang);
+    });
+  }, []);
+  
+  useEffect(() => {
+    isShowing.subscribe((n) => {
+      setAuthShow(n);
+    });
+  }, []);
   
   const [pos, setPos] = useState(0);
   const [isLogin, setIsLogin] = useState(true);
@@ -37,6 +40,21 @@ const LoginPage: React.FC = () => {
   const [password,setPassword] = useState("")
   const [phone,setPhone] = useState("")
 
+  // Error messages for different languages
+  const errorMessages = {
+    fr: {
+      userExists: "Cet utilisateur existe déjà. Veuillez vous connecter.",
+      invalidCredentials: "Email ou mot de passe incorrect.",
+      missingFields: "Veuillez remplir tous les champs requis.",
+      serverError: "Une erreur est survenue. Veuillez réessayer plus tard.",
+    },
+    us: {
+      userExists: "This user already exists. Please log in instead.",
+      invalidCredentials: "Invalid email or password.",
+      missingFields: "Please fill in all required fields.",
+      serverError: "An error occurred. Please try again later.",
+    }
+  };
 
   const uiData = {
     fr: [
@@ -95,24 +113,50 @@ const LoginPage: React.FC = () => {
   };
 
   const next = () => {
+    setErrorMessage(""); // Clear error messages when navigating
     setPos((prev) => (prev + 1 > 1 ? 1 : prev + 1));
   };
 
   const back = () => {
+    setErrorMessage(""); // Clear error messages when navigating
     setPos((prev) => (prev - 1 < 0 ? 0 : prev - 1));
   };
 
   const toLogin = () => {
+    setErrorMessage(""); // Clear error messages when switching modes
     setIsLogin(true);
     next();
   };
 
   const toSignup = () => {
+    setErrorMessage(""); // Clear error messages when switching modes
     setIsLogin(false);
     next();
   };
   const router = useRouter();
+  
+  const validateForm = (): boolean => {
+    if (!email || !password) {
+      setErrorMessage(errorMessages[userLang].missingFields);
+      return false;
+    }
+    
+    if (!isLogin && (!username || !phone)) {
+      setErrorMessage(errorMessages[userLang].missingFields);
+      return false;
+    }
+    
+    return true;
+  };
+  
   const submit = () => {
+    // Clear previous error messages
+    setErrorMessage("");
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
     
     const data = isLogin? {email,password}:{email,"name":username,password,phone};
 
@@ -124,7 +168,14 @@ const LoginPage: React.FC = () => {
         if (res.ok) {
           return res.json();
         } else {
-          throw new Error(`HTTP error! Status: ${res.status}`);
+          // Handle different HTTP error statuses
+          if (res.status === 409) {
+            throw new Error("USER_EXISTS");
+          } else if (res.status === 401) {
+            throw new Error("INVALID_CREDENTIALS");
+          } else {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+          }
         }
       })
       .then((respData) => {
@@ -136,6 +187,15 @@ const LoginPage: React.FC = () => {
       .catch((err) => {
         setLoginFetching(false);
         console.error("Error:", err);
+        
+        // Set appropriate error message based on error type
+        if (err.message === "USER_EXISTS") {
+          setErrorMessage(errorMessages[userLang].userExists);
+        } else if (err.message === "INVALID_CREDENTIALS") {
+          setErrorMessage(errorMessages[userLang].invalidCredentials);
+        } else {
+          setErrorMessage(errorMessages[userLang].serverError);
+        }
       });
   };
 
@@ -177,6 +237,14 @@ const LoginPage: React.FC = () => {
             </div>
             <h1>{isLogin ? uiData[userLang][0].h1 : uiData[userLang][1].h1}</h1>
             <p>{isLogin ? uiData[userLang][0].p : uiData[userLang][1].p}</p>
+            
+            {/* Error message display */}
+            {errorMessage && (
+              <div className="error-message">
+                {errorMessage}
+              </div>
+            )}
+            
             <Input
               type="email"
               placeholder="Email"
@@ -209,6 +277,7 @@ const LoginPage: React.FC = () => {
               placeholder="Mot de passe"
               value={password}
               onChange={setPassword}
+              passwordStrength={!isLogin}
             />
             <button style={{ marginTop: "10px" }} onClick={submit}>
               {!loginFetching ? (
@@ -349,6 +418,16 @@ const LoginPage: React.FC = () => {
           align-items: center;
           gap: 10px;
         }
+        .error-message {
+          background-color: #ffebee;
+          color: #d32f2f;
+          padding: 10px;
+          border-radius: 5px;
+          font-size: 0.8rem;
+          margin-bottom: 10px;
+          text-align: center;
+          border: 1px solid #ffcdd2;
+        }
         .law {
           margin-top: 10px;
           opacity: 0.7;
@@ -416,6 +495,10 @@ const LoginPage: React.FC = () => {
           }
           .law {
             font-size: 0.6rem;
+          }
+          .error-message {
+            font-size: 0.7rem;
+            padding: 8px;
           }
         }
       `}</style>

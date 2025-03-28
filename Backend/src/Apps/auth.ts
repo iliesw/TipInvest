@@ -14,25 +14,51 @@ auth.get("/", (c) => c.json({ status: "Auth alive "+GetVersion() }));
  * Registers a new user.
  * 
  * Endpoint: POST /register
- * Request Body: { name: string, email: string, password: string }
- * Response: { message: string }
+ * Request Body: { name: string, email: string, password: string, phone?: string }
+ * Response: { message: string } | { error: string }
  */
 auth.post("/register", async (c) => {
-  // Parse the request body
-  const { name, email, password } = await c.req.json() as { name: string, email: string, password: string };
+  try {
+    // Parse the request body
+    const { name, email, password, phone } = await c.req.json() as { 
+      name: string, 
+      email: string, 
+      password: string,
+      phone?: string 
+    };
 
-  console.log(name, email, password)
-  // Hash the password before storing it in the database
-  const hashedPassword = await bcrypt.hash(password, 10);
+    // Validate required fields
+    if (!name || !email || !password) {
+      return c.json({ error: "Missing required fields" }, 400);
+    }
 
-  // Insert new user into the database
-  await db.insert(userTable).values({
-    name: name,
-    email: email,
-    passwordHash: hashedPassword,
-  });
+    // Check if user with this email already exists
+    const existingUser = await db
+      .select()
+      .from(userTable)
+      .where(eq(userTable.email, email))
+      .limit(1);
 
-  return c.json({ message: "User registered successfully" });
+    if (existingUser.length > 0) {
+      return c.json({ error: "USER_EXISTS" }, 409);
+    }
+
+    // Hash the password before storing it in the database
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert new user into the database
+    await db.insert(userTable).values({
+      name: name,
+      email: email,
+      passwordHash: hashedPassword,
+      phone: phone || null,
+    });
+
+    return c.json({ message: "User registered successfully" });
+  } catch (error) {
+    console.error("Registration error:", error);
+    return c.json({ error: "Server error during registration" }, 500);
+  }
 });
 
 /**
