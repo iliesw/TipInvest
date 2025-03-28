@@ -53,8 +53,14 @@ auth.post("/register", async (c) => {
       passwordHash: hashedPassword,
       phone: phone || null,
     });
+    // Generate a JWT token for the newly registered user
+    const token = jwt.sign(
+      { id: (await db.select().from(userTable).where(eq(userTable.email, email)).limit(1))[0].id },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" }
+    );
 
-    return c.json({ message: "User registered successfully" });
+    return c.json({ token });
   } catch (error) {
     console.error("Registration error:", error);
     return c.json({ error: "Server error during registration" }, 500);
