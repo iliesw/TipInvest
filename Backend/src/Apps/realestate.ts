@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { db } from "../Database";
-import { imagesTable, realestateTable } from "../Database/schema";
+import { imagesTable, pageViews, pageViews, realestateTable } from "../Database/schema";
 import { eq } from "drizzle-orm";
 
 const realEstate = new Hono();
@@ -17,6 +17,16 @@ realEstate.get("/", async (c) => {
       return { ...listing, images: images.length ? [images[0].imageData] : [] };
     })
   );
+  const pag_view = await db.select().from(pageViews)
+    .where(eq(pageViews.page, "Market"));
+  
+  if (pag_view.length > 0) {
+    // Increment views
+    await db.update(pageViews)
+      .set({ views: parseInt(pag_view[0].views) + 1 })
+      .where(eq(pageViews.page, "Market"));
+  }
+
   return c.json(listingsWithImages);
 });
 
@@ -32,6 +42,12 @@ realEstate.get("/:id", async (c) => {
     .select()
     .from(imagesTable)
     .where(eq(imagesTable.realestateId, id));
+
+  // Increment views
+   await db
+   .update(realestateTable)
+   .set({ views: parseInt(listing[0].views) + 1 })
+   .where(eq(realestateTable.id, id));
 
   return c.json({ ...listing[0], images: images.map((img) => img.imageData) });
 });

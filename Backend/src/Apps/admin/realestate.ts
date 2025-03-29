@@ -16,11 +16,16 @@ adminRealEstate.get("/", async (c) => {
 
 adminRealEstate.get("/:id", async (c) => {
   const id = c.req.param("id");
+
+
   const listing = await db
     .select()
     .from(realestateTable)
     .where(eq(realestateTable.id, id));
   if (!listing.length) return c.json({ error: "Listing not found" }, 404);
+  
+  
+  
   return c.json(listing[0]);
 });
 

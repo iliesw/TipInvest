@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { db } from "../../Database/index";
-import { userTable, realestateTable, transactionTable } from "../../Database/schema";
+import { userTable, realestateTable, transactionTable, pageViews } from "../../Database/schema";
 import { adminAuth } from "../../Middleware/auth";
 import { count } from 'drizzle-orm';
 
@@ -18,6 +18,12 @@ adminDashboard.get("/stats", async (c) => {
         listings: realEstateCount[0].count,
         transactions: transactionCount[0].count,
     });
+});
+
+
+adminDashboard.get("/views", async (c) => {
+    const views = await db.select().from(pageViews);
+    return c.json(views);
 });
 
 export default adminDashboard;

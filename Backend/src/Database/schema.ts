@@ -1,4 +1,5 @@
-import { pgTable, uuid, varchar, text, json, timestamp, decimal, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, json, timestamp, decimal, pgEnum, numeric } from "drizzle-orm/pg-core";
+import { view } from "drizzle-orm/sqlite-core";
 
 export const roleEnum = pgEnum("role", ["user", "admin"]);
 export const statusEnum = pgEnum("status", ["available", "sold"]);
@@ -22,6 +23,7 @@ export const realestateTable = pgTable("REALESTATE", {
   status: statusEnum("status").default("available"),
   createdAt: timestamp("created_at",{ mode: 'date', precision: 3 }).defaultNow(),
   updatedAt: timestamp("updated_at",{ mode: 'date', precision: 3 }).defaultNow().$onUpdate(() => new Date()),
+  views: numeric("views").default('0'),
 });
 
 export const transactionTable = pgTable("TRANSACTIONS", {
@@ -36,4 +38,9 @@ export const imagesTable = pgTable("IMAGES", {
   id: uuid("id").defaultRandom().primaryKey(),
   realestateId: uuid("realestate_id").notNull(),
   imageData: text("image_data").notNull(),
+})
+
+export const pageViews = pgTable("Views", {
+  page: text("page").notNull(),
+  views: numeric("views").default('0'),
 })

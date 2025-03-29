@@ -1,35 +1,100 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import useFetch from '@/lib/fetch';
 import AdminLayout from './layout';
 import { Card } from '@/components/ui/card';
-import { Building, Users, DollarSign, TrendingUp, Eye, MessageSquare, BarChart2 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Building, Users, DollarSign, TrendingUp, Eye, MessageSquare } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 // Sample data for charts
-const propertyViewsData = [
-  { name: 'Jan', views: 400 },
-  { name: 'Feb', views: 300 },
-  { name: 'Mar', views: 600 },
-  { name: 'Apr', views: 800 },
-  { name: 'May', views: 500 },
-  { name: 'Jun', views: 900 },
-];
 
-const propertyTypeData = [
-  { name: 'Apartment', value: 40 },
-  { name: 'House', value: 30 },
-  { name: 'Villa', value: 15 },
-  { name: 'Commercial', value: 15 },
-];
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-const recentProperties = [
-  { id: 1, title: 'Modern Apartment in Downtown', price: '$250,000', views: 124, inquiries: 8, status: 'Active' },
-  { id: 2, title: 'Luxury Villa with Pool', price: '$1,200,000', views: 89, inquiries: 5, status: 'Active' },
-  { id: 3, title: 'Commercial Space in Business District', price: '$450,000', views: 67, inquiries: 3, status: 'Pending' },
-  { id: 4, title: 'Cozy Studio near University', price: '$120,000', views: 45, inquiries: 2, status: 'Sold' },
-];
 
 export default function AdminDashboard() {
+
+  const [recentProperties,setrecentProperties] = useState<[]>()
+  const [stats,setStats] = useState<{
+    listings:number,
+    users:number,
+  }>()
+  const [propertyTypeData,setPropertyTypeData] = useState([])
+  const [propertylocationData,setpropertylocationData] = useState([])
+  const [averageViews,setAverageViews] = useState(0)
+  const [inquiryConversionRate] = useState(0)
+  const [conversionRate,setConversionRate] = useState(0)
+  useEffect(() => {
+    useFetch.get("/admin/realestate").then(res => res.json()).then(data => {
+      setrecentProperties(data); 
+      //@ts-ignore
+      const propertyTypes = data.reduce((acc, property) => {
+        const type = property.details.type;
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      }, {});
+
+      const propertyTypeArray = Object.entries(propertyTypes).map(([name, value]) => ({
+        name,
+        value
+      }));
+      //@ts-ignore
+
+      setPropertyTypeData(propertyTypeArray);
+      // calculate location distrbution 
+      const locationDistribution = {};
+      let totalProperties = 0;
+      
+      //@ts-ignore
+      // Count properties per location
+      data.forEach((property) => {
+        const location = property.details.location;
+      //@ts-ignore
+        locationDistribution[location] = (locationDistribution[location] || 0) + 1;
+        totalProperties++;
+      });
+
+      // Convert to array of objects with percentages
+      const locationData = Object.entries(locationDistribution).map(([name, count]) => ({
+        name,
+      //@ts-ignore
+        value: ((count / totalProperties) * 100)
+      }));
+
+      //@ts-ignore
+      setpropertylocationData(locationData);
+      
+      
+      let totalViews = 0;
+      //@ts-ignore
+      data.forEach((property) => {
+        totalViews += parseFloat(property.views);
+      });
+      setAverageViews(totalViews / data.length);
+      
+      // setInquiryConversionRate(totalInquiries / totalViews);
+      // setAvgDaysOnMarket(totalDaysOnMarket / data.length);
+    })
+    useFetch.get("/admin/dashboard/stats").then(res => res.json()).then(data => {
+      setStats(data);
+    })
+    //calculate distribution of property types
+  },[])
+
+  useEffect(()=>{
+    useFetch.get("/admin/dashboard/views")
+      .then(res => res.json()).then(pageViews => {
+        
+      const totalViews = parseFloat(pageViews[0].views);
+      const averagePropertyViews = (averageViews).toFixed(2);
+      //@ts-ignore
+      const calculatedConversionRate = (averagePropertyViews / totalViews) * 100;
+      console.log(calculatedConversionRate)
+      setConversionRate(parseFloat(calculatedConversionRate.toFixed(1)));
+              
+      })
+  })
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -44,22 +109,13 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Properties</p>
-                <h3 className="text-2xl font-bold">124</h3>
+              
+                <h3 className="text-2xl font-bold">{stats?.listings}</h3>
               </div>
             </div>
           </Card>
           
-          <Card className="p-4">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 mr-4">
-                <DollarSign className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Revenue</p>
-                <h3 className="text-2xl font-bold">$1.2M</h3>
-              </div>
-            </div>
-          </Card>
+          
           
           <Card className="p-4">
             <div className="flex items-center">
@@ -68,11 +124,21 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Users</p>
-                <h3 className="text-2xl font-bold">842</h3>
+                <h3 className="text-2xl font-bold">{stats?.users}</h3>
               </div>
             </div>
           </Card>
-          
+          <Card className="p-4">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-green-100 mr-4">
+                <DollarSign className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Revenue</p>
+                <h3 className="text-2xl font-bold">--</h3>
+              </div>
+            </div>
+          </Card>
           <Card className="p-4">
             <div className="flex items-center">
               <div className="p-3 rounded-full bg-yellow-100 mr-4">
@@ -80,7 +146,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Conversion Rate</p>
-                <h3 className="text-2xl font-bold">3.2%</h3>
+                <h3 className="text-2xl font-bold">{conversionRate} %</h3>
               </div>
             </div>
           </Card>
@@ -88,21 +154,27 @@ export default function AdminDashboard() {
         
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6">
-            <h2 className="text-lg font-medium mb-4">Property Views (Last 6 Months)</h2>
+        <Card className="p-6">
+            <h2 className="text-lg font-medium mb-4">Property Location Distribution</h2>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={propertyViewsData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                <PieChart>
+                  <Pie
+                    data={propertylocationData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {propertyTypeData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
                   <Tooltip />
-                  <Legend />
-                  <Bar dataKey="views" fill="#8884d8" />
-                </BarChart>
+                </PieChart>
               </ResponsiveContainer>
             </div>
           </Card>
@@ -148,29 +220,29 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {recentProperties.map((property) => (
-                  <tr key={property.id}>
+                {recentProperties?.map((property) => (
+                  <tr key={(property as {title: string}).title}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{property.title}</div>
+                      <div className="text-sm font-medium text-gray-900">{(property as {title: string}).title}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{property.price}</div>
+                      <div className="text-sm text-gray-900">{(property as {details: {price: string}}).details.price}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center text-sm text-gray-900">
                         <Eye size={16} className="mr-1 text-gray-400" />
-                        {property.views}
+                        {(property as {views: number}).views}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center text-sm text-gray-900">
                         <MessageSquare size={16} className="mr-1 text-gray-400" />
-                        {property.inquiries}
+                        {0}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${property.status === 'Active' ? 'bg-green-100 text-green-800' : property.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
-                        {property.status}
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${(property as {status: string}).status === 'available' ? 'bg-green-100 text-green-800' : (property as {status: string}).status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
+                        {(property as {status: string}).status}
                       </span>
                     </td>
                   </tr>
@@ -183,33 +255,26 @@ export default function AdminDashboard() {
         {/* Performance Metrics */}
           <h2 className="text-lg font-medium mb-0">Performance Metrics</h2>
         <Card className='border-none hover:shadow-none'>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-gray-50 rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 w-full bg-gray-50 rounded-lg">
               <div className="flex items-center mb-2">
                 <Eye className="h-5 w-5 text-blue-500 mr-2" />
                 <h3 className="text-sm font-medium">Average Views per Property</h3>
               </div>
-              <p className="text-2xl font-bold">78</p>
-              <p className="text-xs text-green-600 mt-1">↑ 12% from last month</p>
+              <p className="text-2xl font-bold">{averageViews}</p>
+              {/* <p className="text-xs text-green-600 mt-1">↑ 12% from last month</p> */}
             </div>
             
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 w-full bg-gray-50 rounded-lg">
               <div className="flex items-center mb-2">
                 <MessageSquare className="h-5 w-5 text-blue-500 mr-2" />
                 <h3 className="text-sm font-medium">Inquiry Conversion Rate</h3>
               </div>
-              <p className="text-2xl font-bold">5.7%</p>
-              <p className="text-xs text-red-600 mt-1">↓ 2% from last month</p>
+              <p className="text-2xl font-bold">{inquiryConversionRate}</p>
+              {/* <p className="text-xs text-red-600 mt-1">↓ 2% from last month</p> */}
             </div>
             
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center mb-2">
-                <BarChart2 className="h-5 w-5 text-blue-500 mr-2" />
-                <h3 className="text-sm font-medium">Avg. Days on Market</h3>
-              </div>
-              <p className="text-2xl font-bold">32</p>
-              <p className="text-xs text-green-600 mt-1">↑ 8% faster than last month</p>
-            </div>
+            
           </div>
         </Card>
       </div>

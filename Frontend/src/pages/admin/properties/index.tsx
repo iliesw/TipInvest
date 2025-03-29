@@ -8,69 +8,6 @@ import Link from 'next/link';
 import useFetch from '@/lib/fetch';
 import Notification from '@/components/ui/notification';
 
-// Fallback sample property data in case API fails
-const sampleProperties = [
-  {
-    id: 1,
-    title: 'Modern Apartment in Downtown',
-    location: 'New York, USA',
-    price: '$250,000',
-    type: 'Apartment',
-    status: 'Active',
-    bedrooms: 2,
-    bathrooms: 2,
-    area: '1,200 sq ft',
-    createdAt: '2023-05-15',
-  },
-  {
-    id: 2,
-    title: 'Luxury Villa with Pool',
-    location: 'Miami, USA',
-    price: '$1,200,000',
-    type: 'Villa',
-    status: 'Active',
-    bedrooms: 5,
-    bathrooms: 4,
-    area: '4,500 sq ft',
-    createdAt: '2023-06-02',
-  },
-  {
-    id: 3,
-    title: 'Commercial Space in Business District',
-    location: 'Chicago, USA',
-    price: '$450,000',
-    type: 'Commercial',
-    status: 'Pending',
-    bedrooms: 0,
-    bathrooms: 2,
-    area: '2,000 sq ft',
-    createdAt: '2023-06-10',
-  },
-  {
-    id: 4,
-    title: 'Cozy Studio near University',
-    location: 'Boston, USA',
-    price: '$120,000',
-    type: 'Studio',
-    status: 'Sold',
-    bedrooms: 1,
-    bathrooms: 1,
-    area: '600 sq ft',
-    createdAt: '2023-04-22',
-  },
-  {
-    id: 5,
-    title: 'Family House with Garden',
-    location: 'Seattle, USA',
-    price: '$380,000',
-    type: 'House',
-    status: 'Active',
-    bedrooms: 4,
-    bathrooms: 3,
-    area: '2,800 sq ft',
-    createdAt: '2023-05-30',
-  },
-];
 
 export default function PropertiesList() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -112,7 +49,6 @@ export default function PropertiesList() {
             type: 'error',
             message: 'Failed to load properties. Using sample data instead.'
           });
-          setProperties(sampleProperties);
         }
       } catch (error) {
         console.error('Error fetching properties:', error);
@@ -121,7 +57,6 @@ export default function PropertiesList() {
           type: 'error',
           message: 'Failed to load properties. Using sample data instead.'
         });
-        setProperties(sampleProperties);
       } finally {
         setLoading(false);
       }
@@ -206,7 +141,7 @@ export default function PropertiesList() {
                 className="w-full px-3 py-2 border rounded-md"
               >
                 <option value="All">All Status</option>
-                <option value="Active">Active</option>
+                <option value="available">Available</option>
                 <option value="Pending">Pending</option>
                 <option value="Sold">Sold</option>
               </select>
@@ -262,12 +197,14 @@ export default function PropertiesList() {
                         <div className="text-sm text-gray-900">{property.details.type}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${property.status === 'Active' ? 'bg-green-100 text-green-800' : property.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${property.status === 'available' ? 'bg-green-100 text-green-800' : property.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
                           {property.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{property.details.bedrooms} bd | {property.details.bathrooms} ba | {property.details.area}</div>
+<div className="text-sm text-gray-900">
+  {property.details.bedrooms} bd | {property.details.bathrooms} ba | {Math.round(property.details.area * 0.092903)} m²
+</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2 items-center">
