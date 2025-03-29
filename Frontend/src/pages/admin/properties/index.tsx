@@ -1,10 +1,14 @@
-import { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState, useEffect } from 'react';
 import AdminLayout from '../layout';
 import { Card } from '@/components/ui/card';
 import { Search, Plus, Edit, Trash2, Eye } from 'lucide-react';
 import Link from 'next/link';
+import useFetch from '@/lib/fetch';
+import Notification from '@/components/ui/notification';
 
-// Sample property data
+// Fallback sample property data in case API fails
 const sampleProperties = [
   {
     id: 1,
@@ -72,7 +76,13 @@ export default function PropertiesList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [typeFilter, setTypeFilter] = useState('All');
-  const [properties, setProperties] = useState(sampleProperties);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState({
+    show: false,
+    type: 'info' as 'success' | 'error' | 'info',
+    message: ''
+  });
   
   // Filter properties based on search term and filters
   const filteredProperties = properties.filter((property) => {
@@ -85,14 +95,82 @@ export default function PropertiesList() {
     return matchesSearch && matchesStatus && matchesType;
   });
   
-  const handleDelete = (id: number) => {
+  // Fetch properties from API
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        setLoading(true);
+        const response = await useFetch.get('/admin/realestate');
+        const data = await response.json();
+        
+        if (response.ok) {
+          setProperties(data);
+        } else {
+          console.error('Failed to fetch properties:', data);
+          setNotification({
+            show: true,
+            type: 'error',
+            message: 'Failed to load properties. Using sample data instead.'
+          });
+          setProperties(sampleProperties);
+        }
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+        setNotification({
+          show: true,
+          type: 'error',
+          message: 'Failed to load properties. Using sample data instead.'
+        });
+        setProperties(sampleProperties);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
+
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this property?')) {
-      setProperties(properties.filter(property => property.id !== id));
+      try {
+        const response = await useFetch.get(`/admin/realestate/${id}`, { method: 'DELETE' });
+        
+        if (response.ok) {
+          setProperties(properties.filter(property => property.id !== id));
+          setNotification({
+            show: true,
+            type: 'success',
+            message: 'Property deleted successfully'
+          });
+        } else {
+          const data = await response.json();
+          setNotification({
+            show: true,
+            type: 'error',
+            message: data.error || 'Failed to delete property'
+          });
+        }
+      } catch (error) {
+        console.error('Error deleting property:', error);
+        setNotification({
+          show: true,
+          type: 'error',
+          message: 'Failed to delete property'
+        });
+      }
     }
   };
   
   return (
     <AdminLayout>
+      {notification.show && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          show={notification.show}
+          onClose={() => setNotification({ ...notification, show: false })}
+        />
+      )}
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Properties</h1>
@@ -192,17 +270,17 @@ export default function PropertiesList() {
                         <div className="text-sm text-gray-900">{property.bedrooms} bd | {property.bathrooms} ba | {property.area}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2 items-center">
                           <Link href={`/admin/properties/${property.id}`}>
-                            <button className="text-blue-600 hover:text-blue-900">
+                            <button className="text-blue-600 hover:text-blue-900 flex flex-col items-center">
                               <Eye size={18} />
                             </button>
                           </Link>
-                          <Link href={`/admin/properties/edit/${property.id}`}>
+                          {/* <Link href={`/admin/properties/edit/${property.id}`}>
                             <button className="text-indigo-600 hover:text-indigo-900">
                               <Edit size={18} />
                             </button>
-                          </Link>
+                          </Link> */}
                           <button 
                             onClick={() => handleDelete(property.id)}
                             className="text-red-600 hover:text-red-900"

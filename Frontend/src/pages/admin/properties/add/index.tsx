@@ -1,76 +1,88 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useState } from 'react';
-import AdminLayout from '../../layout';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Upload, Plus, Minus } from 'lucide-react';
-import Link from 'next/link';
-import useFetch from '@/lib/fetch';
-import { useRouter } from 'next/router';
-import { Checkbox } from '@/components/ui/checkbox';
+import { useState } from "react";
+import AdminLayout from "../../layout";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Upload, Plus, Minus } from "lucide-react";
+import Link from "next/link";
+import useFetch from "@/lib/fetch";
+import { useRouter } from "next/router";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function AddProperty() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
-  
+
   // Form state
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    location: '',
-    price: '',
-    type: 'Apartment',
-    status: 'Active',
+    title: "",
+    description: "",
+    location: "",
+    price: "",
+    type: "Apartment",
+    status: "Active",
     bedrooms: 1,
     bathrooms: 1,
-    area: '',
+    area: 0,
     features: [],
-    customFeatures: [''],
+    customFeatures: [],
+    images:[""],
   });
+  
+  // Function to convert square meters to square feet (for API submission)
+  const sqMToSqFt = (sqM: number) => {
+    return Math.round(sqM / 0.092903);
+  };
+  
+
 
   // Common property features
   const commonFeatures = [
-    'Air Conditioning',
-    'Balcony',
-    'Elevator',
-    'Fitness Center',
-    'Garage',
-    'Garden',
-    'High Ceilings',
-    'Parking',
-    'Pet Friendly',
-    'Pool',
-    'Security System',
-    'Storage',
-    'Washer/Dryer',
-    'WiFi',
-    '24/7 Concierge',
+    "Air Conditioning",
+    "Balcony",
+    "Elevator",
+    "Fitness Center",
+    "Garage",
+    "Garden",
+    "High Ceilings",
+    "Parking",
+    "Pet Friendly",
+    "Pool",
+    "Security System",
+    "Storage",
+    "Washer/Dryer",
+    "WiFi",
+    "24/7 Concierge",
   ];
 
   // Form validation state
   const [errors, setErrors] = useState({
-    title: '',
-    location: '',
-    price: '',
-    area: '',
+    title: "",
+    location: "",
+    price: "",
+    area: "",
   });
 
   // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
     });
-    
+
     // Clear error when user types
     if (errors[name as keyof typeof errors]) {
       setErrors({
         ...errors,
-        [name]: '',
+        [name]: "",
       });
     }
   };
@@ -86,7 +98,7 @@ export default function AddProperty() {
   // Handle features array
   const handleFeatureChange = (index: number, value: string) => {
     const updatedCustomFeatures = [...formData.customFeatures];
-    updatedCustomFeatures[index] = value;
+updatedCustomFeatures[index] = value as never;
     setFormData({
       ...formData,
       customFeatures: updatedCustomFeatures,
@@ -96,7 +108,7 @@ export default function AddProperty() {
   const addFeature = () => {
     setFormData({
       ...formData,
-      customFeatures: [...formData.customFeatures, ''],
+      customFeatures: [...formData.customFeatures, "" as never],
     });
   };
 
@@ -111,6 +123,7 @@ export default function AddProperty() {
 
   // Handle checkbox features
   const handleFeatureCheckbox = (feature: string) => {
+    console.log(feature);
     const updatedFeatures = [...formData.features];
     if (updatedFeatures.includes(feature as never)) {
       // Remove feature if already selected
@@ -118,7 +131,7 @@ export default function AddProperty() {
       updatedFeatures.splice(index, 1);
     } else {
       // Add feature if not selected
-updatedFeatures.push(feature as never);
+      updatedFeatures.push(feature as never);
     }
     setFormData({
       ...formData,
@@ -130,10 +143,12 @@ updatedFeatures.push(feature as never);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
-      
+
       // Create preview URLs
-      const newImagePreviewUrls = filesArray.map(file => URL.createObjectURL(file));
-      
+      const newImagePreviewUrls = filesArray.map((file) =>
+        URL.createObjectURL(file)
+      );
+
       setImages([...images, ...filesArray]);
       setImagePreviewUrls([...imagePreviewUrls, ...newImagePreviewUrls]);
     }
@@ -142,13 +157,13 @@ updatedFeatures.push(feature as never);
   const removeImage = (index: number) => {
     const updatedImages = [...images];
     const updatedPreviewUrls = [...imagePreviewUrls];
-    
+
     // Revoke the object URL to avoid memory leaks
     URL.revokeObjectURL(updatedPreviewUrls[index]);
-    
+
     updatedImages.splice(index, 1);
     updatedPreviewUrls.splice(index, 1);
-    
+
     setImages(updatedImages);
     setImagePreviewUrls(updatedPreviewUrls);
   };
@@ -157,35 +172,27 @@ updatedFeatures.push(feature as never);
   const validateForm = () => {
     let isValid = true;
     const newErrors = {
-      title: '',
-      location: '',
-      price: '',
-      area: '',
+      title: "",
+      location: "",
+      price: "",
+      area: "",
     };
 
     if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = "Title is required";
       isValid = false;
     }
 
     if (!formData.location.trim()) {
-      newErrors.location = 'Location is required';
+      newErrors.location = "Location is required";
       isValid = false;
     }
 
     if (!formData.price.trim()) {
-      newErrors.price = 'Price is required';
+      newErrors.price = "Price is required";
       isValid = false;
     } else if (isNaN(parseFloat(formData.price))) {
-      newErrors.price = 'Price must be a number';
-      isValid = false;
-    }
-
-    if (!formData.area.trim()) {
-      newErrors.area = 'Area is required';
-      isValid = false;
-    } else if (isNaN(parseFloat(formData.area))) {
-      newErrors.area = 'Area must be a number';
+      newErrors.price = "Price must be a number";
       isValid = false;
     }
 
@@ -195,46 +202,61 @@ updatedFeatures.push(feature as never);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
+    const RawImages = await Promise.all(images.map(file => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      return new Promise((resolve) => {
+        reader.onload = () => resolve(reader.result);
+      });
+    }));
+
     e.preventDefault();
     
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
     
     try {
-      // Format data for API
+      // Prepare data for API
       const propertyData = {
-        ...formData,
-        price: parseFloat(formData.price),
-        area: parseFloat(formData.area),
-        // Combine selected predefined features and custom features
-        features: [
-          ...formData.features,
-          ...formData.customFeatures.filter(feature => feature.trim() !== '')
-        ],
-        // In a real implementation, you would upload images to a storage service
-        // and include the URLs in the property data
-        imageUrls: [], // This would be populated with actual image URLs after upload
+        title: formData.title,
+        description: formData.description,
+        ownerId: "00000000-0000-0000-0000-000000000000", // This should be dynamically set based on the logged-in user or admin selection
+        details: {
+          location: formData.location,
+          price: formData.price,
+          type: formData.type,
+          status: formData.status,
+          bedrooms: formData.bedrooms,
+          bathrooms: formData.bathrooms,
+          area: sqMToSqFt(Number(formData.area)), // Convert from m² to sq ft for API
+          features: [...formData.features, ...formData.customFeatures.filter((f:string) => f.trim() !== '')],
+          // Images would typically be uploaded separately and then referenced here
+          images: RawImages
+        }
       };
+      console.log(propertyData)
+
       
-      // Remove the customFeatures field as it's not needed in the API
-      // @ts-ignore
-      delete propertyData.customFeatures;
-      
-      // Send data to API
-      const response = await useFetch.post('/properties', propertyData);
+      // Submit to API
+      const response = await useFetch.post('/admin/realestate', propertyData);
+      const data = await response.json();
       
       if (response.ok) {
-        // Redirect to properties list on success
+        // Show success message and redirect
+        alert('Property created successfully!');
         router.push('/admin/properties');
       } else {
-        throw new Error('Failed to create property');
+        // Show error message
+        alert(`Failed to create property: ${data.error || 'Unknown error'}`);
+        console.error('API Error:', data);
       }
     } catch (error) {
-      console.error('Error creating property:', error);
-      alert('Failed to create property. Please try again.');
+      console.error("Error creating property:", error);
+      alert("Failed to create property. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -246,36 +268,48 @@ updatedFeatures.push(feature as never);
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Add New Property</h1>
           <Link href="/admin/properties">
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button className="flex shadow-none items-center gap-2">
               <ArrowLeft size={16} />
               Back to Properties
             </Button>
           </Link>
         </div>
-        
-        <form onSubmit={handleSubmit}>
+
+        <div >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Basic Information */}
-            <Card className="md:col-span-2">
-              <CardHeader>
+            <Card className="md:col-span-2 p-0 border-none shadow-none hover:shadow-none overflow-visible">
+              <CardHeader className="p-0">
                 <CardTitle>Basic Information</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-0 mt-4">
                 <div>
-                  <label htmlFor="title" className="block text-sm font-medium mb-1">Property Title*</label>
+                  <label
+                    htmlFor="title"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Property Title*
+                  </label>
                   <Input
                     id="title"
                     name="title"
                     value={formData.title}
                     onChange={handleChange}
                     placeholder="Enter property title"
-                    className={errors.title ? 'border-red-500' : ''}
+                    className={errors.title ? "border-red-500" : ""}
                   />
-                  {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+                  {errors.title && (
+                    <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+                  )}
                 </div>
-                
+
                 <div>
-                  <label htmlFor="description" className="block text-sm font-medium mb-1">Description</label>
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Description
+                  </label>
                   <textarea
                     id="description"
                     name="description"
@@ -283,25 +317,34 @@ updatedFeatures.push(feature as never);
                     onChange={handleChange}
                     placeholder="Enter property description"
                     rows={4}
-                    className="flex w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    className="flex w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   />
                 </div>
-                
+
                 <div>
-                  <label htmlFor="location" className="block text-sm font-medium mb-1">Location*</label>
+                  <label
+                    htmlFor="location"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Location*
+                  </label>
                   <Input
                     id="location"
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
                     placeholder="Enter property location"
-                    className={errors.location ? 'border-red-500' : ''}
+                    className={errors.location ? "border-red-500" : ""}
                   />
-                  {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location}</p>}
+                  {errors.location && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.location}
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Property Details */}
             <Card>
               <CardHeader>
@@ -309,26 +352,38 @@ updatedFeatures.push(feature as never);
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label htmlFor="price" className="block text-sm font-medium mb-1">Price ($)*</label>
+                  <label
+                    htmlFor="price"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Price ($)*
+                  </label>
                   <Input
                     id="price"
                     name="price"
                     value={formData.price}
                     onChange={handleChange}
                     placeholder="Enter property price"
-                    className={errors.price ? 'border-red-500' : ''}
+                    className={errors.price ? "border-red-500" : ""}
                   />
-                  {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
+                  {errors.price && (
+                    <p className="text-red-500 text-xs mt-1">{errors.price}</p>
+                  )}
                 </div>
-                
+
                 <div>
-                  <label htmlFor="type" className="block text-sm font-medium mb-1">Property Type</label>
+                  <label
+                    htmlFor="type"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Property Type
+                  </label>
                   <select
                     id="type"
                     name="type"
                     value={formData.type}
                     onChange={handleChange}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   >
                     <option value="Apartment">Apartment</option>
                     <option value="House">House</option>
@@ -337,15 +392,20 @@ updatedFeatures.push(feature as never);
                     <option value="Commercial">Commercial</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label htmlFor="status" className="block text-sm font-medium mb-1">Status</label>
+                  <label
+                    htmlFor="status"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Status
+                  </label>
                   <select
                     id="status"
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    className="flex h-9 w-full rounded-md border  bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   >
                     <option value="Active">Active</option>
                     <option value="Pending">Pending</option>
@@ -354,22 +414,31 @@ updatedFeatures.push(feature as never);
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Specifications */}
             <Card>
               <CardHeader>
                 <CardTitle>Specifications</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="flex flex-col gap-4">
                   <div>
-                    <label htmlFor="bedrooms" className="block text-sm font-medium mb-1">Bedrooms</label>
+                    <label
+                      htmlFor="bedrooms"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Bedrooms
+                    </label>
                     <div className="flex items-center">
                       <Button
                         type="button"
-                        variant="outline"
                         size="icon"
-                        onClick={() => handleNumberChange('bedrooms', Math.max(0, formData.bedrooms - 1))}
+                        onClick={() =>
+                          handleNumberChange(
+                            "bedrooms",
+                            Math.max(0, formData.bedrooms - 1)
+                          )
+                        }
                         className="rounded-r-none"
                       >
                         <Minus size={16} />
@@ -379,30 +448,45 @@ updatedFeatures.push(feature as never);
                         name="bedrooms"
                         type="number"
                         value={formData.bedrooms}
-                        onChange={(e) => handleNumberChange('bedrooms', parseInt(e.target.value) || 0)}
+                        onChange={(e) =>
+                          handleNumberChange(
+                            "bedrooms",
+                            parseInt(e.target.value) || 0
+                          )
+                        }
                         className="rounded-none text-center"
                         min="0"
                       />
                       <Button
                         type="button"
-                        variant="outline"
                         size="icon"
-                        onClick={() => handleNumberChange('bedrooms', formData.bedrooms + 1)}
+                        onClick={() =>
+                          handleNumberChange("bedrooms", formData.bedrooms + 1)
+                        }
                         className="rounded-l-none"
                       >
                         <Plus size={16} />
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div>
-                    <label htmlFor="bathrooms" className="block text-sm font-medium mb-1">Bathrooms</label>
+                    <label
+                      htmlFor="bathrooms"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Bathrooms
+                    </label>
                     <div className="flex items-center">
                       <Button
                         type="button"
-                        variant="outline"
                         size="icon"
-                        onClick={() => handleNumberChange('bathrooms', Math.max(0, formData.bathrooms - 1))}
+                        onClick={() =>
+                          handleNumberChange(
+                            "bathrooms",
+                            Math.max(0, formData.bathrooms - 1)
+                          )
+                        }
                         className="rounded-r-none"
                       >
                         <Minus size={16} />
@@ -412,77 +496,106 @@ updatedFeatures.push(feature as never);
                         name="bathrooms"
                         type="number"
                         value={formData.bathrooms}
-                        onChange={(e) => handleNumberChange('bathrooms', parseInt(e.target.value) || 0)}
+                        onChange={(e) =>
+                          handleNumberChange(
+                            "bathrooms",
+                            parseInt(e.target.value) || 0
+                          )
+                        }
                         className="rounded-none text-center"
                         min="0"
                       />
                       <Button
                         type="button"
-                        variant="outline"
                         size="icon"
-                        onClick={() => handleNumberChange('bathrooms', formData.bathrooms + 1)}
+                        onClick={() =>
+                          handleNumberChange(
+                            "bathrooms",
+                            formData.bathrooms + 1
+                          )
+                        }
                         className="rounded-l-none"
                       >
                         <Plus size={16} />
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div>
-                    <label htmlFor="area" className="block text-sm font-medium mb-1">Area (sq ft)*</label>
+                    <label
+                      htmlFor="area"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Area (m²)*
+                    </label>
                     <Input
                       id="area"
                       name="area"
                       value={formData.area}
                       onChange={handleChange}
                       placeholder="Enter area"
-                      className={errors.area ? 'border-red-500' : ''}
+                      className={errors.area ? "border-red-500" : ""}
                     />
-                    {errors.area && <p className="text-red-500 text-xs mt-1">{errors.area}</p>}
+                    {errors.area && (
+                      <p className="text-red-500 text-xs mt-1">{errors.area}</p>
+                    )}
                   </div>
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Features */}
             <Card className="md:col-span-2">
               <CardHeader>
                 <CardTitle>Features</CardTitle>
-                <p className="text-sm text-muted-foreground">Select common features or add custom ones</p>
+                <p className="text-sm text-muted-foreground">
+                  Select common features or add custom ones
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   {/* Common Features Section */}
                   <div>
-                    <h3 className="text-sm font-medium mb-3">Common Features</h3>
+                    <h3 className="text-sm font-medium mb-3">
+                      Common Features
+                    </h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                       {commonFeatures.map((feature) => (
                         <div key={feature} className="flex items-start">
                           <Checkbox
                             id={`feature-${feature}`}
-checked={formData.features.includes(feature as never)}
-                            onChange={() => handleFeatureCheckbox(feature)}
-                            label={feature}
+                            checked={formData.features.includes(feature as never)}
+                            onClick={() => handleFeatureCheckbox(feature)}
                           />
+                          <label
+                            htmlFor={`feature-${feature}`}
+                            className="text-sm pl-3 font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {feature}
+                          </label>
                         </div>
                       ))}
                     </div>
                   </div>
-                  
+
                   {/* Custom Features Section */}
                   <div>
-                    <h3 className="text-sm font-medium mb-3">Custom Features</h3>
+                    <h3 className="text-sm font-medium mb-3">
+                      Custom Features
+                    </h3>
                     <div className="space-y-3">
                       {formData.customFeatures.map((feature, index) => (
                         <div key={index} className="flex items-center gap-2">
                           <Input
                             value={feature}
-                            onChange={(e) => handleFeatureChange(index, e.target.value)}
+                            onChange={(e) =>
+                              handleFeatureChange(index, e.target.value)
+                            }
                             placeholder={`Custom feature ${index + 1}`}
                           />
                           <Button
                             type="button"
-                            variant="outline"
+                            className="border"
                             size="icon"
                             onClick={() => removeFeature(index)}
                             disabled={formData.customFeatures.length === 1}
@@ -505,7 +618,7 @@ checked={formData.features.includes(feature as never)}
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Images */}
             <Card className="md:col-span-2">
               <CardHeader>
@@ -525,12 +638,16 @@ checked={formData.features.includes(feature as never)}
                     <label htmlFor="images" className="cursor-pointer">
                       <div className="flex flex-col items-center justify-center space-y-2">
                         <Upload className="h-8 w-8 text-gray-400" />
-                        <h3 className="text-sm font-medium">Drag and drop or click to upload</h3>
-                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                        <h3 className="text-sm font-medium">
+                          Drag and drop or click to upload
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          PNG, JPG, GIF up to 200MB
+                        </p>
                       </div>
                     </label>
                   </div>
-                  
+
                   {imagePreviewUrls.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                       {imagePreviewUrls.map((url, index) => (
@@ -555,16 +672,18 @@ checked={formData.features.includes(feature as never)}
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="mt-6 flex justify-end space-x-4">
             <Link href="/admin/properties">
-              <Button type="button" variant="outline">Cancel</Button>
+              <Button type="button" variant="destructive">
+                Cancel
+              </Button>
             </Link>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Property'}
+            <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Property"}
             </Button>
           </div>
-        </form>
+        </div>
       </div>
     </AdminLayout>
   );

@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import {
-  LayoutDashboard,
   Building,
-  BarChart,
-  Users,
-  Settings,
+  // LayoutDashboard,
+  // BarChart,
+  // Users,
+  // Settings,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -20,41 +20,63 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import LogoSM from "./Shared/LogoSM";
+import { useEffect } from "react";
+import useFetch from "@/lib/fetch";
 
 const adminNavItems = [
-  {
-    title: "Dashboard",
-    url: "/admin",
-    icon: LayoutDashboard,
-    isActive: true,
-  },
+  // {
+  //   title: "Dashboard",
+  //   url: "/admin",
+  //   icon: LayoutDashboard,
+  //   isActive: true,
+  // },
   {
     title: "Properties",
     url: "/admin/properties",
     icon: Building,
+    isActive: true,
   },
-  {
-    title: "Analytics",
-    url: "/admin/analytics",
-    icon: BarChart,
-  },
-  {
-    title: "Users",
-    url: "/admin/users",
-    icon: Users,
-  },
-  {
-    title: "Settings",
-    url: "/admin/settings",
-    icon: Settings,
-  },
+  // {
+  //   title: "Analytics",
+  //   url: "/admin/analytics",
+  //   icon: BarChart,
+  // },
+  // {
+  //   title: "Users",
+  //   url: "/admin/users",
+  //   icon: Users,
+  // },
+  // {
+  //   title: "Settings",
+  //   url: "/admin/settings",
+  //   icon: Settings,
+  // },
 ];
 
 export function AdminSidebar() {
-    const u = {
-        name: "John Doe",
-        email: "test@gmail.com"
-    }
+  const [user, setUser] = React.useState({
+    name: "John Doe",
+    email: "test@gmail.com"
+  });
+
+  useEffect(() => {
+    const T = localStorage.getItem("TOKENAUTH");
+    useFetch.get("/user/me", {
+      headers: {
+        Authorization: `Bearer ${T}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        setUser({
+          name: data.name,
+          email: data.email,
+        });
+      });
+  }, []);
   return (
     <Sidebar>
       <SidebarHeader>
@@ -75,7 +97,7 @@ export function AdminSidebar() {
         <SidebarMenu>
           
         </SidebarMenu>
-        <NavUser user={u} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

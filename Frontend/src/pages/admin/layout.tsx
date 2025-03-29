@@ -1,7 +1,6 @@
 "use client";
 import Layout from "@/components/layout";
 
-
 import {
   SidebarInset,
   SidebarProvider,
@@ -18,6 +17,7 @@ import {
 import { Separator } from "@radix-ui/react-separator";
 import { usePathname } from "next/navigation";
 import { AdminSidebar } from "@/components/admin-sidebar";
+import { requireAdmin } from "@/lib/auth";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -30,12 +30,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
   
   useEffect(() => {
-    const token = localStorage.getItem("TOKENAUTH");
-    // In a real application, you would check if the token belongs to an admin user
-    if (token) {
+    // Use the requireAdmin utility function to check if user is authenticated and has admin role
+    if (requireAdmin(router)) {
       setIsAuthed(true);
-    } else {
-      router.push("/");
     }
   }, [router]);
   

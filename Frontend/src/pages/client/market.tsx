@@ -1,11 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @next/next/no-img-element */
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import LayoutC from "./layout";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, MapPin, Bed, Bath, Home, ArrowRight, X, Heart } from "lucide-react";
+import { Search, MapPin, Bed, Bath, Home, X, Heart } from "lucide-react";
 import { motion } from "framer-motion";
+import useFetch from "@/lib/fetch";
 
 export default function Market() {
   const router = useRouter();
@@ -14,99 +18,69 @@ export default function Market() {
   const [propertyType, setPropertyType] = useState("all");
   const [location, setLocation] = useState("all");
 
-  // Mock property data
-  const properties = [
-    {
-      id: 1,
-      title: "Modern Apartment",
-      description: "Beautiful modern apartment in the heart of the city",
-      price: 250000,
-      location: "Downtown",
-      bedrooms: 2,
-      bathrooms: 1,
-      area: 850,
-      type: "apartment",
-      image: "/assets/images/thumbs/property-1.png"
-    },
-    {
-      id: 2,
-      title: "Luxury Villa",
-      description: "Spacious luxury villa with garden and pool",
-      price: 750000,
-      location: "Suburbs",
-      bedrooms: 4,
-      bathrooms: 3,
-      area: 2200,
-      type: "house",
-      image: "/assets/images/thumbs/property-2.png"
-    },
-    {
-      id: 3,
-      title: "Cozy Studio",
-      description: "Cozy studio apartment perfect for singles or couples",
-      price: 120000,
-      location: "Midtown",
-      bedrooms: 1,
-      bathrooms: 1,
-      area: 450,
-      type: "apartment",
-      image: "/assets/images/thumbs/property-3.png"
-    },
-    {
-      id: 4,
-      title: "Family Home",
-      description: "Perfect family home with large backyard",
-      price: 450000,
-      location: "Suburbs",
-      bedrooms: 3,
-      bathrooms: 2,
-      area: 1800,
-      type: "house",
-      image: "/assets/images/thumbs/property-4.png"
-    },
-    {
-      id: 5,
-      title: "Penthouse Suite",
-      description: "Luxurious penthouse with panoramic city views",
-      price: 900000,
-      location: "Downtown",
-      bedrooms: 3,
-      bathrooms: 2,
-      area: 1500,
-      type: "apartment",
-      image: "/assets/images/thumbs/property-5.png"
-    },
-    {
-      id: 6,
-      title: "Countryside Cottage",
-      description: "Charming cottage in a peaceful countryside setting",
-      price: 320000,
-      location: "Rural",
-      bedrooms: 2,
-      bathrooms: 1,
-      area: 1200,
-      type: "house",
-      image: "/assets/images/thumbs/property-6.png"
-    }
-  ];
+  const [uniqueLocations, setUniqueLocations] = useState<string[]>([]);
+
+  const [properties, setProperties] = useState<{
+    id: string;
+    title: string;
+    description: string;
+    images: string[];
+    status: string;
+    ownerId: string;
+    createdAt: string;
+    updatedAt: string;
+    details: {
+      location: string;
+      price: string;
+      type: string;
+      status: string;
+      bedrooms: number;
+      bathrooms: number;
+      area: number;
+    };
+  }[]>([]);
+
+  useEffect(() => {
+    useFetch.get("/realestate").then(res => res.json()).then(data => {
+      setProperties(data);
+      // Extract unique locations from properties
+      const locations = [...new Set(data.map((property: any) => property.details.location))];
+      //@ts-ignore
+      setUniqueLocations(locations);
+      console.log(data);
+    });
+  }, []);
 
   // Filter properties based on search and filters
-  const filteredProperties = properties.filter(property => {
-    const matchesSearch = property.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          property.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          property.location.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesPrice = property.price >= priceRange[0] && property.price <= priceRange[1];
-    
-    const matchesType = propertyType === "all" || property.type === propertyType;
-    
-    const matchesLocation = location === "all" || property.location === location;
-    
+  const filteredProperties = properties.filter((property) => {
+    // Search term filter (case-insensitive)
+    const matchesSearch = searchTerm === '' || 
+      property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property.details.location.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Price range filter
+    const propertyPrice = parseFloat(property.details.price.replace(/[^0-9.-]+/g, ''));
+    const matchesPrice = propertyPrice >= priceRange[0] && propertyPrice <= priceRange[1];
+
+    // Property type filter
+    const matchesType = propertyType === 'all' || 
+      property.details.type.toLowerCase() === propertyType.toLowerCase();
+
+    // Location filter
+    const matchesLocation = location === 'all' || 
+      property.details.location.includes(location);
+
     return matchesSearch && matchesPrice && matchesType && matchesLocation;
   });
 
+  // Function to convert square feet to square meters
+  const sqFtToSqM = (sqFt: number) => {
+    return Math.round(sqFt * 0.092903);
+  };
+
   // Function to handle property click (navigates to property detail page)
-  const handlePropertyClick = (propertyId: number) => {
+  const handlePropertyClick = (propertyId: string) => {
     router.push(`/client/property/${propertyId}`);
   };
 
@@ -170,21 +144,14 @@ export default function Market() {
               <input
                 type="text"
                 placeholder="Search by title, description or location..."
-                className="w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="w-full pl-10 pr-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-black transition-all"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             
             {/* Filter Button with Active Indicator */}
-            <Button 
-              variant={isFilterActive ? "default" : "outline"} 
-              className="flex items-center gap-2 rounded-lg"
-            >
-              <Filter size={18} />
-              Filters {isFilterActive && <span className="bg-white text-blue-600 text-xs rounded-full w-5 h-5 flex items-center justify-center">!</span>}
-            </Button>
-
+            
             {/* Reset Button - Only shows when filters are active */}
             {isFilterActive && (
               <Button 
@@ -197,14 +164,14 @@ export default function Market() {
               </Button>
             )}
           </div>
-          
+
           {/* Filter Options */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Price Range */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Price Range</label>
+            <div className="space-y-4">
+            
               <select 
-                className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all"
+                className="w-full p-3 border rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all"
                 value={`${priceRange[0]}-${priceRange[1]}`}
                 onChange={(e) => {
                   const [min, max] = e.target.value.split('-').map(Number);
@@ -220,10 +187,10 @@ export default function Market() {
             </div>
             
             {/* Property Type */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Property Type</label>
+            <div className="space-y-4">
+            
               <select 
-                className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all"
+                className="w-full p-3 border rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all"
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value)}
               >
@@ -234,18 +201,17 @@ export default function Market() {
             </div>
             
             {/* Location */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Location</label>
+            <div className="space-y-4">
+              
               <select 
-                className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all"
+                className="w-full p-3 border rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               >
                 <option value="all">All Locations</option>
-                <option value="Downtown">Downtown</option>
-                <option value="Midtown">Midtown</option>
-                <option value="Suburbs">Suburbs</option>
-                <option value="Rural">Rural</option>
+                {uniqueLocations.map((loc) => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -293,11 +259,11 @@ export default function Market() {
         {/* Property Listings with Count */}
         <div className="mb-6 flex justify-between items-center">
           <h2 className="text-xl font-semibold">Available Properties <span className="text-blue-600 text-lg ml-2">{filteredProperties.length}</span></h2>
-          <p className="text-sm text-gray-500">{filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'} found</p>
+          <p className="text-sm text-gray-500">{filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'} filtered</p>
         </div>
 
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
@@ -308,71 +274,77 @@ export default function Market() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 * (index % 3) }}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
             >
               <Card 
-                className="overflow-hidden hover:shadow-lg transition-all cursor-pointer h-full border-gray-100"
+                className="overflow-hidden transition-all hover:shadow-none cursor-pointer border-none shadow-none h-full rounded-none"
                 onClick={() => handlePropertyClick(property.id)}
               >
-                <div className="relative h-52 w-full overflow-hidden">
+                <div className="relative aspect-[1/.8] w-full rounded-md overflow-hidden">
                   <img 
-                    src={property.image} 
+                    src={property.images[0]} 
                     alt={property.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full rounded-lg object-cover hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 m-3 rounded-lg font-medium shadow-sm">
-                    ${property.price.toLocaleString()}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/600 to-transparent h-16"></div>
+                  <div className="absolute bottom-1 left-2 text-white px-3 py-1 rounded-full flex items-center gap-3 mb-3">
+                    <span className="flex items-center gap-1 text-sm bg-[#ffffff50] border border-[#ffffff70] px-3 py-1 rounded-full backdrop-blur-sm">
+                      <Bed size={14} className="" />
+                      {property.details.bedrooms} {property.details.bedrooms === 1 ? 'bed' : 'beds'}
+                    </span>
+                    <span className="flex items-center gap-1 text-sm bg-[#ffffff50] border border-[#ffffff70] px-3 py-1 rounded-full backdrop-blur-sm">
+                      <Bath size={14} className="" />
+                      {property.details.bathrooms} {property.details.bathrooms === 1 ? 'bath' : 'baths'}
+                    </span>
+                    <span className="flex items-center gap-1 text-sm bg-[#ffffff50] border border-[#ffffff70] px-3 py-1 rounded-full backdrop-blur-sm">
+                      <Home size={14} className="" />
+                      {sqFtToSqM(property.details.area)} m²
+                    </span>
+                  </div>
+                  
+                  {/* Featured tag similar to "Coup de cœur voyageurs" */}
+                  <div className="absolute top-4 left-4 bg-white text-gray-800 px-3 py-1 rounded-full font-medium shadow-sm text-sm">
+                    Featured Property
                   </div>
                   <button 
-                    className="absolute top-0 left-0 m-3 bg-white p-2 rounded-full shadow-sm hover:bg-gray-100 transition-colors"
+                    className="absolute top-4 bg-white right-4 bg-transparent p-2 rounded-full"
                     onClick={(e) => {
                       e.stopPropagation();
                       // Favorite functionality would go here
                     }}
                   >
-                    <Heart size={18} className="text-gray-500 hover:text-red-500 transition-colors" />
+                    <Heart size={18} className="text-black hover:text-red-500 transition-colors" />
                   </button>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent h-16"></div>
+                  
                 </div>
                 
-                <CardHeader className="pb-2 pt-4">
-                  <CardTitle className="text-lg font-bold">{property.title}</CardTitle>
-                  <CardDescription className="flex items-center gap-1 text-gray-500">
-                    <MapPin size={14} />
-                    {property.location}
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent className="pb-2">
-                  <p className="text-sm text-gray-600 line-clamp-2">{property.description}</p>
-                </CardContent>
-                
-                <CardFooter className="flex justify-between pt-3 pb-4 border-t">
-                  <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded-md">
-                      <Bed size={14} className="text-blue-500" />
-                      {property.bedrooms}
-                    </span>
-                    <span className="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded-md">
-                      <Bath size={14} className="text-blue-500" />
-                      {property.bathrooms}
-                    </span>
-                    <span className="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded-md">
-                      <Home size={14} className="text-blue-500" />
-                      {property.area} ft²
-                    </span>
+                <div className="pt-4 pb-6">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="text-lg font-semibold">{property.title}</h3>
+                      <p className="flex items-center gap-1 text-gray-600 text-sm">
+                        <MapPin size={14} />
+                        {property.details.location}
+                      </p>
+                    </div>
+                    <div className="font-semibold text-lg flex flex-col justify-end items-end">
+                      ${property.details.price.toLocaleString()} <span className="text-sm font-normal text-gray-500">
+                        Price
+                      </span>
+                    </div>
+                    
                   </div>
-                  <Button variant="ghost" size="sm" className="p-1 hover:bg-blue-50 rounded-full">
-                    <ArrowRight size={16} className="text-blue-600" />
-                  </Button>
-                </CardFooter>
+                  
+                  
+                  
+                  
+                </div>
               </Card>
             </motion.div>
           ))}
         </motion.div>
         
         {/* No Results Message */}
-        {filteredProperties.length === 0 && (
+        {properties.length === 0 && (
           <motion.div 
             className="text-center py-16 bg-gray-50 rounded-xl border border-gray-100 flex flex-col items-center"
             initial={{ opacity: 0 }}

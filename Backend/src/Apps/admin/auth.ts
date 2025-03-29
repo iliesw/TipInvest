@@ -5,6 +5,7 @@ import { userTable } from "../../Database/schema";
 import { eq } from "drizzle-orm";
 import { env } from "hono/adapter";
 import * as dotenv from 'dotenv';
+import * as bcrypt from "bcryptjs";
 
 const adminAuth = new Hono();
 
@@ -15,6 +16,11 @@ adminAuth.post("/login", async (c) => {
   
   if (!user.length || user[0].role !== "admin") {
     return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  // Verify password using bcrypt
+  if (!(await bcrypt.compare(password, user[0].passwordHash))) {
+    return c.json({ error: "Invalid credentials" }, 401);
   }
 
   const jwtSecret = env(c).JWT_SECRET as string;

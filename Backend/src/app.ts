@@ -4,6 +4,7 @@ import auth from "./Apps/auth";
 import user from "./Apps/user";
 import admin from "./Apps/admin/index";
 import transaction from "./Apps/transaction";
+import realestate from "./Apps/realestate";
 import { GetVersion } from "../lib";
 
 const app = new Hono();
@@ -16,6 +17,7 @@ app.get('/', (c) => c.text('Server Up' + GetVersion()));
 app.route("/auth", auth);
 app.route("/user", user);
 app.route("/admin", admin);
+app.route("/realestate", realestate);
 app.route("/transaction", transaction);
 
 export default app;

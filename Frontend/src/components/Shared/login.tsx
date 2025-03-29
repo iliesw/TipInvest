@@ -8,7 +8,8 @@ import { isShowing } from "@/stores/isAuthVisible";
 import { SelectedLang } from "@/stores/lang";
 import useFetch from "./../../lib/fetch";
 import { useRouter } from "next/router";
-import { saveToken } from "@/pages/api/set-cookie"
+import { saveToken } from "@/pages/api/set-cookie";
+import { decodeToken } from "@/lib/auth";
 
 
 type Lang = 'fr' | 'us';
@@ -182,7 +183,21 @@ const LoginPage: React.FC = () => {
         setLoginFetching(false);
         console.log("Success:", respData);
         saveToken(respData.token);
-        router.push("/client");
+        
+        // Check user role from token and redirect accordingly
+        try {
+          const tokenData = respData.token.split('.')[1];
+          const decodedData = JSON.parse(atob(tokenData));
+          
+          if (decodedData && decodedData.role === 'admin') {
+            router.push("/admin/properties"); // for now TODO !!!!
+          } else {
+            router.push("/client");
+          }
+        } catch (error) {
+          console.error("Error parsing token:", error);
+          router.push("/client"); // Default fallback
+        }
       })
       .catch((err) => {
         setLoginFetching(false);

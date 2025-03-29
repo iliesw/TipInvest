@@ -31,3 +31,9 @@ export const transactionTable = pgTable("TRANSACTIONS", {
   amount: decimal("amount").notNull(),
   transactionDate: timestamp("transaction_date").defaultNow(),
 });
+
+export const imagesTable = pgTable("IMAGES", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  realestateId: uuid("realestate_id").notNull(),
+  imageData: text("image_data").notNull(),
+})
