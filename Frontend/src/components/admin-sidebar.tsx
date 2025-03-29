@@ -3,7 +3,7 @@
 import * as React from "react";
 import {
   Building,
-  // LayoutDashboard,
+  LayoutDashboard,
   // BarChart,
   // Users,
   // Settings,
@@ -24,17 +24,16 @@ import { useEffect } from "react";
 import useFetch from "@/lib/fetch";
 
 const adminNavItems = [
-  // {
-  //   title: "Dashboard",
-  //   url: "/admin",
-  //   icon: LayoutDashboard,
-  //   isActive: true,
-  // },
+  {
+    title: "Dashboard",
+    url: "/admin",
+    icon: LayoutDashboard,
+    isActive: true,
+  },
   {
     title: "Properties",
     url: "/admin/properties",
     icon: Building,
-    isActive: true,
   },
   // {
   //   title: "Analytics",

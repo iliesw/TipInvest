@@ -253,13 +253,13 @@ export default function PropertiesList() {
                         <div className="text-xs text-gray-500">{property.createdAt}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{property.location}</div>
+                        <div className="text-sm text-gray-900">{property.details.location}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{property.price}</div>
+                        <div className="text-sm text-gray-900">{property.details.price}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{property.type}</div>
+                        <div className="text-sm text-gray-900">{property.details.type}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${property.status === 'Active' ? 'bg-green-100 text-green-800' : property.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
@@ -267,7 +267,7 @@ export default function PropertiesList() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{property.bedrooms} bd | {property.bathrooms} ba | {property.area}</div>
+                        <div className="text-sm text-gray-900">{property.details.bedrooms} bd | {property.details.bathrooms} ba | {property.details.area}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2 items-center">

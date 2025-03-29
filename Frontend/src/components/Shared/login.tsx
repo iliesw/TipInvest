@@ -190,7 +190,7 @@ const LoginPage: React.FC = () => {
           const decodedData = JSON.parse(atob(tokenData));
           
           if (decodedData && decodedData.role === 'admin') {
-            router.push("/admin/properties"); // for now TODO !!!!
+            router.push("/admin");
           } else {
             router.push("/client");
           }
