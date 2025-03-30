@@ -5,6 +5,7 @@ import user from "./Apps/user";
 import admin from "./Apps/admin/index";
 import transaction from "./Apps/transaction";
 import realestate from "./Apps/realestate";
+import agency from "./Apps/agency/index";
 import { GetVersion } from "../lib";
 
 const app = new Hono();
@@ -19,5 +20,6 @@ app.route("/user", user);
 app.route("/admin", admin);
 app.route("/realestate", realestate);
 app.route("/transaction", transaction);
+app.route("/agency", agency);
 
 export default app;

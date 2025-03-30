@@ -45,6 +45,20 @@ export function isAdmin() {
 }
 
 /**
+ * Checks if the current user has agency role
+ * @returns boolean indicating if user is an agency
+ */
+export function isAgency() {
+  if (typeof window === 'undefined') return false;
+  
+  const token = localStorage.getItem('TOKENAUTH');
+  if (!token) return false;
+  
+  const decoded = decodeToken(token);
+  return decoded && decoded.role === 'agency';
+}
+
+/**
  * Redirects to login page if user is not authenticated
  * @param router - Next.js router instance
  */
@@ -68,6 +82,21 @@ export function requireAdmin(router: any) {
   if (!requireAuth(router)) return false;
   
   if (!isAdmin()) {
+    router.push('/');
+    return false;
+  }
+  
+  return true;
+}
+
+/**
+ * Redirects to home page if user is not an agency
+ * @param router - Next.js router instance
+ */
+export function requireAgency(router: any) {
+  if (!requireAuth(router)) return false;
+  
+  if (!isAgency()) {
     router.push('/');
     return false;
   }

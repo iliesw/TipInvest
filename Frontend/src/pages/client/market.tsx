@@ -38,6 +38,11 @@ export default function Market() {
       bathrooms: number;
       area: number;
     };
+    agency?: {
+      id: string;
+      name: string;
+      email: string;
+    };
   }[]>([]);
 
   useEffect(() => {
@@ -325,6 +330,7 @@ export default function Market() {
                         <MapPin size={14} />
                         {property.details.location}
                       </p>
+                      
                     </div>
                     <div className="font-semibold text-lg flex flex-col justify-end items-end">
                       ${property.details.price.toLocaleString()} <span className="text-sm font-normal text-gray-500">

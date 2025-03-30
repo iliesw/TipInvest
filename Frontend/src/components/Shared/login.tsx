@@ -6,7 +6,7 @@ import InputPhone from "./ui/InputPhone";
 import { CircleDashedIcon } from "lucide-react";
 import { isShowing } from "@/stores/isAuthVisible";
 import { SelectedLang } from "@/stores/lang";
-import useFetch from "./../../lib/fetch";
+import useFetch, { Server } from "./../../lib/fetch";
 import { useRouter } from "next/router";
 import { saveToken } from "@/pages/api/set-cookie";
 import { decodeToken } from "@/lib/auth";
@@ -18,6 +18,7 @@ const LoginPage: React.FC = () => {
   const [authshow, setAuthShow] = useState(isShowing.get());
   const [userLang, setUserLang] = useState<Lang>(SelectedLang.get() as Lang);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
   
   useEffect(() => {
     SelectedLang.subscribe((n) => {
@@ -40,6 +41,7 @@ const LoginPage: React.FC = () => {
   const [username,setUsername] = useState("")
   const [password,setPassword] = useState("")
   const [phone,setPhone] = useState("")
+  const [accountType, setAccountType] = useState("user")
 
   // Error messages for different languages
   const errorMessages = {
@@ -48,12 +50,14 @@ const LoginPage: React.FC = () => {
       invalidCredentials: "Email ou mot de passe incorrect.",
       missingFields: "Veuillez remplir tous les champs requis.",
       serverError: "Une erreur est survenue. Veuillez réessayer plus tard.",
+      emailNotVerified: "Veuillez vérifier votre email avant de vous connecter. Vérifiez votre boîte de réception pour le lien de vérification.",
     },
     us: {
       userExists: "This user already exists. Please log in instead.",
       invalidCredentials: "Invalid email or password.",
       missingFields: "Please fill in all required fields.",
       serverError: "An error occurred. Please try again later.",
+      emailNotVerified: "Please verify your email before logging in. Check your inbox for the verification link.",
     }
   };
 
@@ -115,22 +119,26 @@ const LoginPage: React.FC = () => {
 
   const next = () => {
     setErrorMessage(""); // Clear error messages when navigating
+    setSuccessMessage(""); // Clear success messages when navigating
     setPos((prev) => (prev + 1 > 1 ? 1 : prev + 1));
   };
 
   const back = () => {
     setErrorMessage(""); // Clear error messages when navigating
+    setSuccessMessage(""); // Clear success messages when navigating
     setPos((prev) => (prev - 1 < 0 ? 0 : prev - 1));
   };
 
   const toLogin = () => {
     setErrorMessage(""); // Clear error messages when switching modes
+    setSuccessMessage(""); // Clear success messages when switching modes
     setIsLogin(true);
     next();
   };
 
   const toSignup = () => {
     setErrorMessage(""); // Clear error messages when switching modes
+    setSuccessMessage(""); // Clear success messages when switching modes
     setIsLogin(false);
     next();
   };
@@ -151,15 +159,16 @@ const LoginPage: React.FC = () => {
   };
   
   const submit = () => {
-    // Clear previous error messages
+    // Clear previous messages
     setErrorMessage("");
+    setSuccessMessage("");
     
     // Validate form before submission
     if (!validateForm()) {
       return;
     }
     
-    const data = isLogin? {email,password}:{email,"name":username,password,phone};
+    const data = isLogin ? {email,password} : {email,"name":username,password,phone,role:accountType};
 
     console.log(data);
     setLoginFetching(true);
@@ -174,6 +183,8 @@ const LoginPage: React.FC = () => {
             throw new Error("USER_EXISTS");
           } else if (res.status === 401) {
             throw new Error("INVALID_CREDENTIALS");
+          } else if (res.status === 403 && res.statusText.includes("EMAIL_NOT_VERIFIED")) {
+            throw new Error("EMAIL_NOT_VERIFIED");
           } else {
             throw new Error(`HTTP error! Status: ${res.status}`);
           }
@@ -182,6 +193,17 @@ const LoginPage: React.FC = () => {
       .then((respData) => {
         setLoginFetching(false);
         console.log("Success:", respData);
+        
+        // Si c'est une inscription réussie, afficher un message de vérification d'email
+        if (!isLogin && !respData.token) {
+          setErrorMessage("");
+          setSuccessMessage(userLang === 'fr' ? 
+            "Inscription réussie ! Veuillez vérifier votre email pour activer votre compte." : 
+            "Registration successful! Please check your email to activate your account.");
+          return;
+        }
+        
+        // Sinon, c'est une connexion réussie
         saveToken(respData.token);
         
         // Check user role from token and redirect accordingly
@@ -191,6 +213,8 @@ const LoginPage: React.FC = () => {
           
           if (decodedData && decodedData.role === 'admin') {
             router.push("/admin");
+          } else if (decodedData && decodedData.role === 'agency') {
+            router.push("/agency");
           } else {
             router.push("/client");
           }
@@ -208,6 +232,8 @@ const LoginPage: React.FC = () => {
           setErrorMessage(errorMessages[userLang].userExists);
         } else if (err.message === "INVALID_CREDENTIALS") {
           setErrorMessage(errorMessages[userLang].invalidCredentials);
+        } else if (err.message === "EMAIL_NOT_VERIFIED") {
+          setErrorMessage(errorMessages[userLang].emailNotVerified);
         } else {
           setErrorMessage(errorMessages[userLang].serverError);
         }
@@ -255,8 +281,15 @@ const LoginPage: React.FC = () => {
             
             {/* Error message display */}
             {errorMessage && (
-              <div className="error-message">
+              <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>
                 {errorMessage}
+              </div>
+            )}
+            
+            {/* Success message display */}
+            {successMessage && (
+              <div className="success-message" style={{ color: 'green', marginBottom: '10px' }}>
+                {successMessage}
               </div>
             )}
             
@@ -266,6 +299,7 @@ const LoginPage: React.FC = () => {
               value={email}
               onChange={setEmail}
             />
+            
             {(isLogin ? uiData[userLang][0].username : uiData[userLang][1].username) && (
               <div
                 style={{
@@ -294,6 +328,29 @@ const LoginPage: React.FC = () => {
               onChange={setPassword}
               passwordStrength={!isLogin}
             />
+            {!isLogin && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
+                  <select
+                    value={accountType}
+                    onChange={(e) => setAccountType(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      borderRadius: "5px",
+                      border: "1px solid #ddd",
+                    }}
+                  >
+                    <option value="user">{userLang === 'fr' ? 'Client' : 'Client'}</option>
+                    <option value="agency">{userLang === 'fr' ? 'Agence' : 'Agency'}</option>
+                  </select>
+              </div>
+            )}
             <button style={{ marginTop: "10px" }} onClick={submit}>
               {!loginFetching ? (
                 isLogin ? (
@@ -312,6 +369,45 @@ const LoginPage: React.FC = () => {
               <a href="/">Terms of Service</a> and{" "}
               <a href="/">Privacy Policy</a>
             </div>
+            
+            {/* Resend verification link */}
+            {errorMessage === errorMessages[userLang].emailNotVerified && (
+              <button 
+                onClick={() => {
+                  const userEmail = email;
+                  fetch(`${Server}/auth/resend-verification`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail })
+                  })
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.success) {
+                      setSuccessMessage(userLang === 'fr' ? 
+                        "Email de vérification renvoyé. Veuillez vérifier votre boîte de réception." : 
+                        "Verification email resent. Please check your inbox.");
+                      setErrorMessage("");
+                    } else {
+                      setErrorMessage(data.message || errorMessages[userLang].serverError);
+                    }
+                  })
+                  .catch(() => {
+                    setErrorMessage(errorMessages[userLang].serverError);
+                  });
+                }}
+                style={{ 
+                  marginTop: '10px',
+                  padding: '8px 16px',
+                  backgroundColor: '#f0f0f0',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                {userLang === 'fr' ? 'Renvoyer l\'email de vérification' : 'Resend verification email'}
+              </button>
+            )}
           </div>
         </div>
       </div>

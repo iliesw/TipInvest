@@ -33,7 +33,7 @@ adminRealEstate.patch("/:id/status", async (c) => {
   const id = c.req.param("id");
   const { status } = await c.req.json();
 
-  if (!["available", "sold"].includes(status)) {
+  if (!["available", "sold", "pending"].includes(status)) {
     return c.json({ error: "Invalid status" }, 400);
   }
 
@@ -42,6 +42,59 @@ adminRealEstate.patch("/:id/status", async (c) => {
     .set({ status })
     .where(eq(realestateTable.id, id));
   return c.json({ message: "Status updated successfully" });
+});
+
+// Approve a pending property
+adminRealEstate.post("/:id/approve", async (c) => {
+  const id = c.req.param("id");
+  
+  // Check if property exists and is pending
+  const property = await db
+    .select()
+    .from(realestateTable)
+    .where(eq(realestateTable.id, id));
+    
+  if (!property.length) {
+    return c.json({ error: "Property not found" }, 404);
+  }
+  
+  if (property[0].status !== "pending") {
+    return c.json({ error: "Property is not in pending status" }, 400);
+  }
+  
+  // Update property status to available
+  await db
+    .update(realestateTable)
+    .set({ status: "available" })
+    .where(eq(realestateTable.id, id));
+    
+  return c.json({ message: "Property approved successfully" });
+});
+
+// Deny a pending property
+adminRealEstate.post("/:id/deny", async (c) => {
+  const id = c.req.param("id");
+  
+  // Check if property exists and is pending
+  const property = await db
+    .select()
+    .from(realestateTable)
+    .where(eq(realestateTable.id, id));
+    
+  if (!property.length) {
+    return c.json({ error: "Property not found" }, 404);
+  }
+  
+  if (property[0].status !== "pending") {
+    return c.json({ error: "Property is not in pending status" }, 400);
+  }
+  
+  // Delete the property (denial means removing it)
+  await db
+    .delete(realestateTable)
+    .where(eq(realestateTable.id, id));
+    
+  return c.json({ message: "Property denied and removed successfully" });
 });
 
 adminRealEstate.delete("/:id", async (c) => {

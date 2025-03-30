@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../layout';
 import { Card } from '@/components/ui/card';
-import { Search, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Eye, Check } from 'lucide-react';
 import Link from 'next/link';
 import useFetch from '@/lib/fetch';
 import Notification from '@/components/ui/notification';
@@ -95,6 +95,72 @@ export default function PropertiesList() {
       }
     }
   };
+
+  const handleApprove = async (id: string) => {
+    if (window.confirm('Are you sure you want to approve this property?')) {
+      try {
+        const response = await useFetch.get(`/admin/realestate/${id}/approve`, { method: 'POST' });
+        
+        if (response.ok) {
+          // Update the property status in the local state
+          setProperties(properties.map(property => 
+            property.id === id ? { ...property, status: 'available' } : property
+          ));
+          setNotification({
+            show: true,
+            type: 'success',
+            message: 'Property approved successfully'
+          });
+        } else {
+          const data = await response.json();
+          setNotification({
+            show: true,
+            type: 'error',
+            message: data.error || 'Failed to approve property'
+          });
+        }
+      } catch (error) {
+        console.error('Error approving property:', error);
+        setNotification({
+          show: true,
+          type: 'error',
+          message: 'Failed to approve property'
+        });
+      }
+    }
+  };
+
+  const handleDeny = async (id: string) => {
+    if (window.confirm('Are you sure you want to deny this property? This will remove it from the system.')) {
+      try {
+        const response = await useFetch.get(`/admin/realestate/${id}/deny`, { method: 'POST' });
+        
+        if (response.ok) {
+          // Remove the property from the local state
+          setProperties(properties.filter(property => property.id !== id));
+          setNotification({
+            show: true,
+            type: 'success',
+            message: 'Property denied and removed successfully'
+          });
+        } else {
+          const data = await response.json();
+          setNotification({
+            show: true,
+            type: 'error',
+            message: data.error || 'Failed to deny property'
+          });
+        }
+      } catch (error) {
+        console.error('Error denying property:', error);
+        setNotification({
+          show: true,
+          type: 'error',
+          message: 'Failed to deny property'
+        });
+      }
+    }
+  };
   
   return (
     <AdminLayout>
@@ -109,13 +175,13 @@ export default function PropertiesList() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Properties</h1>
-          <Link href="/admin/properties/add">
+          {/* <Link href="/admin/properties/add">
             <button className="flex items-center px-4 py-2  text-white bg-black shadow border
              rounded-md text-sm ">
               <Plus size={16} className="mr-2" />
               Add New Property
             </button>
-          </Link>
+          </Link> */}
         </div>
         
         {/* Search and Filters */}
@@ -213,17 +279,32 @@ export default function PropertiesList() {
                               <Eye size={18} />
                             </button>
                           </Link>
-                          {/* <Link href={`/admin/properties/edit/${property.id}`}>
-                            <button className="text-indigo-600 hover:text-indigo-900">
-                              <Edit size={18} />
+                          {property.status === 'Pending' && (
+                            <>
+                              <button 
+                                onClick={() => handleApprove(property.id)}
+                                className="text-green-600 hover:text-green-900"
+                                title="Approve property"
+                              >
+                                <Check size={18} />
+                              </button>
+                              <button 
+                                onClick={() => handleDeny(property.id)}
+                                className="text-red-600 hover:text-red-900"
+                                title="Deny property"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </>
+                          )}
+                          {property.status !== 'Pending' && (
+                            <button 
+                              onClick={() => handleDelete(property.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              <Trash2 size={18} />
                             </button>
-                          </Link> */}
-                          <button 
-                            onClick={() => handleDelete(property.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            <Trash2 size={18} />
-                          </button>
+                          )}
                         </div>
                       </td>
                     </tr>

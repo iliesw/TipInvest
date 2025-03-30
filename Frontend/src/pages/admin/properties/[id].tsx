@@ -29,9 +29,11 @@ import {
   Tv,
   PawPrint,
   Phone,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import useFetch from "@/lib/fetch";
+import Notification from "@/components/ui/notification";
 
 interface PropertyDetails {
   features: string[];
@@ -194,9 +196,85 @@ const FetchImages = async (images: string[]) => {
         return "bg-blue-100 text-blue-800";
     }
   };
+  
+  // Handle property approval
+  const handleApprove = async () => {
+    if (!id) return;
+    
+    try {
+      const response = await useFetch.get(`/admin/realestate/${id}/approve`, { method: 'POST' });
+      
+      if (response.ok) {
+        // Update the property status locally
+        setProperty(property ? { ...property, status: 'available' } : null);
+        setNotification({
+          show: true,
+          type: 'success',
+          message: 'Property approved successfully'
+        });
+      } else {
+        const data = await response.json();
+        setNotification({
+          show: true,
+          type: 'error',
+          message: data.error || 'Failed to approve property'
+        });
+      }
+    } catch (error) {
+      console.error('Error approving property:', error);
+      setNotification({
+        show: true,
+        type: 'error',
+        message: 'Failed to approve property'
+      });
+    }
+  };
+  
+  // Handle property denial
+  const handleDeny = async () => {
+    if (!id) return;
+    
+    if (window.confirm('Are you sure you want to deny this property? This will remove it from the system.')) {
+      try {
+        const response = await useFetch.get(`/admin/realestate/${id}/deny`, { method: 'POST' });
+        
+        if (response.ok) {
+          setNotification({
+            show: true,
+            type: 'success',
+            message: 'Property denied and removed successfully'
+          });
+          // Redirect back to properties list after denial
+          router.push('/admin/properties');
+        } else {
+          const data = await response.json();
+          setNotification({
+            show: true,
+            type: 'error',
+            message: data.error || 'Failed to deny property'
+          });
+        }
+      } catch (error) {
+        console.error('Error denying property:', error);
+        setNotification({
+          show: true,
+          type: 'error',
+          message: 'Failed to deny property'
+        });
+      }
+    }
+  };
 
   return (
     <AdminLayout>
+      {notification.show && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          show={notification.show}
+          onClose={() => setNotification({ ...notification, show: false })}
+        />
+      )}
       <div className="space-y-6">
         {/* Header with back button and actions */}
         <div className="flex justify-between items-center">
@@ -206,6 +284,25 @@ const FetchImages = async (images: string[]) => {
               Back to Properties
             </Button>
           </Link>
+          
+          {property.status === "pending" && (
+            <div className="flex space-x-2">
+              <Button 
+                onClick={handleApprove} 
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Check size={16} className="mr-2" />
+                Approve Property
+              </Button>
+              <Button 
+                onClick={handleDeny} 
+                variant="destructive"
+              >
+                <Trash2 size={16} className="mr-2" />
+                Deny Property
+              </Button>
+            </div>
+          )}
         </div>
         {/* Property Images */}
         <Card className="p-0 shadow-none border-none hover:shadow-none overflow-visible">

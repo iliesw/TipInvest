@@ -26,6 +26,11 @@ interface Property {
     features: string[];
   };
   images: string[];
+  agency?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 export default function PropertyDetail() {
@@ -364,6 +369,34 @@ export default function PropertyDetail() {
               
             </div>
 
+            {/* Agency Contact Card */}
+            <div className="bg-white p-6 rounded-lg border mb-4">
+              <h2 className="text-xl font-semibold mb-4">Listed By</h2>
+              {property.agency ? (
+                <div className="flex items-start gap-4">
+                  <div className="bg-blue-100 p-3 rounded-full">
+                    <Building size={24} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">{property.agency.name}</h3>
+                    <p className="text-gray-600 text-sm">{property.agency.email}</p>
+                    <Button 
+                      variant="outline" 
+                      className="mt-3 flex items-center gap-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.location.href = `mailto:${property.agency?.email}?subject=Inquiry about ${property.title}`;
+                      }}
+                    >
+                      <Phone size={16} />
+                      Contact Agent
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-600">No agency information available</p>
+              )}
+            </div>
             
           </div>
         </div>

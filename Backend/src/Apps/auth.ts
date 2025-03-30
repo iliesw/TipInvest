@@ -20,11 +20,12 @@ auth.get("/", (c) => c.json({ status: "Auth alive "+GetVersion() }));
 auth.post("/register", async (c) => {
   try {
     // Parse the request body
-    const { name, email, password, phone } = await c.req.json() as { 
+    const { name, email, password, phone, role } = await c.req.json() as { 
       name: string, 
       email: string, 
       password: string,
-      phone?: string 
+      phone?: string,
+      role?: 'user' | 'agency'
     };
 
     // Validate required fields
@@ -52,15 +53,28 @@ auth.post("/register", async (c) => {
       email: email,
       passwordHash: hashedPassword,
       phone: phone || null,
+      role: role || 'user',
     });
+    // Get the newly created user
+    const newUser = (await db.select().from(userTable).where(eq(userTable.email, email)).limit(1))[0];
+    
     // Generate a JWT token for the newly registered user
     const token = jwt.sign(
-      { id: (await db.select().from(userTable).where(eq(userTable.email, email)).limit(1))[0].id },
+      { id: newUser.id, role: newUser.role },
       process.env.JWT_SECRET!,
       { expiresIn: "7d" }
     );
 
-    return c.json({ token });
+    // Return token and user information (excluding password hash)
+    return c.json({
+      token,
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role
+      }
+    });
   } catch (error) {
     console.error("Registration error:", error);
     return c.json({ error: "Server error during registration" }, 500);
@@ -72,7 +86,7 @@ auth.post("/register", async (c) => {
  * 
  * Endpoint: POST /login
  * Request Body: { email: string, password: string }
- * Response: { token: string } | { error: string }
+ * Response: { token: string, user: { id, name, email, role } } | { error: string }
  */
 auth.post("/login", async (c) => {
   // Parse the request body
@@ -96,8 +110,17 @@ auth.post("/login", async (c) => {
     process.env.JWT_SECRET!,
     { expiresIn: "7d"}
   );
-
-  return c.json({ token });
+  
+  // Return token and user information (excluding password hash)
+  return c.json({
+    token,
+    user: {
+      id: user[0].id,
+      name: user[0].name,
+      email: user[0].email,
+      role: user[0].role
+    }
+  });
 });
 
 /**
@@ -153,7 +176,7 @@ auth.post("/forgot-password", async (c) => {
   const resetToken = jwt.sign({ id: user[0].id }, process.env.JWT_SECRET!, { expiresIn: "15m" });
 
   // In a real application, you would send the resetToken via email to the user.
-  console.log(`Password reset token for ${email}: ${resetToken}`);
+  // console.log(`Password reset token for ${email}: ${resetToken}`);
 
   return c.json({ message: "If an account with that email exists, password reset instructions have been sent." });
 });
