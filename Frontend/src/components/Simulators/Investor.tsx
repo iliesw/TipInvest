@@ -13,6 +13,8 @@ import {
   Download,
   Ellipsis,
   RotateCcw,
+  Building,
+  Info,
 } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 import {
@@ -60,15 +62,6 @@ async function Chat(prompt: string, onChunk?: (chunk: string) => void) {
 
   return fullText;
 }
-
-const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 205 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 73 },
-  { month: "May", desktop: 209 },
-  { month: "June", desktop: 214 },
-];
 
 const chartConfig = (_label: string) => ({
   desktop: {
@@ -334,9 +327,23 @@ function Chart({ values, label }: { values: any[]; label: string }) {
   );
 }
 import { marked } from "marked";
+// Dictionary of banks with their interest rates and features
+const banksList = [
+  { id: 1, name: "TipInvest Bank", interestRate: 7, description: "Our standard offering with competitive rates", color: "#0088FE" },
+  { id: 2, name: "National Trust", interestRate: 8, description: "Established bank with strong security features", color: "#00C49F" },
+  { id: 3, name: "Global Finance", interestRate: 6.5, description: "International bank with flexible terms", color: "#FFBB28" },
+  { id: 4, name: "City Credit Union", interestRate: 7.2, description: "Community-focused with personalized service", color: "#FF8042" },
+  { id: 5, name: "Premier Savings", interestRate: 8.5, description: "Premium rates for high-value investments", color: "#8884d8" },
+  { id: 6, name: "Coastal Bank", interestRate: 6.8, description: "Regional bank with local expertise", color: "#82ca9d" },
+];
+
 function PropertyDiv({ data }: { data: any }) {
   const $D = useStore(data);
   const [IntrestRate, SetIntrestRate] = useState($D.IntrestRate);
+  const [selectedBank, setSelectedBank] = useState(banksList.find(bank => bank.interestRate === IntrestRate) || banksList[0]);
+  const [TotalCost, SetTotalCost] = useState($D.TotalCost || $D.Capital || 0); // Coût total du projet
+  const [MonthlyRent, SetMonthlyRent] = useState($D.MonthlyRent || 0); // Loyer mensuel brut
+  const [LoanAmount, SetLoanAmount] = useState($D.LoanAmount || 0); // Montant du prêt
   const [Capital, SetCapital] = useState($D.Capital);
   const [Duration, SetDuration] = useState($D.Duration);
   const [PropertyType, SetPropertyType] = useState($D.PropertyType);
@@ -344,30 +351,45 @@ function PropertyDiv({ data }: { data: any }) {
   const [qualityScore, setQualityScore] = useState($D.Quality);
   const [Monthly, SetMonthly] = useState($D.Monthly);
   const [OverviewData, SetOverviewData] = useState($D.Rapport);
+  const [showBankComparison, setShowBankComparison] = useState(true);
+  const [MortgagePayment, SetMortgagePayment] = useState(0); // Mensualité du crédit à rembourser
+  const [GrossYield, SetGrossYield] = useState(0); // Rentabilité brute
   // Update the store whenever any property value changes
   useEffect(() => {
     const currentData = {
       Capital: Capital,
+      TotalCost: TotalCost,
+      MonthlyRent: MonthlyRent,
+      LoanAmount: LoanAmount,
       Duration: Duration,
       IntrestRate: IntrestRate,
       PropertyType: propertyTypes[PropertyType].name,
       Risk: riskScore,
       Quality: qualityScore,
       Monthly: Monthly,
-      Gain : gain,
+      MortgagePayment: MortgagePayment,
+      GrossYield: GrossYield,
+      Gain: gain,
       Rapport: marked.parse(OverviewData),
+      Bank: selectedBank.name,
     };
 
     data.set(currentData);
   }, [
     IntrestRate,
     Capital,
+    TotalCost,
+    MonthlyRent,
+    LoanAmount,
     Duration,
     PropertyType,
     riskScore,
     qualityScore,
     Monthly,
+    MortgagePayment,
+    GrossYield,
     OverviewData,
+    selectedBank,
   ]);
 
   const propertyTypes = [
@@ -428,32 +450,48 @@ function PropertyDiv({ data }: { data: any }) {
     setRiskScore(Math.min(10, Math.max(1, Math.round(riskScore))));
   }, [propertyTypes, PropertyType, Duration, IntrestRate, Capital]);
 
+  // Calcul de la mensualité du crédit (mortgage payment)  
   useEffect(() => {
     const monthlyInterestRate = parseFloat(IntrestRate) / 100.0 / 12.0;
     const numberOfPayments = Duration;
 
-    // Base PMT formula:
+    // Base PMT formula pour le prêt:
     const numerator =
-      Capital *
+      LoanAmount *
       monthlyInterestRate *
       Math.pow(1 + monthlyInterestRate, numberOfPayments);
     const denominator = Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1;
-    const baseMonthlyPayment = denominator === 0 ? 0 : numerator / denominator;
+    const mortgagePayment = denominator === 0 ? 0 : numerator / denominator;
 
-    // Adjustments based on property type:
+    SetMortgagePayment(Math.floor(mortgagePayment));
+
+    // Calcul du rendement locatif (pour Monthly)
     const currentProperty = propertyTypes[PropertyType];
     const multiplier = currentProperty.returnMultiplier;
+    
+    // On utilise MonthlyRent comme base pour le loyer mensuel brut
+    SetMonthly(MonthlyRent);
+  }, [IntrestRate, Duration, LoanAmount, MonthlyRent, propertyTypes, PropertyType]);
+  
+  // Calcul de la rentabilité brute
+  useEffect(() => {
+    if (TotalCost > 0) {
+      // Rentabilité brute = (loyer annuel / coût total) * 100
+      const annualRent = MonthlyRent * 12;
+      const grossYield = (annualRent / TotalCost) * 100;
+      SetGrossYield(grossYield);
+    } else {
+      SetGrossYield(0);
+    }
+  }, [MonthlyRent, TotalCost]);
 
-    SetMonthly(Math.floor(baseMonthlyPayment * multiplier));
-  }, [IntrestRate, Duration, Capital, propertyTypes, PropertyType]);
-
-  const [gain,setGain] = useState(0);
-useEffect(() => {
-  // Prevent division by zero by using a default value when Capital is 0
-  const f = Capital > 0 ? (Monthly * 12.0 / Capital * 100.0) : 0;
-  console.log(f);
-  setGain(f);
-}, [Monthly, Capital]);
+  const [gain, setGain] = useState(0);
+  useEffect(() => {
+    // Prevent division by zero by using a default value when Capital is 0
+    const f = Capital > 0 ? ((Monthly * 12.0) / Capital) * 100.0 : 0;
+    console.log(f);
+    setGain(f);
+  }, [Monthly, Capital]);
 
   const qualityColor = `hsl(${qualityScore * 12}, 100%, 40%)`;
   const riskColor = `hsl(${(10 - riskScore) * 12}, 100%, 40%)`;
@@ -464,12 +502,17 @@ useEffect(() => {
   const Overview = async () => {
     const Data = {
       Capital: Capital,
+      TotalCost: TotalCost,
+      MonthlyRent: MonthlyRent,
+      LoanAmount: LoanAmount,
       Duration: Duration,
       IntrestRate: IntrestRate,
       PropertyType: propertyTypes[PropertyType].name,
       Risk: riskScore,
       Quality: qualityScore,
-      Monthly: Monthly,
+      Monthly: MonthlyRent,
+      MortgagePayment: MortgagePayment,
+      GrossYield: GrossYield,
       Gain: gain,
       Rapport: OverviewData,
     };
@@ -487,22 +530,22 @@ useEffect(() => {
   // Rest of the component remains the same...
   return (
     <div
-      className="rounded-lg hover:bg-gray-200 transition w-full min-w-1/3  bg-gray-100 gap-16 relative overflow-hidden flex flex-col items-start p-6 m-0 justify-between border"
+      className="rounded-lg hover:bg-gray-200 transition w-full bg-gray-100 gap-4 relative overflow-hidden flex flex-col md:flex-row items-start p-4 md:p-6 m-0 justify-between border min-h-96"
       style={{ borderRadius: "10px" }}
     >
-      {/* Rest of the JSX remains unchanged */}
+      <span className="w-full flex-col flex justify-between h-full md:w-1/2 lg:w-3/5">
       <div
         className="w-full absolute h-full top-0 left-0 opacity-35"
         style={{
           background: `radial-gradient(circle at 0% 0%,${qualityColor},transparent)`,
         }}
       ></div>
-      <div className="flex justify-between items-start w-full relative">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start w-full relative">
+        <div className="flex flex-col justify-between">
+          <div className="flex flex-wrap items-center gap-2">
             <FinancialTooltip term="Investment Quality">
               <p
-                className={`text-sm px-3 mb-2 py-1 w-fit rounded-full text-white`}
+                className={`text-xs sm:text-sm px-2 sm:px-3 mb-2 py-1 w-fit rounded-full text-white`}
                 style={{ background: qualityColor }}
               >
                 Investment Quality{" "}
@@ -515,7 +558,7 @@ useEffect(() => {
             </FinancialTooltip>
             <FinancialTooltip term="Risk Level">
               <p
-                className={`text-sm px-3 mb-2 py-1 w-fit rounded-full text-white`}
+                className={`text-xs sm:text-sm px-2 sm:px-3 mb-2 py-1 w-fit rounded-full text-white`}
                 style={{ background: riskColor }}
               >
                 Risk Level{" "}
@@ -528,63 +571,19 @@ useEffect(() => {
             </FinancialTooltip>
           </div>
 
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
             {propertyTypes[PropertyType].name} Property
           </h1>
-          <div className="flex gap-2 mt-1">
-            <FinancialTooltip term="Return Multiplier">
-              <p className="text-sm text-gray-500">
-                Return Multiplier:{" "}
-                <AnimatedNumber
-                  value={propertyTypes[PropertyType].returnMultiplier}
-                  suffix="x"
-                  duration={0.5}
-                  formatOptions={{
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1,
-                  }}
-                />
-              </p>
-            </FinancialTooltip>
-            <FinancialTooltip term="Risk Factor">
-              <p className="text-sm text-gray-500">
-                Risk Factor:{" "}
-                <AnimatedNumber
-                  value={propertyTypes[PropertyType].riskFactor}
-                  duration={0.5}
-                  formatOptions={{
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1,
-                  }}
-                />
-              </p>
-            </FinancialTooltip>
-            <FinancialTooltip term="Appreciation">
-              <p className="text-sm text-gray-500">
-                Appreciation:{" "}
-                <AnimatedNumber
-                  value={propertyTypes[PropertyType].appreciationRate * 100}
-                  suffix="%/year"
-                  duration={0.5}
-                  formatOptions={{
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1,
-                  }}
-                />
-              </p>
-            </FinancialTooltip>
-          </div>
+
         </div>
-        <button className="rounded-lg p-1  hover:bg-white transition">
-          <Ellipsis size={16} />
-        </button>
+
       </div>
-      <div className="flex gap-5 justify-between w-full items-end relative">
-        <div className="flex flex-col gap-2 w-3/5">
+      <div className="flex flex-col md:flex-row gap-5 justify-between w-full items-start md:items-end relative">
+        <div className="flex flex-col gap-2 w-full md:w-3/5">
           {OverviewData.length > 0 ? (
-            <div className="bg-[#ffffffd0] rounded-xl p-3 text-sm flex flex-col">
+            <div className="bg-[#ffffffd0] rounded-xl p-2 sm:p-3 text-sm flex flex-col">
               <div className="flex w-full mb-2 justify-between pr-2">
-                <p className="text-xl font-bold">AI Report</p>
+                <p className="text-lg sm:text-xl font-bold">AI Report</p>
                 <button onClick={Overview} disabled={isLoading}>
                   <RotateCcw
                     size={16}
@@ -593,13 +592,13 @@ useEffect(() => {
                 </button>
               </div>
 
-              <div className="text-sm">
+              <div className="text-xs sm:text-sm">
                 <MarkdownRenderer markdown={OverviewData} />
               </div>
             </div>
           ) : (
             <Button
-              className="bg-white rounded-full text-black hover:bg-neutral-100 w-fit group"
+              className="bg-white rounded-full text-black hover:bg-neutral-100 w-fit group text-xs sm:text-sm"
               onClick={Overview}
               disabled={isLoading}
             >
@@ -610,128 +609,239 @@ useEffect(() => {
                 </>
               ) : (
                 <>
-                  <ChartColumnDecreasing />
+                  <ChartColumnDecreasing className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
                   Generate AI Report
                 </>
               )}
             </Button>
           )}
-          <InputO onChange={SetPropertyType} />
-          <div className="flex items-center gap-2">
-            {/* <InputR
-              title={"Period"}
-              min={6}
-              max={120}
-              steps={6}
-              small={true}
-              Icon={Calendar}
-              initialValue={Duration}
-              onChange={SetDuration}
-            /> */}
-            <InputN placeholder="Period" value={Duration} onChange={SetDuration}/>
-            <div className="relative" onClick={(e) => e.stopPropagation()}>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDropdownOpen(!dropdownOpen);
-                }}
-                className="bg-white text-black w-fit h-9 flex items-center border text-sm text-nowrap rounded-full py-1 px-4"
-              >
-                <FinancialTooltip term="Interest Rate">
-                  {IntrestRate}% Interest
-                </FinancialTooltip>
-                <span className="ml-2">
-                  <ArrowDownUp className="rotate-45" size={16} />
-                </span>
-              </button>
-              {dropdownOpen && (
-                <div
-                  className="absolute bottom-[120%] mt-1 bg-white rounded-lg shadow-lg z-20 py-1 min-w-full"
-                  onClick={(e) => e.stopPropagation()}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+            <div className="col-span-2">
+              {/* <h3 className="text-sm font-semibold mb-1">Type de propriété</h3> */}
+              <InputO onChange={SetPropertyType} />
+            </div>
+            
+              <FinancialTooltip term="Coût total" className="w-full">
+                <InputN
+                  placeholder="Coût total"
+                  value={TotalCost.toString()}
+                  onChange={SetTotalCost}
+                />
+              </FinancialTooltip>
+            
+              <FinancialTooltip term="Loyer mensuel" className="w-full">
+                <InputN
+                  placeholder="Loyer mensuel"
+                  value={MonthlyRent.toString()}
+                  onChange={SetMonthlyRent}
+                />
+              </FinancialTooltip>
+            
+              <FinancialTooltip term="Montant du prêt" className="w-full">
+                <InputN
+                  placeholder="Montant du prêt"
+                  value={LoanAmount.toString()}
+                  onChange={SetLoanAmount}
+                />
+              </FinancialTooltip>
+              <InputN
+                placeholder="Durée (mois)"
+                value={Duration.toString()}
+                onChange={SetDuration}
+              />
+            
+            <div className="col-span-2">
+              <div className="relative" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDropdownOpen(!dropdownOpen);
+                  }}
+                  className="bg-white text-black w-full h-9 flex items-center border text-sm rounded-full py-1 px-4 justify-between"
                 >
-                  {[7, 8, 12].map((rate) => (
-                    <button
-                      key={rate}
-                      className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
-                        IntrestRate === rate ? "font-bold" : ""
-                      }`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        SetIntrestRate(rate);
-                        setDropdownOpen(false);
-                      }}
-                    >
-                      {rate}%
-                    </button>
-                  ))}
-                </div>
-              )}
+                  <FinancialTooltip term="Interest Rate">
+                    <div className="flex items-center">
+                      <Building size={16} className="mr-1" />
+                      {selectedBank.name} ({selectedBank.interestRate}%)
+                    </div>
+                  </FinancialTooltip>
+                  <span>
+                    <ArrowDownUp className="rotate-45" size={16} />
+                  </span>
+                </button>
+                {dropdownOpen && (
+                  <div
+                    className="absolute bottom-[120%] mt-1 bg-white rounded-lg shadow-lg z-20 py-1 min-w-[250px] w-full"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {banksList.map((bank) => (
+                      <button
+                        key={bank.id}
+                        className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+                          selectedBank.id === bank.id ? "font-bold" : ""
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          SetIntrestRate(bank.interestRate);
+                          setSelectedBank(bank);
+                          setDropdownOpen(false);
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <span className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: bank.color }}></span>
+                            {bank.name}
+                          </div>
+                          <span className="text-gray-500">{bank.interestRate}%</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <FinancialTooltip term="Capital" className="w-full">
-            {/* <InputR
-              title={"Investment"}
-              min={5000}
-              max={100000}
-              steps={5000}
-              initialValue={Capital}
-              Icon={DollarSign}
-              onChange={SetCapital}
-            /> */}
-            <InputN placeholder="Investment" value={Capital} onChange={SetCapital} type="email"/>
-          </FinancialTooltip>
+          
+          
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <h3 className="text-xl font-bold font-[Code] text-gray-900">
-            <FinancialTooltip term="Duration">
-              <AnimatedNumber
-                value={Duration}
-                suffix=" Months"
-                duration={0.5}
-              />
-            </FinancialTooltip>
-          </h3>
-          <h3 className="text-xl font-bold font-[Code] text-gray-900">
-            <FinancialTooltip term="Monthly Payment">
-              <AnimatedNumber
-                value={Monthly}
-                prefix="$"
-                suffix=" / Month"
-                duration={0.5}
-                formatOptions={{
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }}
-              />
-            </FinancialTooltip>
-          </h3>
-          <p className="text-sm text-gray-500">Rentabilite Brute</p>
-
-          <h1  className="text-5xl font-bold mb-2">
-            <FinancialTooltip term="Monthly Payment">
-              <AnimatedNumber
-                value={gain}
-                prefix="$"
-                duration={0.5}
-                formatOptions={{
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }}
-              />
-            </FinancialTooltip>
-          </h1>
-          <p className="text-sm text-gray-500">Estimated Total</p>
-          <FinancialTooltip term="Total Price">
-            <h1 className="text-5xl font-bold">
-              <AnimatedNumber
-                value={Monthly * Duration}
-                prefix="$"
-                duration={0.5}
-              />
-            </h1>
-          </FinancialTooltip>
+        <div className="flex flex-col items-start md:items-end gap-2 w-full md:w-auto mt-4 md:mt-0">
+          <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border w-full">
+            <h3 className="text-base sm:text-lg font-bold mb-2 sm:mb-3">Résultats</h3>
+            
+            <div className="space-y-3 sm:space-y-4">
+              <div>
+                <p className="text-xs sm:text-sm text-gray-500">1. Mensualité du crédit à rembourser</p>
+                <h3 className="text-xl sm:text-2xl font-bold font-[Code] text-gray-900">
+                  <FinancialTooltip term="Mensualité du crédit">
+                    <AnimatedNumber
+                      value={MortgagePayment}
+                      prefix="$"
+                      suffix=" / mois"
+                      duration={0.5}
+                      formatOptions={{
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      }}
+                    />
+                  </FinancialTooltip>
+                </h3>
+              </div>
+              
+              <div>
+                <p className="text-xs sm:text-sm text-gray-500">2. Rentabilité brute</p>
+                <h3 className="text-xl sm:text-2xl font-bold font-[Code] text-gray-900">
+                  <FinancialTooltip term="Rentabilité brute">
+                    <AnimatedNumber
+                      value={GrossYield}
+                      suffix="%"
+                      duration={0.5}
+                      formatOptions={{
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }}
+                    />
+                  </FinancialTooltip>
+                </h3>
+              </div>
+              
+              <div className="pt-2 border-t">
+                <p className="text-xs sm:text-sm text-gray-500">Loyer mensuel brut</p>
+                <h3 className="text-lg sm:text-xl font-bold font-[Code] text-gray-900">
+                  <FinancialTooltip term="Loyer mensuel">
+                    <AnimatedNumber
+                      value={MonthlyRent}
+                      prefix="$"
+                      suffix=" / mois"
+                      duration={0.5}
+                      formatOptions={{
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      }}
+                    />
+                  </FinancialTooltip>
+                </h3>
+              </div>
+              
+              <div>
+                <p className="text-xs sm:text-sm text-gray-500">Durée du crédit</p>
+                <h3 className="text-lg sm:text-xl font-bold font-[Code] text-gray-900">
+                  <FinancialTooltip term="Durée">
+                    <AnimatedNumber
+                      value={Duration}
+                      suffix=" mois"
+                      duration={0.5}
+                    />
+                  </FinancialTooltip>
+                </h3>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      </span> 
+      <span className="w-full relative h-full mt-4 md:mt-0 md:w-1/2 lg:w-2/5">{showBankComparison && (
+            <div className="bg-white flex flex-col justify-between rounded-xl p-3 sm:p-4 shadow-sm border w-full h-full">
+              <h3 className="text-base sm:text-lg font-bold mb-2 sm:mb-3">Bank Comparison</h3>
+              <div className="overflow-x-auto -mx-3 sm:mx-0">
+                <table className="w-full text-xs sm:text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-1 sm:py-2 pl-3 sm:pl-0">Bank</th>
+                      <th className="text-right py-1 sm:py-2">Rate</th>
+                      <th className="text-right py-1 sm:py-2">Monthly</th>
+                      <th className="text-right py-1 sm:py-2 hidden sm:table-cell">Total</th>
+                      <th className="text-right py-1 sm:py-2 pr-3 sm:pr-0">Quality</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {banksList.map((bank) => {
+                      // Calculate monthly payment for this bank
+                      const monthlyInterestRate = bank.interestRate / 100.0 / 12.0;
+                      const numberOfPayments = Duration;
+                      const numerator = Capital * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments);
+                      const denominator = Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1;
+                      const baseMonthlyPayment = denominator === 0 ? 0 : numerator / denominator;
+                      const currentProperty = propertyTypes[PropertyType];
+                      const multiplier = currentProperty.returnMultiplier;
+                      const monthlyPayment = Math.floor(baseMonthlyPayment * multiplier);
+                      const totalPayment = monthlyPayment * Duration;
+                      
+                      // Calculate quality score for this bank
+                      const durationFactor = Math.min(1, Duration / 60);
+                      const interestFactor = 1 - bank.interestRate / 20;
+                      const capitalFactor = Math.min(1, Capital / 50000);
+                      const qualityScore = (durationFactor * 3 + interestFactor * 3 + capitalFactor * 2 + currentProperty.appreciationRate * 50) / currentProperty.riskFactor;
+                      const bankQualityScore = Math.min(10, Math.max(1, Math.round(qualityScore)));
+                      
+                      return (
+                        <tr key={bank.id} className={`border-b hover:bg-gray-50 ${selectedBank.id === bank.id ? 'bg-blue-50' : ''}`}>
+                          <td className="py-1 sm:py-2 pl-3 sm:pl-0">
+                            <div className="flex items-center">
+                              <span className="h-2 w-2 sm:h-3 sm:w-3 rounded-full mr-1 sm:mr-2" style={{ backgroundColor: bank.color }}></span>
+                              {bank.name}
+                            </div>
+                          </td>
+                          <td className="text-right py-1 sm:py-2">{bank.interestRate}%</td>
+                          <td className="text-right py-1 sm:py-2">${monthlyPayment}</td>
+                          <td className="text-right py-1 sm:py-2 hidden sm:table-cell">${totalPayment}</td>
+                          <td className="text-right py-1 sm:py-2 pr-3 sm:pr-0">
+                            <span className="px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs text-white" 
+                              style={{ backgroundColor: `hsl(${bankQualityScore * 12}, 100%, 40%)` }}>
+                              {bankQualityScore}/10
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-2 sm:mt-3 text-xs text-gray-500 px-3 sm:px-0">
+                <p>* Calculations based on current property type and investment amount</p>
+              </div>
+            </div>
+          )}</span> 
+      
     </div>
   );
 }
@@ -751,7 +861,7 @@ function PropertiesSection() {
       className={`w-full gap-3 h-full ${
         $P.length == 0
           ? "items-center justify-center flex flex-col"
-          : "grid grid-cols-2"
+          : "grid grid-cols-1"
       }  `}
     >
       {$P.map((item, index) => {
@@ -762,18 +872,22 @@ function PropertiesSection() {
           const PS = atom({
             IntrestRate: 8,
             Capital: 10000,
+            TotalCost: 10000,
+            MonthlyRent: 1000,
+            LoanAmount: 8000,
             Duration: 12,
             PropertyType: 0,
             Risk: 1,
             Quality: 1,
             Monthly: 1000,
+            MortgagePayment: 0,
+            GrossYield: 0,
             Gain: 0,
             Rapport: "",
           });
-          // @ts-expect-error
           Properties.set([...$P, PS]);
         }}
-        className="rounded-lg cursor-pointer hover:bg-gray-200 transition w-96 h-fit bg-gray-100 relative overflow-hidden flex flex-col items-start p-6 justify-between border"
+        className="rounded-lg cursor-pointer hover:bg-gray-200 transition w-full sm:w-96 h-fit bg-gray-100 relative overflow-hidden flex flex-col items-start p-4 sm:p-6 justify-between border"
         style={{ borderRadius: "10px" }}
       >
         <div className="absolute top-0 left-0 w-full h-full"></div>
@@ -798,7 +912,22 @@ function PropertiesSection() {
 export default function InvestorSim() {
   const $P = useStore(Properties);
 
-  const Page = (i: { PropertyType: string; Rapport: string; Capital: string; Duration: string; IntrestRate: string; Risk: string; Quality: string; Monthly: string; Gain:number }) => {
+  const Page = (i: {
+    PropertyType: string;
+    Rapport: string;
+    TotalCost?: string;
+    MonthlyRent?: string;
+    LoanAmount?: string;
+    Capital: string;
+    Duration: string;
+    IntrestRate: string;
+    Risk: string;
+    Quality: string;
+    Monthly: string;
+    MortgagePayment?: number;
+    GrossYield?: number;
+    Gain: number;
+  }) => {
     return (
       "<house><h1>" +
       i.PropertyType +
@@ -806,29 +935,36 @@ export default function InvestorSim() {
       i.Rapport +
       "</p><h2 style='margin-top:10px;margin-bottom:10px'>Investissement :</h2>" +
       "<div>" +
-      "<p class='stat'><b>Capital:</b> $" +
-      i.Capital +
+      "<p class='stat'><b>Coût total du projet:</b> $" +
+      (i.TotalCost || i.Capital) +
       "</p>" +
-      "<p class='stat'><b>Duration:</b> " +
+      "<p class='stat'><b>Loyer mensuel brut:</b> $" +
+      (i.MonthlyRent || i.Monthly) +
+      "</p>" +
+      "<p class='stat'><b>Montant du prêt:</b> $" +
+      (i.LoanAmount || i.Capital) +
+      "</p>" +
+      "<p class='stat'><b>Durée du crédit:</b> " +
       i.Duration +
-      " months</p>" +
-      "<p class='stat'><b>Interest Rate:</b> " +
+      " mois</p>" +
+      "<p class='stat'><b>Taux d'intérêt:</b> " +
       i.IntrestRate +
       "%</p>" +
-      "<p class='stat'><b>Property Type:</b> " +
+      "<p class='stat'><b>Type de propriété:</b> " +
       i.PropertyType +
       "</p>" +
-      "<p class='stat'><b>Risk Score:</b> " +
+      "<p class='stat'><b>Mensualité du crédit:</b> $" +
+      (i.MortgagePayment || 0) +
+      "</p>" +
+      "<p class='stat'><b>Rentabilité brute:</b> " +
+      (i.GrossYield ? i.GrossYield.toFixed(2) : "0") +
+      "%</p>" +
+      "<p class='stat'><b>Niveau de risque:</b> " +
       i.Risk +
       "/10</p>" +
-      "<p class='stat'><b>Quality Score:</b> " +
+      "<p class='stat'><b>Score de qualité:</b> " +
       i.Quality +
       "/10</p>" +
-      "<p class='stat'><b>Monthly Payment:</b> $" +
-      i.Monthly +
-      "</p>" +
-      "<p class='stat'><b>Gain:</b> $" +
-      Math.floor(i.Gain) +
       "</div>" +
       "</house>"
     );
@@ -901,9 +1037,13 @@ print({orientation: 'portrait'})
             in.
           </p>
         </div>
-        {$P.length == 0? <div></div> : <Button onClick={PrintPage} className="border">
-          Downoad Reports <Download />
-        </Button>}
+        {$P.length == 0 ? (
+          <div></div>
+        ) : (
+          <Button onClick={PrintPage} className="border">
+            Downoad Reports <Download />
+          </Button>
+        )}
       </div>
 
       {$P.length == 0 ? <div></div> : <MetricSerction />}

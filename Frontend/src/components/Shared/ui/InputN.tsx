@@ -19,7 +19,7 @@ export default function InputN({
 
   return (
     <div className="ainput">
-      <div className="flex items-center pl-3 bg-white rounded-full w-full border overflow-hidden" style={{ position: "relative" }}>
+      <div className="flex items-center pl-3 bg-white rounded-lg w-full border overflow-hidden" style={{ position: "relative" }}>
         {icon && <div className="icon">{icon}</div>}
         <p>{placeholder}</p>
         <input
@@ -56,6 +56,7 @@ export default function InputN({
             pointer-events: none;
             background: none;
             transition: 0.3s ease all;
+            white-space: nowrap;
             
           }
 

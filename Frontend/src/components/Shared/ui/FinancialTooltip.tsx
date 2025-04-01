@@ -13,6 +13,13 @@ const financialTerms: Record<string, string> = {
   'Monthly Payment': 'The estimated monthly payment based on the investment amount, interest rate, and duration.',
   'Total Price': 'The total amount paid over the entire duration of the investment.',
   'Capital': 'The initial amount invested in the property.',
+  'Bank Comparison': 'A table showing how different banks and their interest rates affect your investment returns and monthly payments.',
+  'TipInvest Bank': 'Our standard offering with competitive rates for property investments.',
+  'National Trust': 'Established bank with strong security features and reliable mortgage products.',
+  'Global Finance': 'International bank with flexible terms and global investment opportunities.',
+  'City Credit Union': 'Community-focused lender with personalized service and competitive rates.',
+  'Premier Savings': 'Premium rates for high-value investments with additional benefits for premium clients.',
+  'Coastal Bank': 'Regional bank with local expertise in property markets and personalized service.',
 };
 
 interface FinancialTooltipProps {
