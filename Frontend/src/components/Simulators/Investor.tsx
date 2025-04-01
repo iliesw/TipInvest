@@ -452,22 +452,18 @@ function PropertyDiv({ data }: { data: any }) {
 
   // Calcul de la mensualité du crédit (mortgage payment)  
   useEffect(() => {
+    // Formule 1 : [capital × (taux/12)] / [1 – (1 + (taux/12) – (12 × nombre d'années de remboursement))]
     const monthlyInterestRate = parseFloat(IntrestRate) / 100.0 / 12.0;
-    const numberOfPayments = Duration;
 
-    // Base PMT formula pour le prêt:
-    const numerator =
-      LoanAmount *
-      monthlyInterestRate *
-      Math.pow(1 + monthlyInterestRate, numberOfPayments);
-    const denominator = Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1;
+    // Application de la formule demandée
+    const numerator = LoanAmount * monthlyInterestRate;
+    const denominator = 1 - (1 + monthlyInterestRate - (Duration));
     const mortgagePayment = denominator === 0 ? 0 : numerator / denominator;
 
     SetMortgagePayment(Math.floor(mortgagePayment));
 
     // Calcul du rendement locatif (pour Monthly)
     const currentProperty = propertyTypes[PropertyType];
-    const multiplier = currentProperty.returnMultiplier;
     
     // On utilise MonthlyRent comme base pour le loyer mensuel brut
     SetMonthly(MonthlyRent);
@@ -488,8 +484,7 @@ function PropertyDiv({ data }: { data: any }) {
   const [gain, setGain] = useState(0);
   useEffect(() => {
     // Prevent division by zero by using a default value when Capital is 0
-    const f = Capital > 0 ? ((Monthly * 12.0) / Capital) * 100.0 : 0;
-    console.log(f);
+    const f = Capital > 0 ? ((MonthlyRent * 12.0) / TotalCost * 100.0)  : 0;
     setGain(f);
   }, [Monthly, Capital]);
 
