@@ -452,14 +452,12 @@ function PropertyDiv({ data }: { data: any }) {
 
   // Calcul de la mensualité du crédit (mortgage payment)  
   useEffect(() => {
-    // Nouvelle formule : [capital*(0.03/12)]/[1-(1+0.03/12)-(12*nombre d'années de remboursement))]
-    const fixedInterestRate = 0.03; // Taux fixe de 3%
-    const monthlyInterestRate = fixedInterestRate / 12.0;
-    const yearsOfRepayment = Duration / 12.0; // Conversion de la durée de mois en années
+    // Formule 1 : [capital × (taux/12)] / [1 – (1 + (taux/12) – (12 × nombre d'années de remboursement))]
+    const monthlyInterestRate = parseFloat(IntrestRate) / 100.0 / 12.0;
 
-    // Application de la nouvelle formule
+    // Application de la formule demandée
     const numerator = LoanAmount * monthlyInterestRate;
-    const denominator = 1 - (1 + monthlyInterestRate - (12 * yearsOfRepayment));
+    const denominator = 1 - (1 + monthlyInterestRate - (Duration));
     const mortgagePayment = denominator === 0 ? 0 : numerator / denominator;
 
     SetMortgagePayment(Math.floor(mortgagePayment));
@@ -615,7 +613,7 @@ function PropertyDiv({ data }: { data: any }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
             <div className="col-span-2">
               {/* <h3 className="text-sm font-semibold mb-1">Type de propriété</h3> */}
-              <InputO onChange={SetPropertyType} />
+              {/* <InputO onChange={SetPropertyType} /> */}
             </div>
             
               <FinancialTooltip term="Coût total" className="w-full">

@@ -21,13 +21,12 @@ export default function InputN({
     <div className="ainput">
       <div className="flex items-center pl-3 bg-white rounded-lg w-full border overflow-hidden" style={{ position: "relative" }}>
         {icon && <div className="icon">{icon}</div>}
-        <p>{placeholder}</p>
         <input
         className="focus:outline-none"
           type="number"
           max={1000000}
           min={0}
-          value={input}
+          placeholder={placeholder}
           onChange={(e) => {
             setInput(e.target.value);
             onChange?.(parseFloat(e.target.value) || 0);
@@ -70,7 +69,7 @@ export default function InputN({
           input {
             width: 100%;
             height: 40px;
-            padding: 0 12px;
+            padding: 0 0px;
           }
 
           input:-webkit-autofill,
