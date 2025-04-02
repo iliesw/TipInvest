@@ -452,12 +452,14 @@ function PropertyDiv({ data }: { data: any }) {
 
   // Calcul de la mensualité du crédit (mortgage payment)  
   useEffect(() => {
-    // Formule 1 : [capital × (taux/12)] / [1 – (1 + (taux/12) – (12 × nombre d'années de remboursement))]
-    const monthlyInterestRate = parseFloat(IntrestRate) / 100.0 / 12.0;
+    // Nouvelle formule : [capital*(0.03/12)]/[1-(1+0.03/12)-(12*nombre d'années de remboursement))]
+    const fixedInterestRate = 0.03; // Taux fixe de 3%
+    const monthlyInterestRate = fixedInterestRate / 12.0;
+    const yearsOfRepayment = Duration / 12.0; // Conversion de la durée de mois en années
 
-    // Application de la formule demandée
+    // Application de la nouvelle formule
     const numerator = LoanAmount * monthlyInterestRate;
-    const denominator = 1 - (1 + monthlyInterestRate - (Duration));
+    const denominator = 1 - (1 + monthlyInterestRate - (12 * yearsOfRepayment));
     const mortgagePayment = denominator === 0 ? 0 : numerator / denominator;
 
     SetMortgagePayment(Math.floor(mortgagePayment));
@@ -626,7 +628,7 @@ function PropertyDiv({ data }: { data: any }) {
             
               <FinancialTooltip term="Loyer mensuel" className="w-full">
                 <InputN
-                  placeholder="Loyer mensuel"
+                  placeholder="Loyer mensuel souhiaté"
                   value={MonthlyRent.toString()}
                   onChange={SetMonthlyRent}
                 />
@@ -734,37 +736,6 @@ function PropertyDiv({ data }: { data: any }) {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       }}
-                    />
-                  </FinancialTooltip>
-                </h3>
-              </div>
-              
-              <div className="pt-2 border-t">
-                <p className="text-xs sm:text-sm text-gray-500">Loyer mensuel brut</p>
-                <h3 className="text-lg sm:text-xl font-bold font-[Code] text-gray-900">
-                  <FinancialTooltip term="Loyer mensuel">
-                    <AnimatedNumber
-                      value={MonthlyRent}
-                      prefix="$"
-                      suffix=" / mois"
-                      duration={0.5}
-                      formatOptions={{
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
-                      }}
-                    />
-                  </FinancialTooltip>
-                </h3>
-              </div>
-              
-              <div>
-                <p className="text-xs sm:text-sm text-gray-500">Durée du crédit</p>
-                <h3 className="text-lg sm:text-xl font-bold font-[Code] text-gray-900">
-                  <FinancialTooltip term="Durée">
-                    <AnimatedNumber
-                      value={Duration}
-                      suffix=" mois"
-                      duration={0.5}
                     />
                   </FinancialTooltip>
                 </h3>
