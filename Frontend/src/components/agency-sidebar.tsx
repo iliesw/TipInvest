@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   Building,
   LayoutDashboard,
+  MessageCircle,
   PlusCircle,
 } from "lucide-react";
 
@@ -36,6 +37,11 @@ const agencyNavItems = [
     title: "Add Property",
     url: "/agency/properties/add",
     icon: PlusCircle,
+  },
+  {
+    title: "Real Estate Chat",
+    url: "/client/chat",
+    icon: MessageCircle,
   },
 ];
 

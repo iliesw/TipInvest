@@ -2,6 +2,7 @@
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
     "buffer": "^6.0.3",
-    "react-leaflet-cluster": "^2.1.0"
+    "react-leaflet-cluster": "^2.1.0",
+    "react-markdown": "^10.1.0"
   }
 }

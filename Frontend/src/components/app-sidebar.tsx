@@ -7,6 +7,7 @@ import {
   SquareTerminal,
   Home,
   Store,
+  MessageCircle,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -43,6 +44,11 @@ const data = {
       title: "Market Place",
       url: "/client/market",
       icon: Store,
+    },
+    {
+      title: "Real Estate Chat",
+      url: "/client/chat",
+      icon: MessageCircle,
     },
   ],
   navSecondary: [
