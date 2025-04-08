@@ -21,7 +21,6 @@ export const authMiddleware = async (c: Context, next: Next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string, role: string };
-    console.log("Decoded token:", decoded);
     
     // Vérifier si l'email de l'utilisateur est vérifié
     const user = await db

@@ -1,68 +1,38 @@
 "use client";
-
-import * as React from "react";
+import useFetch from "@/lib/fetch";
+import { useEffect } from "react";
+import { NavMain } from "./nav-main";
+import { NavUser } from "./nav-user";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 import {
+  Calendar,
+  Users,
+  Home,
   LifeBuoy,
   Send,
-  SquareTerminal,
-  Home,
-  Store,
-  MessageCircle,
-  Headset,
-  VideoIcon,
 } from "lucide-react";
-
-import { NavMain } from "@/components/nav-main";
-// import { NavProjects } from "@/components/nav-projects";
-import { NavUser } from "@/components/nav-user";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { useEffect } from "react";
+import React from "react";
 import LogoSM from "./Shared/LogoSM";
-import useFetch from "@/lib/fetch";
+
 
 const data = {
   navMain: [
     {
-      title: "Home",
-      url: "/client",
-      icon: Home,
-      isActive: false,
-    },
-    {
-      title: "Simulator",
-      url: "/client/simulator",
-      icon: SquareTerminal,
-      isActive: true,
-    },
-    {
-      title: "Market Place",
-      url: "/client/market",
-      icon: Store,
-    },
-    {
-      title: "Real Estate Chat",
-      url: "/client/chat",
-      icon: MessageCircle,
-    },
-    {
-      title: "Experts",
-      url: "/client/experts",
-      icon: Headset,
-    },
-    {
-      title: "Meetings",
-      url: "/client/meetings",
-      icon: VideoIcon,
-    },
+        title: "Dashboard",
+        url: "/expert",
+        icon: Home,
 
+      },
+      {
+        title: "Profile",
+        url: "/expert/profile",
+        icon: Users,
+      },
+      {
+        title: "Meetings",
+        url: "/expert/meetings",
+        icon: Calendar,
+      }
   ],
   navSecondary: [
     {
@@ -76,20 +46,18 @@ const data = {
       icon: Send,
     },
   ],
-  projects: [
-
-  ],
+  projects: [],
 };
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function ExpertSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     const T = localStorage.getItem("TOKENAUTH");
-    useFetch.get("/user/me", {
-      headers: {
-        Authorization: `Bearer ${T}`,
-        "Content-Type": "application/json",
-      },
-    })
+    useFetch
+      .get("/user/me", {
+        headers: {
+          Authorization: `Bearer ${T}`,
+          "Content-Type": "application/json",
+        },
+      })
       .then((res) => {
         return res.json();
       })
@@ -115,7 +83,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <LogoSM />
                 <div className="ml-2 grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">TipInvest</span>
-                  <span className="truncate text-xs">Client</span>
+                  <span className="truncate text-xs">Expert</span>
                 </div>
               </a>
             </SidebarMenuButton>

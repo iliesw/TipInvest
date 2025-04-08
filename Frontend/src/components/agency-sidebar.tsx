@@ -40,7 +40,7 @@ const agencyNavItems = [
   },
   {
     title: "Real Estate Chat",
-    url: "/client/chat",
+    url: "/agency/chat",
     icon: MessageCircle,
   },
 ];

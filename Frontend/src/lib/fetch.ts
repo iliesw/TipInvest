@@ -2,7 +2,7 @@
 export const Server = "https://tipinvest-production-76d3.up.railway.app";
 // export const Server = "http://localhost:3001";
 
-function Fetch(url: string, method = "GET", body = {}, params = {}) {
+async function Fetch(url: string, method = "GET", body = {}, params = {}) {
   // Get authentication token from localStorage
   const token = typeof window !== 'undefined' ? localStorage.getItem("TOKENAUTH") : null;
   
@@ -19,19 +19,38 @@ function Fetch(url: string, method = "GET", body = {}, params = {}) {
     headers["Authorization"] = `Bearer ${token}`;
   }
   
-  return fetch(Server + url, {
-    method: method,
-    body: method === "GET" ? undefined : JSON.stringify(body),
-    headers,
-    ...params,
-  });
+  try {
+    const response = await fetch(Server + url, {
+      method: method,
+      body: method === "GET" ? undefined : JSON.stringify(body),
+      headers,
+      ...params,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({
+        error: `HTTP error! status: ${response.status}`,
+      }));
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+
+    return response;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message || 'Network error occurred');
+    }
+    throw new Error('Network error occurred');
+  }
 }
 
 export default class useFetch {
-  static get = (url: any, params: any = {}) =>
-    Fetch(url, "GET", undefined, { ...params });
-  static post = (url: any, body: any, params: any = {}) =>
-    Fetch(url, "POST", body, { ...params });
+  static async get(url: string, params: any = {}) {
+    return Fetch(url, "GET", undefined, { ...params });
+  }
+
+  static async post(url: string, body: any, params: any = {}) {
+    return Fetch(url, "POST", body, { ...params });
+  }
 }
 
 export function Logout(){

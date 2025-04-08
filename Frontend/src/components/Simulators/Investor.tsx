@@ -337,6 +337,7 @@ const banksList = [
   { id: 6, name: "Coastal Bank", interestRate: 6.8, description: "Regional bank with local expertise", color: "#82ca9d" },
 ];
 
+
 function PropertyDiv({ data }: { data: any }) {
   const $D = useStore(data);
   const [IntrestRate, SetIntrestRate] = useState($D.IntrestRate);
@@ -452,20 +453,30 @@ function PropertyDiv({ data }: { data: any }) {
 
   // Calcul de la mensualité du crédit (mortgage payment)  
   useEffect(() => {
-    // Formule 1 : [capital × (taux/12)] / [1 – (1 + (taux/12) – (12 × nombre d'années de remboursement))]
+    // Validate inputs
+    if (!LoanAmount || !IntrestRate || !Duration || LoanAmount <= 0 || IntrestRate <= 0 || Duration <= 0) {
+      SetMortgagePayment(0);
+      return;
+    }
+
     const monthlyInterestRate = parseFloat(IntrestRate) / 100.0 / 12.0;
-
-    // Application de la formule demandée
-    const numerator = LoanAmount * monthlyInterestRate;
-    const denominator = 1 - (1 + monthlyInterestRate - (Duration));
-    const mortgagePayment = denominator === 0 ? 0 : numerator / denominator;
-
-    SetMortgagePayment(Math.floor(mortgagePayment));
-
-    // Calcul du rendement locatif (pour Monthly)
-    const currentProperty = propertyTypes[PropertyType];
+    const numberOfPayments = Duration;
     
-    // On utilise MonthlyRent comme base pour le loyer mensuel brut
+    try {
+      // Standard mortgage payment formula: P * (r * (1 + r)^n) / ((1 + r)^n - 1)
+      const mortgagePayment = LoanAmount * 
+        (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / 
+        (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
+
+      // Check if the result is a valid number
+      const payment = Number.isFinite(mortgagePayment) ? Math.floor(mortgagePayment) : 0;
+      SetMortgagePayment(payment);
+    } catch (error) {
+      console.error('Error calculating mortgage payment:', error);
+      SetMortgagePayment(0);
+    }
+    
+    // Set monthly rental income
     SetMonthly(MonthlyRent);
   }, [IntrestRate, Duration, LoanAmount, MonthlyRent, propertyTypes, PropertyType]);
   
@@ -483,10 +494,10 @@ function PropertyDiv({ data }: { data: any }) {
 
   const [gain, setGain] = useState(0);
   useEffect(() => {
-    // Prevent division by zero by using a default value when Capital is 0
-    const f = Capital > 0 ? ((MonthlyRent * 12.0) / TotalCost * 100.0)  : 0;
+    // Prevent division by zero by using a default value when TotalCost is 0
+    const f = TotalCost > 0 ? ((MonthlyRent * 12.0) / TotalCost * 100.0) : 0;
     setGain(f);
-  }, [Monthly, Capital]);
+  }, [MonthlyRent, TotalCost, Capital]);
 
   const qualityColor = `hsl(${qualityScore * 12}, 100%, 40%)`;
   const riskColor = `hsl(${(10 - riskScore) * 12}, 100%, 40%)`;
@@ -754,6 +765,7 @@ function PropertyDiv({ data }: { data: any }) {
                       <th className="text-right py-1 sm:py-2">Rate</th>
                       <th className="text-right py-1 sm:py-2">Monthly</th>
                       <th className="text-right py-1 sm:py-2 hidden sm:table-cell">Total</th>
+                      <th className="text-right py-1 sm:py-2">Gain %</th>
                       <th className="text-right py-1 sm:py-2 pr-3 sm:pr-0">Quality</th>
                     </tr>
                   </thead>
@@ -762,7 +774,9 @@ function PropertyDiv({ data }: { data: any }) {
                       // Calculate monthly payment for this bank
                       const monthlyInterestRate = bank.interestRate / 100.0 / 12.0;
                       const numberOfPayments = Duration;
-                      const numerator = Capital * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments);
+                      // Use LoanAmount instead of Capital for mortgage calculation
+                      const loanAmountToUse = LoanAmount > 0 ? LoanAmount : Capital;
+                      const numerator = loanAmountToUse * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments);
                       const denominator = Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1;
                       const baseMonthlyPayment = denominator === 0 ? 0 : numerator / denominator;
                       const currentProperty = propertyTypes[PropertyType];
@@ -788,6 +802,11 @@ function PropertyDiv({ data }: { data: any }) {
                           <td className="text-right py-1 sm:py-2">{bank.interestRate}%</td>
                           <td className="text-right py-1 sm:py-2">${monthlyPayment}</td>
                           <td className="text-right py-1 sm:py-2 hidden sm:table-cell">${totalPayment}</td>
+                          <td className="text-right py-1 sm:py-2">
+                            {MonthlyRent > 0 && TotalCost > 0 ? 
+                              ((MonthlyRent * 12 / TotalCost) * 100).toFixed(2) + '%' : 
+                              '0.00%'}
+                          </td>
                           <td className="text-right py-1 sm:py-2 pr-3 sm:pr-0">
                             <span className="px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs text-white" 
                               style={{ backgroundColor: `hsl(${bankQualityScore * 12}, 100%, 40%)` }}>

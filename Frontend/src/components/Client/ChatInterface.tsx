@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Trash2, Bot, User } from "lucide-react";
+import { Send, Bot, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import ReactMarkdown from "react-markdown";
@@ -116,16 +116,6 @@ export default function ChatInterface() {
     }
   };
 
-  const clearChat = () => {
-    setMessages([
-      {
-        id: "welcome-new",
-        text: "Chat cleared. How else can I help with your real estate questions?",
-        sender: "bot",
-        timestamp: new Date(),
-      },
-    ]);
-  };
 
   // Auto-resize textarea as user types
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -135,23 +125,10 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-col w-full h-[calc(100vh-95px)] bg-white rounded-md shadow-sm border overflow-hidden">
-      {/* Chat header */}
-      <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-        <h2 className="font-semibold text-lg">Real Estate Assistant</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={clearChat}
-            className="p-2 text-gray-500 hover:text-red-500 hover:bg-gray-100 rounded-full transition-colors"
-            title="Clear chat"
-          >
-            <Trash2 size={18} />
-          </button>
-        </div>
-      </div>
+    <div className="flex flex-col w-full h-full bg-white rounded-md  overflow-hidden">
 
       {/* Messages container */}
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto">
         <AnimatePresence>
           {messages.map((message) => (
             <motion.div
@@ -164,7 +141,7 @@ export default function ChatInterface() {
               }`}
             >
               <div
-                className={`flex max-w-[80%] ${
+                className={`flex max-w-[80%] items-end ${
                   message.sender === "user" ? "flex-row-reverse" : ""
                 }`}
               >
@@ -205,8 +182,7 @@ export default function ChatInterface() {
       </div>
 
       {/* Input area */}
-      <div className=" bg-white">
-        <div className="relative m-0 border-t">
+      <div className="relative h-fit border-t">
           <textarea
             ref={inputRef}
             value={input}
@@ -220,7 +196,7 @@ export default function ChatInterface() {
           <button
             onClick={handleSend}
             disabled={typing || !input.trim()}
-            className={`absolute right-3 bottom-3 p-1.5 rounded-md ${
+            className={`absolute right-3 bottom-1/2 translate-y-1/2 p-1.5 rounded-md ${
                 typing || !input.trim()
                 ? "text-gray-400 cursor-not-allowed"
                 : "text-blue-600 hover:bg-blue-50"
@@ -228,7 +204,6 @@ export default function ChatInterface() {
           >
             <Send size={20} />
           </button>
-        </div>
       </div>
     </div>
   );

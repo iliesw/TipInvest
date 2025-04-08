@@ -103,3 +103,32 @@ export function requireAgency(router: any) {
   
   return true;
 }
+
+/**
+ * Checks if the current user has expert role
+ * @returns boolean indicating if user is an expert
+ */
+export function isExpert() {
+  if (typeof window === 'undefined') return false;
+  
+  const token = localStorage.getItem('TOKENAUTH');
+  if (!token) return false;
+  
+  const decoded = decodeToken(token);
+  return decoded && decoded.role === 'expert';
+}
+
+/**
+ * Redirects to home page if user is not an expert
+ * @param router - Next.js router instance
+ */
+export function requireExpert(router: any) {
+  if (!requireAuth(router)) return false;
+  
+  if (!isExpert()) {
+    router.push('/');
+    return false;
+  }
+  
+  return true;
+}

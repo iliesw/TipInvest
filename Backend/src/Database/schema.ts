@@ -1,8 +1,9 @@
 import { pgTable, uuid, varchar, text, json, timestamp, decimal, pgEnum, numeric, boolean } from "drizzle-orm/pg-core";
 import { view } from "drizzle-orm/sqlite-core";
 
-export const roleEnum = pgEnum("role", ["user", "admin", "agency"]);
+export const roleEnum = pgEnum("role", ["user", "admin", "agency", "expert"]);
 export const statusEnum = pgEnum("status", ["available", "sold","pending"]);
+export const meetingStatusEnum = pgEnum("meeting_status", ["scheduled", "completed", "cancelled"]);
 
 export const userTable = pgTable("USER", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -45,4 +46,30 @@ export const imagesTable = pgTable("IMAGES", {
 export const pageViews = pgTable("Views", {
   page: text("page").notNull(),
   views: numeric("views").default('0'),
+});
+
+export const expertProfileTable = pgTable("EXPERT_PROFILE", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => userTable.id),
+  specialization: varchar("specialization", { length: 255 }).notNull(),
+  bio: text("bio").notNull(),
+  hourlyRate: decimal("hourly_rate").notNull(),
+  profilePicture: text("profile_picture"),
+  availability: json("availability"),
+  createdAt: timestamp("created_at", { mode: 'date', precision: 3 }).defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: 'date', precision: 3 }).defaultNow().$onUpdate(() => new Date()),
+});
+
+export const meetingTable = pgTable("MEETING", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  expertId: uuid("expert_id").notNull().references(() => expertProfileTable.id),
+  clientId: uuid("client_id").notNull().references(() => userTable.id),
+  scheduledTime: timestamp("scheduled_time", { mode: 'date', precision: 3 }).notNull(),
+  duration: numeric("duration").notNull(), // in minutes
+  status: meetingStatusEnum("status").default("scheduled"),
+  topic: varchar("topic", { length: 255 }),
+  notes: text("notes"),
+  meetingLink: varchar("meeting_link", { length: 255 }),
+  createdAt: timestamp("created_at", { mode: 'date', precision: 3 }).defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: 'date', precision: 3 }).defaultNow().$onUpdate(() => new Date()),
 })

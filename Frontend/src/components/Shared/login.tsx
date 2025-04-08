@@ -215,6 +215,8 @@ const LoginPage: React.FC = () => {
             router.push("/admin");
           } else if (decodedData && decodedData.role === 'agency') {
             router.push("/agency");
+          } else if (decodedData && decodedData.role === 'expert') {
+            router.push("/expert");
           } else {
             router.push("/client");
           }
@@ -348,6 +350,7 @@ const LoginPage: React.FC = () => {
                   >
                     <option value="user">{userLang === 'fr' ? 'Client' : 'Client'}</option>
                     <option value="agency">{userLang === 'fr' ? 'Agence' : 'Agency'}</option>
+                    <option value="expert">{userLang === 'fr' ? 'Expert' : 'Expert'}</option>
                   </select>
               </div>
             )}
