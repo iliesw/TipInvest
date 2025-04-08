@@ -118,7 +118,7 @@ export default function ExpertDashboard() {
               
               <Card className="p-6 flex flex-col items-center justify-center text-center">
                 <Clock className="h-8 w-8 text-green-500 mb-2" />
-                <h3 className="text-2xl font-bold">{profile.hourlyRate} €</h3>
+                <h3 className="text-2xl font-bold">{profile?.hourlyRate} €</h3>
                 <p className="text-gray-500">Hourly Rate</p>
               </Card>
               

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages */
 import { useEffect, useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Calendar, Clock, Mic, MicOff, Phone, Video as VideoIcon, VideoOff, Share2 } from 'lucide-react';
