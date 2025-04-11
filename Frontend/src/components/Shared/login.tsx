@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
@@ -203,7 +204,7 @@ const LoginPage: React.FC = () => {
         const defaultBio = userLang === "fr" ? `` : ``;
 
         const defaultHourlyRate = 50; // Default hourly rate in euros
-
+        // @ts-ignore
         data.expertProfile = {
           specialization,
           bio: bio || defaultBio,
@@ -440,9 +441,6 @@ const LoginPage: React.FC = () => {
                       }
                       value={specialization || ""}
                       onChange={setSpecialization}
-                      style={{
-                        borderColor: specialization ? "#ddd" : "#ff6b6b",
-                      }}
                     />
                   </div>
                 )}
