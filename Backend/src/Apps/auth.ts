@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { db } from "../Database/index";
-import { userTable } from "../Database/schema";
+import { userTable, expertProfileTable } from "../Database/schema";
 import { eq } from "drizzle-orm";
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
@@ -20,12 +20,17 @@ auth.get("/", (c) => c.json({ status: "Auth alive "+GetVersion() }));
 auth.post("/register", async (c) => {
   try {
     // Parse the request body
-    const { name, email, password, phone, role } = await c.req.json() as { 
+    const { name, email, password, phone, role, expertProfile } = await c.req.json() as { 
       name: string, 
       email: string, 
       password: string,
       phone?: string,
-      role?: 'user' | 'agency'
+      role?: 'user' | 'agency' | 'expert',
+      expertProfile?: {
+        specialization: string,
+        bio: string,
+        hourlyRate: number
+      }
     };
 
     // Validate required fields
@@ -57,6 +62,27 @@ auth.post("/register", async (c) => {
     });
     // Get the newly created user
     const newUser = (await db.select().from(userTable).where(eq(userTable.email, email)).limit(1))[0];
+    
+    // If the user is registering as an expert, create an expert profile
+    console.log("User role:", role);
+    if (role === 'expert') {
+      console.log("Creating expert profile for user:", newUser.id);
+      await db.insert(expertProfileTable).values({
+        userId: newUser.id,
+        specialization: expertProfile?.specialization || '',
+        bio: expertProfile?.bio || '',
+        hourlyRate: expertProfile?.hourlyRate?.toString() || '0', // Convert to string for decimal type
+        availability: {
+          monday: Array(24).fill(false),
+          tuesday: Array(24).fill(false),
+          wednesday: Array(24).fill(false),
+          thursday: Array(24).fill(false),
+          friday: Array(24).fill(false),
+          saturday: Array(24).fill(false),
+          sunday: Array(24).fill(false),
+        }
+      });
+    }
     
     // Generate a JWT token for the newly registered user
     const token = jwt.sign(

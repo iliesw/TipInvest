@@ -67,7 +67,7 @@ const Validators: ValidatorsType = {
 
 type InputProps = {
   name?: string;
-  type?: "email" | "password" | "username";
+  type?: "email" | "password" | "username" | "pro";
   placeholder?: string;
   passwordStrength?: boolean;
   value?: string;
@@ -106,6 +106,7 @@ export default function Input({
           {type === "email" && <Mail size={16} />}
           {type === "password" && <KeyRound size={16} />}
           {type === "username" && <User size={16} />}
+          {type === "pro" && <User size={16} />}
         </div>
         <input
           type={type === "password" ? (hidden ? "password" : "text") : type}
