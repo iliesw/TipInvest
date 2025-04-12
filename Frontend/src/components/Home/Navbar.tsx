@@ -123,12 +123,33 @@ const Navbar = () => {
                   </Link>
                 ))}
               </div>
-              <div className="py-6">
-                <button className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50" onClick={() => {
-                  setMobileMenuOpen(false);
-              isShowing.set(true);
-              isShowing.notify();
-            }}> 
+              <div className="py-6 space-y-2">
+                <div className="flex items-center -mx-3 px-3">
+                  <button
+                    className="rounded-full overflow-hidden w-[30px] h-[30px] mr-3 border shadow"
+                    onClick={() => {
+                      Next();
+                      // Keep mobile menu open after language change
+                    }}
+                  >
+                    <img
+                      src={`https://flagsapi.com/${userLang.toLocaleUpperCase()}/flat/64.png`}
+                      className="scale-150 object-contain"
+                      alt={userLang}
+                    />
+                  </button>
+                  <span className="text-sm font-medium text-gray-600">
+                    {userLang === "fr" ? "Français" : "English"}
+                  </span>
+                </div>
+                <button 
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50" 
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    isShowing.set(true);
+                    isShowing.notify();
+                  }}
+                > 
                   Log in
                 </button>
               </div>
