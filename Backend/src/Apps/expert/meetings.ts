@@ -44,10 +44,7 @@ meetings.get("/", async (c) => {
       })
       .from(meetingTable)
       .where(
-        and(
           eq(meetingTable.expertId, expertId),
-          gte(meetingTable.scheduledTime, now)
-        )
       )
       .orderBy(meetingTable.scheduledTime);
 

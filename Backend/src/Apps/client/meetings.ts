@@ -14,7 +14,9 @@ const meetings = new Hono();
 meetings.get("/", async (c) => {
   try {
     const { id } = c.get("jwtPayload");
-
+console.log(id);
+    // TODO: Implement pagination and filtering if needed
+    // TOD
     // Get current date for filtering upcoming meetings
     const now = new Date();
 
@@ -31,10 +33,7 @@ meetings.get("/", async (c) => {
       })
       .from(meetingTable)
       .where(
-        and(
           eq(meetingTable.clientId, id),
-          gte(meetingTable.scheduledTime, now)
-        )
       )
       .orderBy(meetingTable.scheduledTime);
 

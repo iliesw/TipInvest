@@ -191,7 +191,7 @@ export default function ExpertMeetings() {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500">With {meeting.clientName}</p>
+                    <p className="text-sm text-gray-500">With {meeting.client.name}</p>
                     <div className="flex items-center mt-2 text-sm text-gray-500">
                       <Calendar className="h-4 w-4 mr-1" />
                       <span>{formatDate(meeting.scheduledTime)}</span>
@@ -200,7 +200,7 @@ export default function ExpertMeetings() {
                     </div>
                   </div>
                   <div className="flex space-x-2">
-                    {meeting.status !== 'cancelled' && new Date(meeting.scheduledTime) > new Date() && (
+                    {(
                       <>
                         <button
                           onClick={() => handleCancelMeeting(meeting.id)}
@@ -217,7 +217,7 @@ export default function ExpertMeetings() {
                         </button>
                         
                         <a 
-                          href={`/expert/video?meetingId=${meeting.id}`}
+                          href={`/expert/meetings/${meeting.id}`}
                           className={`px-3 py-1 ${isWithinOneHour(meeting.scheduledTime) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'} text-white rounded-md transition-colors inline-flex items-center group relative`}
                           onClick={(e) => !isWithinOneHour(meeting.scheduledTime) && e.preventDefault()}
                         >

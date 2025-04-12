@@ -50,7 +50,8 @@ experts.get("/:id", async (c) => {
     const expertWithProfile = await db
       .select()
       .from(expertProfileTable)
-     .leftJoin(userTable, eq(expertProfileTable.userId, userTable.id))
+      .leftJoin(userTable, eq(expertProfileTable.userId, userTable.id))
+      .where(eq(expertProfileTable.id, expertId))
      
 
     console.log(expertWithProfile);

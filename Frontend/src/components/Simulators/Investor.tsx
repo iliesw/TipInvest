@@ -1110,7 +1110,7 @@ export default function InvestorSim() {
       (i.MortgagePayment || 0) +
       "</p>" +
       "<p class='stat'><b>Rentabilité brute:</b> " +
-      (i.GrossYield ? i.GrossYield.toFixed(2) : "0") +
+      (i.Gain ? i.Gain.toFixed(2) : "0") +
       "%</p>" +
       "<p class='stat'><b>Niveau de risque:</b> " +
       i.Risk +

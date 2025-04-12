@@ -131,8 +131,13 @@ export default function ExpertsList() {
                   </div>
 
                   <a
-                    href={`/client/experts/${expert.id}`}
+                    href="#"
                     className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors inline-flex items-center"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // Use window.location for client-side navigation
+                      window.location.href = `/client/experts/${expert.id}`;
+                    }}
                   >
                     <Calendar className="h-4 w-4 mr-2" />
                     Book Now
