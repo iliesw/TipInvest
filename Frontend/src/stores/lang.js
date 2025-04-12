@@ -1,7 +1,7 @@
 import { atom } from 'nanostores'
 
 export const SupportedLangs = ["fr","us"]
-export const SelectedLang = atom("fr")
+export const SelectedLang = atom("us")
 
 
 export function Next(){
