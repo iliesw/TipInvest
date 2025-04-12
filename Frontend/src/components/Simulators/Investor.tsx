@@ -7,14 +7,10 @@
 import {
   ArrowDownUp,
   ArrowRight,
-  Calendar,
   ChartColumnDecreasing,
-  DollarSign,
   Download,
-  Ellipsis,
   RotateCcw,
   Building,
-  Info,
 } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 import {
@@ -22,10 +18,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import InputR from "../Shared/ui/InputR";
-import InputO from "../Shared/ui/InputO";
 import AnimatedNumber from "../Shared/ui/AnimatedNumber";
 import Spinner from "../Shared/ui/Spinner";
 import MarkdownRenderer from "../Shared/ui/MarkdownRenderer";
@@ -72,12 +66,42 @@ const chartConfig = (_label: string) => ({
 
 function MetricSerction() {
   const store = useStore(Properties);
-  const [chartData, setChartData] = useState([]);
-  const Data = useMemo(() => {
-    return store.map((element: { get: () => any }) => element.get());
-  }, [store]);
+  const [chartData, setChartData] = useState<{
+    title:string,
+    icon:React.FC,
+    valueD:string,
+    value:number,
+    chartData:any
+  }[]>([]);
+  const [Data, setData] = useState<
+    {
+      IntrestRate:number,
+      TotalCost:number,
+      MonthlyRent:number,
+      LoanAmount:number,
+      Duration:number,
+      Risk:number,
+      Quality:number,
+      Monthly:number,
+      MortgagePayment:number,
+      Gain:number,
+      Rapport:string,
+    }[]
+  >([]);
 
-  const GetNext6Mounths = () => {
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const sto: any = [];
+      store.forEach((e, i) => {
+        sto.push(e.get());
+      });
+      setData(sto);
+      setChartData(CalculateData())
+    }, 500);
+    return () => clearInterval(intervalId); // Cleanup function
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  const GetNext6Months = () => {
     const currentDate = new Date();
     const months = [
       "Jan",
@@ -104,7 +128,7 @@ function MetricSerction() {
   const GetRev = () => {
     let RevT = 0;
     const RevChart = [];
-    const months = GetNext6Mounths();
+    const months = GetNext6Months();
 
     // Initialize RevChart with months and desktop revenue set to 0
     for (let i = 0; i < months.length; i++) {
@@ -113,11 +137,19 @@ function MetricSerction() {
 
     // Loop through each data entry (each property)
     for (let i = 0; i < Data.length; i++) {
+      // Monthly rental income is the primary revenue source
+      const monthlyRent = Data[i].MonthlyRent || Data[i].Monthly || 0;
+      
       for (let t = 0; t < RevChart.length; t++) {
-        const R = Math.floor(
-          Data[i].Capital * Math.pow(1 + Data[i].IntrestRate / 100 / 12, t + 1)
-        );
-        RevChart[t].desktop += R; // Accumulate value instead of overwriting
+        // Calculate revenue with a small annual appreciation (3%)
+        const annualAppreciation = 1.03; // 3% annual appreciation
+        const monthlyAppreciation = Math.pow(annualAppreciation, t/12);
+        const R = Math.floor(monthlyRent * monthlyAppreciation);
+        
+        // Add property value appreciation (unrealized gain)
+        const propertyAppreciation = Data[i].TotalCost * (Math.pow(1.02, t/12) - 1) / RevChart.length;
+        
+        RevChart[t].desktop += R + Math.floor(propertyAppreciation); // Accumulate value
       }
     }
 
@@ -132,7 +164,7 @@ function MetricSerction() {
 
   const GetCashFlow = () => {
     const CashFlowChart = [];
-    const months = GetNext6Mounths();
+    const months = GetNext6Months();
 
     // Initialize CashFlowChart with months and net cash flow set to 0
     for (let i = 0; i < months.length; i++) {
@@ -143,21 +175,38 @@ function MetricSerction() {
     for (let i = 0; i < Data.length; i++) {
       for (let t = 0; t < CashFlowChart.length; t++) {
         // Rental income (assumed provided in Data)
-        const income = Data[i].Monthly || 0;
+        const monthlyRent = Data[i].MonthlyRent || Data[i].Monthly || 0;
 
-        // Interest-based expense calculation
-        const expense =
-          (Data[i].Capital * (Data[i].IntrestRate / 100)) / 12 / Math.max(1, t);
-
-        // Net Cash Flow = Income - Expense
-        const netFlow = Math.floor(income - expense);
+        // Mortgage payment (principal + interest)
+        const mortgagePayment = Data[i].MortgagePayment || 0;
+        
+        // Property management fee (typically 8-10% of rental income)
+        const managementFee = monthlyRent * 0.08;
+        
+        // Property tax (estimated at 1% of property value annually)
+        const propertyTax = (Data[i].TotalCost * 0.01) / 12;
+        
+        // Maintenance and repairs (estimated at 1% of property value annually)
+        const maintenance = (Data[i].TotalCost * 0.01) / 12;
+        
+        // Insurance (estimated at 0.5% of property value annually)
+        const insurance = (Data[i].TotalCost * 0.005) / 12;
+        
+        // Vacancy allowance (estimated at 5% of rental income)
+        const vacancy = monthlyRent * 0.05;
+        
+        // Total expenses
+        const totalExpenses = mortgagePayment + managementFee + propertyTax + maintenance + insurance + vacancy;
+        
+        // Net Cash Flow = Income - Expenses
+        const netFlow = Math.floor(monthlyRent - totalExpenses);
 
         // Accumulate in chart
         CashFlowChart[t].desktop += netFlow;
       }
     }
 
-    // Compute total net cash flow over 6 months
+    // Compute total net cash flow over the months
     const TotalCashFlow = CashFlowChart.reduce(
       (sum, entry) => sum + entry.desktop,
       0
@@ -171,7 +220,7 @@ function MetricSerction() {
 
   const GetRiskAdjustedReturns = () => {
     const RiskChart = [];
-    const months = GetNext6Mounths();
+    const months = GetNext6Months();
 
     // Initialize RiskChart with months and adjusted returns set to 0
     for (let i = 0; i < months.length; i++) {
@@ -180,13 +229,28 @@ function MetricSerction() {
 
     // Loop through each property in Data
     for (let i = 0; i < Data.length; i++) {
-      // Adjust interest rate based on risk factor
-      const adjustedRate = Data[i].IntrestRate * (1 - Data[i].Risk / 10);
-
+      // Base expected return (annual) - combination of rental yield and appreciation
+      const rentalYield = ((Data[i].MonthlyRent || Data[i].Monthly || 0) * 12) / Data[i].TotalCost;
+      const expectedAppreciation = 0.03; // 3% annual appreciation
+      const baseReturn = rentalYield + expectedAppreciation;
+      
+      // Risk adjustment factor (higher risk = lower adjusted return)
+      const riskFactor = 1 - (Data[i].Risk / 10); // Adjust divisor from 20 to 10 for more pronounced risk impact
+      
+      // Quality adjustment factor (higher quality = higher adjusted return)
+      const qualityFactor = 1 + (Data[i].Quality / 20); // Quality on scale of 0-10
+      
+      // Calculate risk-adjusted annual return rate
+      const riskAdjustedAnnualRate = baseReturn * riskFactor * qualityFactor;
+      
       for (let t = 0; t < RiskChart.length; t++) {
-        // Calculate risk-adjusted growth
+        // Convert annual rate to monthly and calculate compounded growth
+        const monthlyRate = riskAdjustedAnnualRate / 12;
+        const monthsElapsed = t + 1;
+        
+        // Calculate risk-adjusted value growth
         const adjustedValue = Math.floor(
-          Data[i].Capital * Math.pow(1 + adjustedRate / 100 / 12, t + 1)
+          Data[i].TotalCost * Math.pow(1 + monthlyRate, monthsElapsed)
         );
 
         // Accumulate adjusted return per month
@@ -207,7 +271,7 @@ function MetricSerction() {
   };
 
   const CalculateData = () => {
-    return [
+    return[
       {
         title: "Revenue",
         icon: ArrowDownUp,
@@ -229,18 +293,12 @@ function MetricSerction() {
         value: GetRiskAdjustedReturns().TotalRiskAdjustedReturn,
         chartData: GetRiskAdjustedReturns().RiskChart,
       },
-    ];
+    ]
   };
-
-  // Calculate metrics data whenever Data changes
-  useEffect(() => {
-    // @ts-ignore
-    setChartData(CalculateData());
-    // console.log("Data Changed", Data);
-  }, [Data]);
 
   return (
     <div className="flex gap-[10px] mt-5 flex-row w-full">
+      {/* <p>{JSON.stringify(Data)}</p> */}
       {chartData.map((item, index) => (
         <Metric key={index} data={item} />
       ))}
@@ -329,47 +387,75 @@ function Chart({ values, label }: { values: any[]; label: string }) {
 import { marked } from "marked";
 // Dictionary of banks with their interest rates and features
 const banksList = [
-  { id: 1, name: "TipInvest Bank", interestRate: 7, description: "Our standard offering with competitive rates", color: "#0088FE" },
-  { id: 2, name: "National Trust", interestRate: 8, description: "Established bank with strong security features", color: "#00C49F" },
-  { id: 3, name: "Global Finance", interestRate: 6.5, description: "International bank with flexible terms", color: "#FFBB28" },
-  { id: 4, name: "City Credit Union", interestRate: 7.2, description: "Community-focused with personalized service", color: "#FF8042" },
-  { id: 5, name: "Premier Savings", interestRate: 8.5, description: "Premium rates for high-value investments", color: "#8884d8" },
-  { id: 6, name: "Coastal Bank", interestRate: 6.8, description: "Regional bank with local expertise", color: "#82ca9d" },
+  {
+    id: 1,
+    name: "TipInvest Bank",
+    interestRate: 7,
+    description: "Our standard offering with competitive rates",
+    color: "#0088FE",
+  },
+  {
+    id: 2,
+    name: "National Trust",
+    interestRate: 8,
+    description: "Established bank with strong security features",
+    color: "#00C49F",
+  },
+  {
+    id: 3,
+    name: "Global Finance",
+    interestRate: 6.5,
+    description: "International bank with flexible terms",
+    color: "#FFBB28",
+  },
+  {
+    id: 4,
+    name: "City Credit Union",
+    interestRate: 7.2,
+    description: "Community-focused with personalized service",
+    color: "#FF8042",
+  },
+  {
+    id: 5,
+    name: "Premier Savings",
+    interestRate: 8.5,
+    description: "Premium rates for high-value investments",
+    color: "#8884d8",
+  },
+  {
+    id: 6,
+    name: "Coastal Bank",
+    interestRate: 6.8,
+    description: "Regional bank with local expertise",
+    color: "#82ca9d",
+  },
 ];
-
 
 function PropertyDiv({ data }: { data: any }) {
   const $D = useStore(data);
   const [IntrestRate, SetIntrestRate] = useState($D.IntrestRate);
-  const [selectedBank, setSelectedBank] = useState(banksList.find(bank => bank.interestRate === IntrestRate) || banksList[0]);
+  const [selectedBank, setSelectedBank] = useState(
+    banksList.find((bank) => bank.interestRate === IntrestRate) || banksList[0]
+  );
   const [TotalCost, SetTotalCost] = useState($D.TotalCost || $D.Capital || 0); // Coût total du projet
   const [MonthlyRent, SetMonthlyRent] = useState($D.MonthlyRent || 0); // Loyer mensuel brut
   const [LoanAmount, SetLoanAmount] = useState($D.LoanAmount || 0); // Montant du prêt
-  const [Capital, SetCapital] = useState($D.Capital);
   const [Duration, SetDuration] = useState($D.Duration);
-  const [PropertyType, SetPropertyType] = useState($D.PropertyType);
   const [riskScore, setRiskScore] = useState($D.Risk);
   const [qualityScore, setQualityScore] = useState($D.Quality);
-  const [Monthly, SetMonthly] = useState($D.Monthly);
   const [OverviewData, SetOverviewData] = useState($D.Rapport);
-  const [showBankComparison, setShowBankComparison] = useState(true);
   const [MortgagePayment, SetMortgagePayment] = useState(0); // Mensualité du crédit à rembourser
-  const [GrossYield, SetGrossYield] = useState(0); // Rentabilité brute
   // Update the store whenever any property value changes
   useEffect(() => {
     const currentData = {
-      Capital: Capital,
       TotalCost: TotalCost,
       MonthlyRent: MonthlyRent,
       LoanAmount: LoanAmount,
       Duration: Duration,
       IntrestRate: IntrestRate,
-      PropertyType: propertyTypes[PropertyType].name,
       Risk: riskScore,
       Quality: qualityScore,
-      Monthly: Monthly,
       MortgagePayment: MortgagePayment,
-      GrossYield: GrossYield,
       Gain: gain,
       Rapport: marked.parse(OverviewData),
       Bank: selectedBank.name,
@@ -378,17 +464,13 @@ function PropertyDiv({ data }: { data: any }) {
     data.set(currentData);
   }, [
     IntrestRate,
-    Capital,
     TotalCost,
     MonthlyRent,
     LoanAmount,
     Duration,
-    PropertyType,
     riskScore,
     qualityScore,
-    Monthly,
     MortgagePayment,
-    GrossYield,
     OverviewData,
     selectedBank,
   ]);
@@ -416,88 +498,108 @@ function PropertyDiv({ data }: { data: any }) {
 
   // Calculate investment quality (0-10 scale)
   useEffect(() => {
-    const currentProperty = propertyTypes[PropertyType];
-
+    // Property type factor - default to House if not specified
+    const selectedPropertyType = "House"; // This would ideally come from user selection
+    const propertyTypeFactor = propertyTypes.find(type => type.name === selectedPropertyType)?.returnMultiplier || 1.0;
+    
     // Base quality factors
-    const durationFactor = Math.min(1, Duration / 60);
-    const interestFactor = 1 - IntrestRate / 20;
-    const capitalFactor = Math.min(1, Capital / 50000);
-
-    // Calculate quality score (0-10 scale)
-    const qualityScore =
-      (durationFactor * 3 +
-        interestFactor * 3 +
-        capitalFactor * 2 +
-        currentProperty.appreciationRate * 50) /
-      currentProperty.riskFactor;
-
+    const durationFactor = Math.min(1, Duration / 60); // Longer duration is better (up to 5 years)
+    const interestFactor = 1 - IntrestRate / 20; // Lower interest rate is better
+    
+    // Rental yield factor (annual rent / property cost)
+    const rentalYieldFactor = TotalCost > 0 ? Math.min(1.5, ((MonthlyRent * 12) / TotalCost) * 5) : 0;
+    
+    // Loan-to-value ratio factor (lower is better for quality)
+    const ltvRatio = TotalCost > 0 ? LoanAmount / TotalCost : 0;
+    const ltvFactor = 1 - (ltvRatio * 0.5); // Lower LTV means higher quality
+    
+    // Calculate quality score (0-10 scale) with weighted components
+    const qualityScore = (
+      durationFactor * 2 +
+      interestFactor * 2 +
+      rentalYieldFactor * 3 +
+      ltvFactor * 2 +
+      propertyTypeFactor
+    ) / 1.0; // Adjusted divisor to get a reasonable range
+    
     setQualityScore(Math.min(10, Math.max(1, Math.round(qualityScore))));
-  }, [propertyTypes, PropertyType, Duration, IntrestRate, Capital]);
+  }, [propertyTypes, Duration, IntrestRate, TotalCost, MonthlyRent, LoanAmount]);
 
   // Calculate risk level (0-10 scale)
   useEffect(() => {
-    const currentProperty = propertyTypes[PropertyType];
-
+    // Property type risk factor
+    const selectedPropertyType = "House"; // This would ideally come from user selection
+    const propertyTypeRiskFactor = propertyTypes.find(type => type.name === selectedPropertyType)?.riskFactor || 0.7;
+    
     // Risk factors
-    const durationRisk = Duration > 60 ? 0.8 : Duration > 24 ? 1.0 : 1.2;
-    const interestRisk = IntrestRate / 10;
-    const capitalRisk = Math.max(0.5, 1 - Capital / 100000);
+    const durationRisk = Duration > 60 ? 0.6 : Duration > 24 ? 0.8 : 1.2; // Longer duration reduces risk
+    const interestRisk = IntrestRate / 15; // Higher interest rate increases risk
+    
+    // Loan-to-value ratio risk (higher ratio = higher risk)
+    const ltvRatio = TotalCost > 0 ? LoanAmount / TotalCost : 0;
+    const ltvRisk = ltvRatio * 5; // Higher LTV means higher risk
+    
+    // Debt service coverage ratio (DSCR) - lower is riskier
+    const annualRent = MonthlyRent * 12;
+    const annualMortgage = MortgagePayment * 12;
+    const dscr = annualMortgage > 0 ? annualRent / annualMortgage : 3; // Default to low risk if no mortgage
+    const dscrRisk = dscr < 1 ? 3 : dscr < 1.25 ? 2 : dscr < 1.5 ? 1 : 0.5;
+    
+    // Calculate risk score (0-10 scale) with weighted components
+    const calculatedRiskScore = (
+      durationRisk * 1.5 +
+      interestRisk * 2 +
+      ltvRisk * 2 +
+      dscrRisk * 3 +
+      propertyTypeRiskFactor * 1.5
+    ) / 1.0; // Adjusted divisor to get a reasonable range
+    
+    // Ensure risk score is within 1-10 range and is a whole number
+    const newRiskScore = Math.min(10, Math.max(1, Math.round(calculatedRiskScore)));
+    
+    // Only update if the risk score has actually changed
+    if (newRiskScore !== riskScore) {
+      setRiskScore(newRiskScore);
+    }
+  }, [Duration, IntrestRate, TotalCost, LoanAmount, MonthlyRent, MortgagePayment, propertyTypes, riskScore]);
 
-    // Calculate risk score (0-10 scale)
-    const riskScore =
-      (durationRisk * 2 + interestRisk * 3 + capitalRisk * 2) *
-      currentProperty.riskFactor;
-
-    setRiskScore(Math.min(10, Math.max(1, Math.round(riskScore))));
-  }, [propertyTypes, PropertyType, Duration, IntrestRate, Capital]);
-
-  // Calcul de la mensualité du crédit (mortgage payment)  
   useEffect(() => {
-    // Validate inputs
-    if (!LoanAmount || !IntrestRate || !Duration || LoanAmount <= 0 || IntrestRate <= 0 || Duration <= 0) {
+    if (
+      !LoanAmount ||
+      !IntrestRate ||
+      !Duration ||
+      LoanAmount <= 0 ||
+      IntrestRate <= 0 ||
+      Duration <= 0
+    ) {
       SetMortgagePayment(0);
       return;
     }
 
-    const monthlyInterestRate = parseFloat(IntrestRate) / 100.0 / 12.0;
-    const numberOfPayments = Duration;
-    
-    try {
-      // Standard mortgage payment formula: P * (r * (1 + r)^n) / ((1 + r)^n - 1)
-      const mortgagePayment = LoanAmount * 
-        (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / 
-        (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
+    const C = parseFloat(LoanAmount); // Capital
+    const T = parseFloat(IntrestRate) / 100 / 12; // Monthly interest rate
+    const N = parseFloat(Duration); // Number of months
 
-      // Check if the result is a valid number
-      const payment = Number.isFinite(mortgagePayment) ? Math.floor(mortgagePayment) : 0;
-      SetMortgagePayment(payment);
+    try {
+      const numerator = C * T;
+      const denominator = 1 - Math.pow(1 + T, -N);
+
+      const M = denominator !== 0 ? numerator / denominator : 0;
+
+      SetMortgagePayment(Math.floor(M));
     } catch (error) {
-      console.error('Error calculating mortgage payment:', error);
+      console.error("Erreur dans le calcul de la mensualité :", error);
       SetMortgagePayment(0);
     }
-    
-    // Set monthly rental income
-    SetMonthly(MonthlyRent);
-  }, [IntrestRate, Duration, LoanAmount, MonthlyRent, propertyTypes, PropertyType]);
-  
-  // Calcul de la rentabilité brute
-  useEffect(() => {
-    if (TotalCost > 0) {
-      // Rentabilité brute = (loyer annuel / coût total) * 100
-      const annualRent = MonthlyRent * 12;
-      const grossYield = (annualRent / TotalCost) * 100;
-      SetGrossYield(grossYield);
-    } else {
-      SetGrossYield(0);
-    }
-  }, [MonthlyRent, TotalCost]);
+  }, [IntrestRate, Duration, LoanAmount]);
+
 
   const [gain, setGain] = useState(0);
   useEffect(() => {
     // Prevent division by zero by using a default value when TotalCost is 0
-    const f = TotalCost > 0 ? ((MonthlyRent * 12.0) / TotalCost * 100.0) : 0;
+    const f = TotalCost > 0 ? ((MonthlyRent * 12.0) / TotalCost) * 100.0 : 0;
     setGain(f);
-  }, [MonthlyRent, TotalCost, Capital]);
+  }, [MonthlyRent, TotalCost]);
 
   const qualityColor = `hsl(${qualityScore * 12}, 100%, 40%)`;
   const riskColor = `hsl(${(10 - riskScore) * 12}, 100%, 40%)`;
@@ -507,18 +609,15 @@ function PropertyDiv({ data }: { data: any }) {
 
   const Overview = async () => {
     const Data = {
-      Capital: Capital,
       TotalCost: TotalCost,
       MonthlyRent: MonthlyRent,
       LoanAmount: LoanAmount,
       Duration: Duration,
       IntrestRate: IntrestRate,
-      PropertyType: propertyTypes[PropertyType].name,
       Risk: riskScore,
       Quality: qualityScore,
       Monthly: MonthlyRent,
       MortgagePayment: MortgagePayment,
-      GrossYield: GrossYield,
       Gain: gain,
       Rapport: OverviewData,
     };
@@ -540,93 +639,91 @@ function PropertyDiv({ data }: { data: any }) {
       style={{ borderRadius: "10px" }}
     >
       <span className="w-full flex-col flex justify-between h-full md:w-1/2 lg:w-3/5">
-      <div
-        className="w-full absolute h-full top-0 left-0 opacity-35"
-        style={{
-          background: `radial-gradient(circle at 0% 0%,${qualityColor},transparent)`,
-        }}
-      ></div>
-      <div className="flex flex-col sm:flex-row justify-between items-start w-full relative">
-        <div className="flex flex-col justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <FinancialTooltip term="Investment Quality">
-              <p
-                className={`text-xs sm:text-sm px-2 sm:px-3 mb-2 py-1 w-fit rounded-full text-white`}
-                style={{ background: qualityColor }}
-              >
-                Investment Quality{" "}
-                <AnimatedNumber
-                  value={qualityScore}
-                  suffix=" / 10"
-                  duration={0.5}
-                />
-              </p>
-            </FinancialTooltip>
-            <FinancialTooltip term="Risk Level">
-              <p
-                className={`text-xs sm:text-sm px-2 sm:px-3 mb-2 py-1 w-fit rounded-full text-white`}
-                style={{ background: riskColor }}
-              >
-                Risk Level{" "}
-                <AnimatedNumber
-                  value={riskScore}
-                  suffix=" / 10"
-                  duration={0.5}
-                />
-              </p>
-            </FinancialTooltip>
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-            {propertyTypes[PropertyType].name} Property
-          </h1>
-
-        </div>
-
-      </div>
-      <div className="flex flex-col md:flex-row gap-5 justify-between w-full items-start md:items-end relative">
-        <div className="flex flex-col gap-2 w-full md:w-3/5">
-          {OverviewData.length > 0 ? (
-            <div className="bg-[#ffffffd0] rounded-xl p-2 sm:p-3 text-sm flex flex-col">
-              <div className="flex w-full mb-2 justify-between pr-2">
-                <p className="text-lg sm:text-xl font-bold">AI Report</p>
-                <button onClick={Overview} disabled={isLoading}>
-                  <RotateCcw
-                    size={16}
-                    className={isLoading ? "animate-spin" : ""}
+        <div
+          className="w-full absolute h-full top-0 left-0 opacity-35"
+          style={{
+            background: `radial-gradient(circle at 0% 0%,${qualityColor},transparent)`,
+          }}
+        ></div>
+        <div className="flex flex-col sm:flex-row justify-between items-start w-full relative">
+          <div className="flex flex-col justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <FinancialTooltip term="Investment Quality">
+                <p
+                  className={`text-xs sm:text-sm px-2 sm:px-3 mb-2 py-1 w-fit rounded-full text-white`}
+                  style={{ background: qualityColor }}
+                >
+                  Investment Quality{" "}
+                  <AnimatedNumber
+                    value={qualityScore}
+                    suffix=" / 10"
+                    duration={0.5}
                   />
-                </button>
+                </p>
+              </FinancialTooltip>
+              <FinancialTooltip term="Risk Level">
+                <p
+                  className={`text-xs sm:text-sm px-2 sm:px-3 mb-2 py-1 w-fit rounded-full text-white`}
+                  style={{ background: riskColor }}
+                >
+                  Risk Level{" "}
+                  <AnimatedNumber
+                    value={riskScore}
+                    suffix=" / 10"
+                    duration={0.5}
+                  />
+                </p>
+              </FinancialTooltip>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+              Property
+            </h1>
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row gap-5 justify-between w-full items-start md:items-end relative">
+          <div className="flex flex-col gap-2 w-full md:w-3/5">
+            {OverviewData.length > 0 ? (
+              <div className="bg-[#ffffffd0] rounded-xl p-2 sm:p-3 text-sm flex flex-col">
+                <div className="flex w-full mb-2 justify-between pr-2">
+                  <p className="text-lg sm:text-xl font-bold">AI Report</p>
+                  <button onClick={Overview} disabled={isLoading}>
+                    <RotateCcw
+                      size={16}
+                      className={isLoading ? "animate-spin" : ""}
+                    />
+                  </button>
+                </div>
+
+                <div className="text-xs sm:text-sm">
+                  <MarkdownRenderer markdown={OverviewData} />
+                </div>
+              </div>
+            ) : (
+              <Button
+                className="bg-white rounded-full text-black hover:bg-neutral-100 w-fit group text-xs sm:text-sm"
+                onClick={Overview}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Spinner size="sm" />
+                    Generating Report...
+                  </>
+                ) : (
+                  <>
+                    <ChartColumnDecreasing className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
+                    Generate AI Report
+                  </>
+                )}
+              </Button>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+              <div className="col-span-2">
+                {/* <h3 className="text-sm font-semibold mb-1">Type de propriété</h3> */}
+                {/* <InputO onChange={SetPropertyType} /> */}
               </div>
 
-              <div className="text-xs sm:text-sm">
-                <MarkdownRenderer markdown={OverviewData} />
-              </div>
-            </div>
-          ) : (
-            <Button
-              className="bg-white rounded-full text-black hover:bg-neutral-100 w-fit group text-xs sm:text-sm"
-              onClick={Overview}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Spinner size="sm" />
-                  Generating Report...
-                </>
-              ) : (
-                <>
-                  <ChartColumnDecreasing className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
-                  Generate AI Report
-                </>
-              )}
-            </Button>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
-            <div className="col-span-2">
-              {/* <h3 className="text-sm font-semibold mb-1">Type de propriété</h3> */}
-              {/* <InputO onChange={SetPropertyType} /> */}
-            </div>
-            
               <FinancialTooltip term="Coût total" className="w-full">
                 <InputN
                   placeholder="Coût total"
@@ -634,7 +731,7 @@ function PropertyDiv({ data }: { data: any }) {
                   onChange={SetTotalCost}
                 />
               </FinancialTooltip>
-            
+
               <FinancialTooltip term="Loyer mensuel" className="w-full">
                 <InputN
                   placeholder="Loyer mensuel souhiaté"
@@ -642,7 +739,7 @@ function PropertyDiv({ data }: { data: any }) {
                   onChange={SetMonthlyRent}
                 />
               </FinancialTooltip>
-            
+
               <FinancialTooltip term="Montant du prêt" className="w-full">
                 <InputN
                   placeholder="Montant du prêt"
@@ -655,176 +752,251 @@ function PropertyDiv({ data }: { data: any }) {
                 value={Duration.toString()}
                 onChange={SetDuration}
               />
-            
-            <div className="col-span-2">
-              <div className="relative" onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDropdownOpen(!dropdownOpen);
-                  }}
-                  className="bg-white text-black w-full h-9 flex items-center border text-sm rounded-full py-1 px-4 justify-between"
-                >
-                  <FinancialTooltip term="Interest Rate">
-                    <div className="flex items-center">
-                      <Building size={16} className="mr-1" />
-                      {selectedBank.name} ({selectedBank.interestRate}%)
-                    </div>
-                  </FinancialTooltip>
-                  <span>
-                    <ArrowDownUp className="rotate-45" size={16} />
-                  </span>
-                </button>
-                {dropdownOpen && (
-                  <div
-                    className="absolute bottom-[120%] mt-1 bg-white rounded-lg shadow-lg z-20 py-1 min-w-[250px] w-full"
-                    onClick={(e) => e.stopPropagation()}
+
+              <div className="col-span-2">
+                <div className="relative" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDropdownOpen(!dropdownOpen);
+                    }}
+                    className="bg-white text-black w-full h-9 flex items-center border text-sm rounded-full py-1 px-4 justify-between"
                   >
-                    {banksList.map((bank) => (
-                      <button
-                        key={bank.id}
-                        className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
-                          selectedBank.id === bank.id ? "font-bold" : ""
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          SetIntrestRate(bank.interestRate);
-                          setSelectedBank(bank);
-                          setDropdownOpen(false);
-                        }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <span className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: bank.color }}></span>
-                            {bank.name}
-                          </div>
-                          <span className="text-gray-500">{bank.interestRate}%</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          
-        </div>
-        <div className="flex flex-col items-start md:items-end gap-2 w-full md:w-auto mt-4 md:mt-0">
-          <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border w-full">
-            <h3 className="text-base sm:text-lg font-bold mb-2 sm:mb-3">Résultats</h3>
-            
-            <div className="space-y-3 sm:space-y-4">
-              <div>
-                <p className="text-xs sm:text-sm text-gray-500">1. Mensualité du crédit à rembourser</p>
-                <h3 className="text-xl sm:text-2xl font-bold font-[Code] text-gray-900">
-                  <FinancialTooltip term="Mensualité du crédit">
-                    <AnimatedNumber
-                      value={MortgagePayment}
-                      prefix="$"
-                      suffix=" / mois"
-                      duration={0.5}
-                      formatOptions={{
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
-                      }}
-                    />
-                  </FinancialTooltip>
-                </h3>
-              </div>
-              
-              <div>
-                <p className="text-xs sm:text-sm text-gray-500">2. Rentabilité brute</p>
-                <h3 className="text-xl sm:text-2xl font-bold font-[Code] text-gray-900">
-                  <FinancialTooltip term="Rentabilité brute">
-                    <AnimatedNumber
-                      value={GrossYield}
-                      suffix="%"
-                      duration={0.5}
-                      formatOptions={{
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      }}
-                    />
-                  </FinancialTooltip>
-                </h3>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      </span> 
-      <span className="w-full relative h-full mt-4 md:mt-0 md:w-1/2 lg:w-2/5">{showBankComparison && (
-            <div className="bg-white flex flex-col justify-between rounded-xl p-3 sm:p-4 shadow-sm border w-full h-full">
-              <h3 className="text-base sm:text-lg font-bold mb-2 sm:mb-3">Bank Comparison</h3>
-              <div className="overflow-x-auto -mx-3 sm:mx-0">
-                <table className="w-full text-xs sm:text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-1 sm:py-2 pl-3 sm:pl-0">Bank</th>
-                      <th className="text-right py-1 sm:py-2">Rate</th>
-                      <th className="text-right py-1 sm:py-2">Monthly</th>
-                      <th className="text-right py-1 sm:py-2 hidden sm:table-cell">Total</th>
-                      <th className="text-right py-1 sm:py-2">Gain %</th>
-                      <th className="text-right py-1 sm:py-2 pr-3 sm:pr-0">Quality</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {banksList.map((bank) => {
-                      // Calculate monthly payment for this bank
-                      const monthlyInterestRate = bank.interestRate / 100.0 / 12.0;
-                      const numberOfPayments = Duration;
-                      // Use LoanAmount instead of Capital for mortgage calculation
-                      const loanAmountToUse = LoanAmount > 0 ? LoanAmount : Capital;
-                      const numerator = loanAmountToUse * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments);
-                      const denominator = Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1;
-                      const baseMonthlyPayment = denominator === 0 ? 0 : numerator / denominator;
-                      const currentProperty = propertyTypes[PropertyType];
-                      const multiplier = currentProperty.returnMultiplier;
-                      const monthlyPayment = Math.floor(baseMonthlyPayment * multiplier);
-                      const totalPayment = monthlyPayment * Duration;
-                      
-                      // Calculate quality score for this bank
-                      const durationFactor = Math.min(1, Duration / 60);
-                      const interestFactor = 1 - bank.interestRate / 20;
-                      const capitalFactor = Math.min(1, Capital / 50000);
-                      const qualityScore = (durationFactor * 3 + interestFactor * 3 + capitalFactor * 2 + currentProperty.appreciationRate * 50) / currentProperty.riskFactor;
-                      const bankQualityScore = Math.min(10, Math.max(1, Math.round(qualityScore)));
-                      
-                      return (
-                        <tr key={bank.id} className={`border-b hover:bg-gray-50 ${selectedBank.id === bank.id ? 'bg-blue-50' : ''}`}>
-                          <td className="py-1 sm:py-2 pl-3 sm:pl-0">
+                    <FinancialTooltip term="Interest Rate">
+                      <div className="flex items-center">
+                        <Building size={16} className="mr-1" />
+                        {selectedBank.name} ({selectedBank.interestRate}%)
+                      </div>
+                    </FinancialTooltip>
+                    <span>
+                      <ArrowDownUp className="rotate-45" size={16} />
+                    </span>
+                  </button>
+                  {dropdownOpen && (
+                    <div
+                      className="absolute bottom-[120%] mt-1 bg-white rounded-lg shadow-lg z-20 py-1 min-w-[250px] w-full"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {banksList.map((bank) => (
+                        <button
+                          key={bank.id}
+                          className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+                            selectedBank.id === bank.id ? "font-bold" : ""
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            SetIntrestRate(bank.interestRate);
+                            setSelectedBank(bank);
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
                             <div className="flex items-center">
-                              <span className="h-2 w-2 sm:h-3 sm:w-3 rounded-full mr-1 sm:mr-2" style={{ backgroundColor: bank.color }}></span>
+                              <span
+                                className="h-3 w-3 rounded-full mr-2"
+                                style={{ backgroundColor: bank.color }}
+                              ></span>
                               {bank.name}
                             </div>
-                          </td>
-                          <td className="text-right py-1 sm:py-2">{bank.interestRate}%</td>
-                          <td className="text-right py-1 sm:py-2">${monthlyPayment}</td>
-                          <td className="text-right py-1 sm:py-2 hidden sm:table-cell">${totalPayment}</td>
-                          <td className="text-right py-1 sm:py-2">
-                            {MonthlyRent > 0 && TotalCost > 0 ? 
-                              ((MonthlyRent * 12 / TotalCost) * 100).toFixed(2) + '%' : 
-                              '0.00%'}
-                          </td>
-                          <td className="text-right py-1 sm:py-2 pr-3 sm:pr-0">
-                            <span className="px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs text-white" 
-                              style={{ backgroundColor: `hsl(${bankQualityScore * 12}, 100%, 40%)` }}>
-                              {bankQualityScore}/10
+                            <span className="text-gray-500">
+                              {bank.interestRate}%
                             </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-2 sm:mt-3 text-xs text-gray-500 px-3 sm:px-0">
-                <p>* Calculations based on current property type and investment amount</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          )}</span> 
-      
+          </div>
+          <div className="flex flex-col items-start md:items-end gap-2 w-full md:w-auto mt-4 md:mt-0">
+            <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border w-full">
+              <h3 className="text-base sm:text-lg font-bold mb-2 sm:mb-3">
+                Résultats
+              </h3>
+
+              <div className="space-y-3 sm:space-y-4">
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    1. Mensualité du crédit à rembourser
+                  </p>
+                  <h3 className="text-xl sm:text-2xl font-bold font-[Code] text-gray-900">
+                    <FinancialTooltip term="Mensualité du crédit">
+                      <AnimatedNumber
+                        value={MortgagePayment}
+                        prefix="$"
+                        suffix=" / mois"
+                        duration={0.5}
+                        formatOptions={{
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
+                        }}
+                      />
+                    </FinancialTooltip>
+                  </h3>
+                </div>
+
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    2. Rentabilité brute
+                  </p>
+                  <h3 className="text-xl sm:text-2xl font-bold font-[Code] text-gray-900">
+                    <FinancialTooltip term="Rentabilité brute">
+                      <AnimatedNumber
+                        value={gain}
+                        suffix="%"
+                        duration={0.5}
+                        formatOptions={{
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }}
+                      />
+                    </FinancialTooltip>
+                  </h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </span>
+      <span className="w-full relative h-full mt-4 md:mt-0 md:w-1/2 lg:w-2/5">
+        {(
+          <div className="bg-white flex flex-col justify-between rounded-xl p-3 sm:p-4 shadow-sm border w-full h-full">
+            <h3 className="text-base sm:text-lg font-bold mb-2 sm:mb-3">
+              Bank Comparison
+            </h3>
+            <div className="overflow-x-auto -mx-3 sm:mx-0">
+              <table className="w-full text-xs sm:text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-1 sm:py-2 pl-3 sm:pl-0">
+                      Bank
+                    </th>
+                    <th className="text-right py-1 sm:py-2">Rate</th>
+                    <th className="text-right py-1 sm:py-2">Monthly</th>
+                    <th className="text-right py-1 sm:py-2 hidden sm:table-cell">
+                      Total
+                    </th>
+                    <th className="text-right py-1 sm:py-2">Gain %</th>
+                    <th className="text-right py-1 sm:py-2 pr-3 sm:pr-0">
+                      Quality
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {banksList.map((bank) => {
+                    // Calculate monthly payment for this bank
+                    const monthlyInterestRate =
+                      bank.interestRate / 100.0 / 12.0;
+                    const numberOfPayments = Duration;
+                    // Use LoanAmount instead of Capital for mortgage calculation
+                    const loanAmountToUse =
+                      LoanAmount > 0 ? LoanAmount : 0;
+                    const numerator =
+                      loanAmountToUse *
+                      monthlyInterestRate *
+                      Math.pow(1 + monthlyInterestRate, numberOfPayments);
+                    const denominator =
+                      Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1;
+                    const baseMonthlyPayment =
+                      denominator === 0 ? 0 : numerator / denominator;
+                    const monthlyPayment = Math.floor(
+                      baseMonthlyPayment 
+                    );
+                    const totalPayment = monthlyPayment * Duration;
+
+                    // Calculate quality score for this bank
+                    // Duration factor - longer duration is better (up to 5 years)
+                    const durationFactor = Math.min(1, Duration / 60);
+                    
+                    // Interest factor - lower interest rate is better
+                    const interestFactor = 1 - bank.interestRate / 20;
+                    
+                    // Rental yield factor - higher yield is better
+                    const rentalYieldFactor = TotalCost > 0 ? Math.min(1.5, ((MonthlyRent * 12) / TotalCost) * 5) : 0;
+                    
+                    // Loan-to-value ratio factor - lower LTV is better for quality
+                    const ltvRatio = TotalCost > 0 ? LoanAmount / TotalCost : 0;
+                    const ltvFactor = 1 - (ltvRatio * 0.5);
+                    
+                    // Debt service coverage ratio - higher is better
+                    const monthlyPaymentForDscr = monthlyPayment > 0 ? monthlyPayment : 1;
+                    const dscr = MonthlyRent / monthlyPaymentForDscr;
+                    const dscrFactor = dscr >= 1.5 ? 1.2 : dscr >= 1.25 ? 1.0 : dscr >= 1.0 ? 0.8 : 0.5;
+                    
+                    // Calculate weighted quality score
+                    const qualityScore =
+                      (durationFactor * 1.5 +     // 15% weight
+                       interestFactor * 2.5 +     // 25% weight
+                       rentalYieldFactor * 2.5 +  // 25% weight
+                       ltvFactor * 2.0 +         // 20% weight
+                       dscrFactor * 1.5) / 1.0;   // 15% weight
+                       
+                    const bankQualityScore = Math.min(
+                      10,
+                      Math.max(1, Math.round(qualityScore))
+                    );
+
+                    return (
+                      <tr
+                        key={bank.id}
+                        className={`border-b hover:bg-gray-50 ${
+                          selectedBank.id === bank.id ? "bg-blue-50" : ""
+                        }`}
+                      >
+                        <td className="py-1 sm:py-2 pl-3 sm:pl-0">
+                          <div className="flex items-center">
+                            <span
+                              className="h-2 w-2 sm:h-3 sm:w-3 rounded-full mr-1 sm:mr-2"
+                              style={{ backgroundColor: bank.color }}
+                            ></span>
+                            {bank.name}
+                          </div>
+                        </td>
+                        <td className="text-right py-1 sm:py-2">
+                          {bank.interestRate}%
+                        </td>
+                        <td className="text-right py-1 sm:py-2">
+                          ${monthlyPayment}
+                        </td>
+                        <td className="text-right py-1 sm:py-2 hidden sm:table-cell">
+                          ${totalPayment}
+                        </td>
+                        <td className="text-right py-1 sm:py-2">
+                          {MonthlyRent > 0 && TotalCost > 0
+                            ? (((MonthlyRent * 12) / TotalCost) * 100).toFixed(
+                                2
+                              ) + "%"
+                            : "0.00%"}
+                        </td>
+                        <td className="text-right py-1 sm:py-2 pr-3 sm:pr-0">
+                          <span
+                            className="px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs text-white"
+                            style={{
+                              backgroundColor: `hsl(${
+                                bankQualityScore * 12
+                              }, 100%, 40%)`,
+                            }}
+                          >
+                            {bankQualityScore}/10
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-2 sm:mt-3 text-xs text-gray-500 px-3 sm:px-0">
+              <p>
+                * Calculations based on current property type and investment
+                amount
+              </p>
+            </div>
+          </div>
+        )}
+      </span>
     </div>
   );
 }
@@ -853,24 +1025,22 @@ function PropertiesSection() {
       <div
         onClick={() => {
           const PS = atom({
-            IntrestRate: 8,
-            Capital: 10000,
-            TotalCost: 10000,
-            MonthlyRent: 1000,
-            LoanAmount: 8000,
-            Duration: 12,
+            IntrestRate: 7,
+            TotalCost: 0,
+            MonthlyRent: 0,
+            LoanAmount: 0,
+            Duration: 0,
             PropertyType: 0,
-            Risk: 1,
-            Quality: 1,
-            Monthly: 1000,
+            Risk: 0,
+            Quality: 0,
+            Monthly: 0,
             MortgagePayment: 0,
-            GrossYield: 0,
             Gain: 0,
             Rapport: "",
           });
           Properties.set([...$P, PS]);
         }}
-        className="rounded-lg cursor-pointer hover:bg-gray-200 transition w-full sm:w-96 h-fit bg-gray-100 relative overflow-hidden flex flex-col items-start p-4 sm:p-6 justify-between border"
+        className="rounded-lg cursor-pointer hover:bg-gray-200 transition w-full sm:w-96 h-fit bg-gray-100 relative overflow-hidden flex flex-col items-start p-4 sm:p-6 justify-between"
         style={{ borderRadius: "10px" }}
       >
         <div className="absolute top-0 left-0 w-full h-full"></div>
@@ -1029,7 +1199,7 @@ print({orientation: 'portrait'})
         )}
       </div>
 
-      {$P.length == 0 ? <div></div> : <MetricSerction />}
+      {/* {$P.length == 0 ? <div></div> : <MetricSerction />} */}
       <br />
       <div className="overflow-y-auto h-full w-full">
         <PropertiesSection />
