@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Calendar, Clock, Search, Video, X } from 'lucide-react';
@@ -6,6 +7,7 @@ import { decodeToken } from '@/lib/auth';
 import useFetch from '@/lib/fetch';
 
 interface Meeting {
+  client: any;
   id: string;
   clientName: string;
   scheduledTime: string;

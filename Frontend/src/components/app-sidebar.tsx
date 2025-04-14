@@ -10,6 +10,7 @@ import {
   MessageCircle,
   Headset,
   VideoIcon,
+  PaintRoller,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -51,6 +52,11 @@ const data = {
       title: "Real Estate Chat",
       url: "/client/chat",
       icon: MessageCircle,
+    },
+    {
+      title: "Decorator",
+      url: "/client/decorator",
+      icon: PaintRoller,
     },
     {
       title: "Experts",
