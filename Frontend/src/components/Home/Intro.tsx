@@ -3,7 +3,8 @@
 
 const Intro = () => {
   return (
-    <div className=" overflow-hidden h-[500px] sm:h-[700px] w-full mt-[-30vh] flex items-end justify-center">
+    <div className=" overflow-hidden h-[500px] sm:h-[700px] w-full mt-[-30vh] flex items-end justify-center relative">
+      {/* Particles Container */}
       <div className="justify-center px-10 md:flex w-full mt-[-0%]">
         <div className="imga d0 w-full  md:w-[65vw] h-[35vh] bg-gradient-to-t from-[#008e2650] to-transparent rounded-lg overflow-visible flex d1 relative">
           <img
@@ -17,6 +18,25 @@ const Intro = () => {
         </div>
       </div>
       <style jsx>{`
+  @keyframes floatUp {
+    0% {
+      transform: translateY(100vh) scale(0);
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateY(-20vh) scale(1);
+      opacity: 0;
+    }
+  }
+
+  .particle {
+    background: linear-gradient(to right, #008e26, #00ff4c);
+    border-radius: 50%;
+    animation: floatUp 7s infinite linear;
+  }
   @keyframes moveUp {
     from {
       transform: translateY(100%);

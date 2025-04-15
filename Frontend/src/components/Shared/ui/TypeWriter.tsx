@@ -6,6 +6,7 @@ interface TypeWriterProps {
   speed?: number;
   className?: string;
   parseMarkdown?: boolean;
+  delay?: number;
 }
 
 export default function TypeWriter({
@@ -13,6 +14,7 @@ export default function TypeWriter({
   speed = 30,
   className = '',
   parseMarkdown = true,
+  delay = 0,
 }: TypeWriterProps) {
   const [displayedText, setDisplayedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -38,6 +40,13 @@ export default function TypeWriter({
       return () => clearTimeout(timeout);
     }
   }, [currentIndex, text, speed]);
+  
+  useEffect(() => {
+    const delayTimeout = setTimeout(() => {
+      setCurrentIndex(0);
+    }, delay);
+    return () => clearTimeout(delayTimeout);
+  }, [delay]);
   
   // Parse markdown to HTML if parseMarkdown is true
   if (parseMarkdown && displayedText) {

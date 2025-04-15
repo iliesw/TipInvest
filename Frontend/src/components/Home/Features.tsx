@@ -146,18 +146,11 @@ function FF() {
       transition={{ duration: 0.8 }}
       viewport={{ once: true }}
     >
-      <div className="w-full sm:w-2/3 mx-auto px-8 text-gray-600 md:px-8">
+      <div className="w-full sm:w-2/3 mx-auto my-20 text-gray-600">
         <div className="max-w-7xl space-y-3">
-          <motion.h3
-            className="text-lime-600 font-semibold"
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            Features
-          </motion.h3>
+          
           <motion.p
-            className="text-gray-800 text-3xl font-semibold sm:text-4xl"
+            className="text-gray-800 text-center text-3xl font-semibold sm:text-4xl"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
@@ -167,7 +160,7 @@ function FF() {
               : "Reinventing Real Estate Investment"}
           </motion.p>
           <motion.p
-            className="max-w-xl"
+            className="text-center w-full"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
@@ -182,19 +175,19 @@ function FF() {
             {features[userLang].map((item, idx) => (
               <motion.li
                 key={idx}
-                className={`feature-${idx + 1} space-y-3 py-8 lg:px-4 sm:py-0`}
+                className={` space-y-3 bg-neutral-100 rounded-lg mx-1 p-6`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: idx * 0.2 }}
                 viewport={{ once: true }}
               >
-                <div className="w-12 h-12 border text-lime-600 rounded-full flex items-center justify-center text-2xl">
+                <div className="w-12 h-12 border bg-lime-300 text-black rounded-full flex items-center justify-center text-2xl">
                   {item.icon}
                 </div>
                 <h4 className="text-lg text-gray-800 font-semibold">
                   {item.title}
                 </h4>
-                <p>{item.desc}</p>
+                <p className="text-sm">{item.desc}</p>
               </motion.li>
             ))}
           </ul>

@@ -76,7 +76,7 @@ export default function InvestmentCalculator() {
             max="50000"
             value={investment}
             onChange={(e) => setInvestment(Number(e.target.value))}
-            className="w-full mt-6 appearance-none h-6 bg-gray-200 rounded-full"
+            className="w-full mt-6 font-bold appearance-none h-6 bg-gray-200 rounded-full"
           />
         </div>
         <motion.div

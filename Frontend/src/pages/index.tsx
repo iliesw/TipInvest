@@ -7,15 +7,12 @@ import Faq from "@/components/Home/Faq";
 import Features from "@/components/Home/Features";
 import { Footer } from "@/components/Home/Footer";
 import Stats from "@/components/Home/Stats";
-// import Sim from "@/components/Home/Sim";
 import ChatbotPopup from "@/components/Home/Chatbot";
 import Intro from "@/components/Home/Intro";
 import Bento from "@/components/Home/Bento";
 import Navbar from "@/components/Home/Navbar";
-
 import { Metadata } from 'next';
 import Prices from "@/components/Pricing/Prices";
-// import Add from "@/components/Shared/Add";
  
 export const metadata: Metadata = {
   title: 'TipInvest',
@@ -24,6 +21,9 @@ export const metadata: Metadata = {
 };
 
 import Layout from '../components/layout';
+import FeaturedProperties from "@/components/Home/FeaturedProperties";
+import ImageShowcase from "@/components/Home/ImageShowcase";
+import { Vid } from "@/components/Home/Vid";
 
 
 export default function Home() {
@@ -31,14 +31,16 @@ export default function Home() {
     <Layout>
     <div className="bg-[#fcfcfc]">
       <ChatbotPopup />
-      {/* <Add /> */}
       <Navbar />
       <Hero />
       <Intro />
-      <Features />
+      <FeaturedProperties />
       <Bento  />
+      <ImageShowcase />
       <Stats />
       <Proof />
+      <Vid />
+      <Features />
       <Prices />
       <Brands />
       <Faq />
