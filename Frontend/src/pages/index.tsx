@@ -34,10 +34,10 @@ export default function Home() {
       <Navbar />
       <Hero />
       <Intro />
-      <FeaturedProperties />
       <Bento  />
-      <ImageShowcase />
+      <FeaturedProperties />
       <Stats />
+      <ImageShowcase />
       <Proof />
       <Vid />
       <Features />

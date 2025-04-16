@@ -171,23 +171,26 @@ function FF() {
           </motion.p>
         </div>
         <div className="mt-12">
-          <ul className="grid gap-x-12 divide-y [&>.feature-1]:pl-0 sm:grid-cols-2 sm:gap-y-8 sm:divide-y-0 lg:divide-x lg:grid-cols-3 lg:gap-x-0">
+          <ul className="grid gap-x-12 sm:grid-cols-2 sm:gap-y-8 lg:grid-cols-3 lg:gap-x-0">
             {features[userLang].map((item, idx) => (
               <motion.li
                 key={idx}
-                className={` space-y-3 bg-neutral-100 rounded-lg mx-1 p-6`}
+                className={`space-y-3 bg-white border h-48 flex flex-col justify-between rounded-xl mx-2 shadow-md p-6`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: idx * 0.2 }}
                 viewport={{ once: true }}
               >
-                <div className="w-12 h-12 border bg-lime-300 text-black rounded-full flex items-center justify-center text-2xl">
+                <div className="w-12 h-12 bg-lime-300 text-black rounded-full flex items-center justify-center text-2xl">
                   {item.icon}
                 </div>
+                <div>
+
                 <h4 className="text-lg text-gray-800 font-semibold">
                   {item.title}
                 </h4>
                 <p className="text-sm">{item.desc}</p>
+                </div>
               </motion.li>
             ))}
           </ul>
