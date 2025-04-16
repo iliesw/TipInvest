@@ -34,6 +34,10 @@ export default function Home() {
       <Navbar />
       <Hero />
       <Intro />
+      {/* <div className="relative h-0">
+
+      <div className="bg-gradient-to-b absolute mt-3 from-[#008e2650] to-transparent w-full rounded-bl-lg  h-[100vh]"></div>
+      </div> */}
       <Bento  />
       <FeaturedProperties />
       <Stats />

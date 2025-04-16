@@ -27,7 +27,7 @@ export const Vid = () => {
     };
 
     return (
-        <div className="aspect-video w-full sm:w-2/3 rounded-xl mx-auto relative">
+        <div className="aspect-video px-3 sm:p-0 w-full sm:w-2/3 rounded-xl mx-auto relative">
             <video
                 ref={videoRef}
                 src={vidstr}

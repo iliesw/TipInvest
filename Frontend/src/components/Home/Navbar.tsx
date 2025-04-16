@@ -83,7 +83,7 @@ const Navbar = () => {
               isShowing.set(true);
               isShowing.notify();
             }}
-            className="text-sm/6 font-semibold text-gray-900"
+            className="text-sm/6 font-semibold border p-4 rounded-full py-1 bg-black text-white"
           >
             Log in <span aria-hidden="true">&rarr;</span>
           </button>
@@ -143,7 +143,7 @@ const Navbar = () => {
                   </span>
                 </div>
                 <button 
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50" 
+                  className="-mx-3 block  rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50" 
                   onClick={() => {
                     setMobileMenuOpen(false);
                     isShowing.set(true);

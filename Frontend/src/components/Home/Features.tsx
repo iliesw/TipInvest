@@ -171,7 +171,7 @@ function FF() {
           </motion.p>
         </div>
         <div className="mt-12">
-          <ul className="grid gap-x-12 sm:grid-cols-2 sm:gap-y-8 lg:grid-cols-3 lg:gap-x-0">
+          <ul className="flex flex-col sm:flex-row gap-2 ">
             {features[userLang].map((item, idx) => (
               <motion.li
                 key={idx}

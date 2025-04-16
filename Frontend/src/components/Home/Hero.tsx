@@ -62,13 +62,13 @@ export default function Example() {
             <span className="">
               {Content[userLang as keyof typeof Content].invest_today1}
             </span>
-            <span className="">
+            <span className="text-lime-600">
               {Content[userLang as keyof typeof Content].invest_today2}
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="mt-6 text-lg text-gray-500 animate-fade-in">
+          <p className="mt-6 text-md text-gray-500 animate-fade-in ">
             {Content[userLang as keyof typeof Content].invest_with_tipinvest}
           </p>
 

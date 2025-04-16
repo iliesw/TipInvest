@@ -346,7 +346,7 @@ function Metric({
   );
 }
 
-function Chart({ values, label }: { values: any[]; label: string }) {
+export function Chart({ values, label }: { values: any[]; label: string }) {
   return (
     <div className="w-full h-full">
       <ChartContainer config={chartConfig(label)}>

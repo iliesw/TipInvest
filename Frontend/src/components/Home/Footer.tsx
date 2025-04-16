@@ -1,4 +1,4 @@
-import { FaFacebook, FaInstagram, FaYoutube } from "react-icons/fa";
+import { FaFacebook, FaLinkedin, FaYoutube } from "react-icons/fa";
 import Logo from "../Shared/Logo";
 import { SelectedLang } from "@/stores/lang";
 import { useEffect, useState } from "react";
@@ -78,8 +78,8 @@ const Content = {
 
 
 const socialMediaLinks = [
-  { name: "@tipinvest", href: "#", icon: FaInstagram, bgColor: "bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500" },
-  { name: "@tipinvest", href: "#", icon: FaFacebook, bgColor: "bg-blue-600" },
+  { name: "@tipinvest", href: "https://www.linkedin.com/company/tips-invest", icon: FaLinkedin, bgColor: "bg-blue-400" },
+  { name: "@tipinvest", href: "https://www.facebook.com/profile.php?id=61557572841502", icon: FaFacebook, bgColor: "bg-blue-600" },
   { name: "@tipinvest", href: "#", icon: FaYoutube, bgColor: "bg-red-500" },
 ];
 type Lang = 'fr' | 'us';

@@ -53,7 +53,7 @@ export default function ImageShowcase() {
   const allProjects = [...projects, ...projects, ...projects];
 
   return (
-    <div className="w-full sm:w-2/3 mx-auto overflow-hidden">
+    <div className="w-full px-3 sm:px-0 sm:w-2/3 mx-auto overflow-hidden">
       <p className="text-lime-600 font-bold mb-2">Our Projects</p>
       <h1 className="text-4xl font-[Figtree] font-bold">
         Creating Lasting Memories through Real Estate
@@ -68,7 +68,7 @@ export default function ImageShowcase() {
           {allProjects.map((project, i) => (
             <div
               key={i}
-              className="w-full aspect-[1/2.1] h-[550px] group relative rounded-md"
+              className="w-full aspect-[1/2.1] h-[500px] group relative rounded-md"
             >
               <div className="group-hover:bg-black/40 group-hover:backdrop-blur absolute w-full z-10 aspect-[1/2.1] rounded-md h-[500px] flex flex-col justify-end text-white p-4 group-hover:opacity-100 opacity-0">
                 <h1 className="text-2xl">{project.title}</h1>
