@@ -17,6 +17,10 @@ interface Property {
   details: {
     type: string;
     location: string;
+    coords:{
+      x:number,
+      y:number,
+    }
     price: number;
     bedrooms: number;
     bathrooms: number;
@@ -316,7 +320,8 @@ export default function PropertyDetail() {
                         () => import('@/components/ui/PropertyMap'),
                         { ssr: false, loading: () => <p>Loading map...</p> }
                       );
-                      return <PropertyMapComponent location={""} title={property.title} />;
+                      // return <PropertyMapComponent location={{x:37.262354,y:9.845}} />;
+                      return <PropertyMapComponent location={property.details.coords || {x:0.0,y:0.0}} />;
                     })()}
                   </>
                 )}

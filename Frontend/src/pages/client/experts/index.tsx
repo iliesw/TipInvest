@@ -1,11 +1,15 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Calendar, Search } from "lucide-react";
+import { Bookmark, Search } from "lucide-react";
 import LayoutC from "../layout";
 import useFetch from "@/lib/fetch";
 
 interface Expert {
+  availability: any;
+  createdAt: string;
+  profilePicture: string | undefined;
   user: any;
   id: string;
   name: string;
@@ -74,6 +78,29 @@ export default function ExpertsList() {
     ...new Set(experts.map((expert) => expert.specialization)),
   ];
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  const avalabiliti = (e:{}) => {
+    const today = new Date().getDay()
+    const keys = Object.keys(e)
+    const DayToday = keys[today]
+    const hour = new Date().getHours()
+    if (hour > 23 || hour < 6){
+      return false
+    }
+    // @ts-ignore
+    return e[DayToday][hour-6]
+  }
+
+  const fulltime = (e: { (availability: any): unknown;[x: string]: boolean[]; }) => {
+    const today = new Date().getDay()
+    const keys = Object.keys(e)
+    const DayToday = keys[today]
+    // @ts-ignore
+    const l:Array<boolean> = e[DayToday]
+
+    return !l.includes(false)
+  }
+
   return (
     <LayoutC>
       <div className="space-y-6 w-full">
@@ -89,7 +116,7 @@ export default function ExpertsList() {
             <input
               type="text"
               placeholder="Search experts..."
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-64"
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-64"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -118,30 +145,51 @@ export default function ExpertsList() {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
           </div>
         ) : filteredExperts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex gap-4 flex-wrap">
             {filteredExperts.map((expert) => (
-              <Card key={expert.id} className="p-6 flex flex-col h-full">
-                <h3 className="text-2xl mb-2 font-[Milk] font-bold">{expert.user.name}</h3>
-                <p className="text-black">{expert.specialization}</p>
-
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-gray-700">
-                    <span className="font-bold">{expert.hourlyRate}€</span> /
-                    hour
+              <Card
+                key={expert.id}
+                className="p-6 relative w-[450px] flex rounded-3xl shadow-lg flex-col h-full"
+                
+              >
+                <div className="w-full flex justify-between">
+                  <img
+                    src={expert.profilePicture || "/assets/images/1077114.png"}
+                    className="w-16 aspect-square rounded-full border object-cover"
+                  />
+                  <div className="flex gap-2 flex-col items-end">
+                    <button className="border h-fit flex items-center gap-2 px-2 py-1 rounded-sm text-sm">
+                      <Bookmark size={16} /> Save
+                    </button>
+                    <p className="text-[12px] opacity-65">Joined {new Date(expert.createdAt).getFullYear()}</p>
                   </div>
+                </div>
+                <div className="mt-4">
+                  <h2 className="text-black opacity-70">@ {expert.user.name}</h2>
+                  <h1 className="text-2xl font-[Rubik] font-extrabold ">{expert.specialization}</h1>
+                  <div className="tags flex flex-wrap gap-2 mt-2">
+                    {fulltime(expert.availability) === true && (
+                      <div className="text-[12px] bg-blue-100 transition-all hover:shadow-blue-500 hover:shadow-xl text-blue-800 py-1 px-2.5 rounded-full border border-blue-200">Full Time</div>
+                    )}
+                    {avalabiliti(expert.availability) === true ? (
+                      <div className="text-[12px] bg-green-100 transition-all hover:shadow-green-500 hover:shadow-xl text-green-800 py-1 px-2.5 rounded-full border border-green-200">Available Now</div>
+                    ) : (
+                      <div className="text-[12px] bg-gray-100 transition-all hover:shadow-gray-500 hover:shadow-xl text-gray-500 py-1 px-2.5 rounded-full border border-gray-200">Unabailable</div>
+                    )}
+                    
+                  </div>
+                </div>
 
-                  <a
-                    href="#"
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors inline-flex items-center"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      // Use window.location for client-side navigation
-                      window.location.href = `/client/experts/${expert.id}`;
-                    }}
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Book Now
-                  </a>
+                <div className="border-t-2 mt-12 pt-4 flex justify-between items-center">
+                  <div className="flex flex-col">
+                    <h2 className="font-black font-[Rubik]">${expert.hourlyRate}</h2>
+                    <p className="text-[12px] opacity-40">0 Reviews</p>
+                  </div>
+                  <button className="bg-black text-sm text-white h-fit px-3 py-1.5 rounded-sm" onClick={(e) => {
+                  e.preventDefault();
+                  // Use window.location for client-side navigation
+                  window.location.href = `/client/experts/${expert.id}`;
+                }}>Book Now</button>
                 </div>
               </Card>
             ))}
