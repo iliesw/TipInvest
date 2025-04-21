@@ -24,7 +24,7 @@ export const sendVerificationEmail = async (
 ): Promise<boolean> => {
   try {
     // Construire l'URL de vérification
-    const verificationUrl = `${"http://localhost:3001"}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${"http://localhost:3000"}/verify-email?token=${verificationToken}`;
 
     // Options de l'email
     const mailOptions = {

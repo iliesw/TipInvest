@@ -5,6 +5,8 @@ import { eq } from "drizzle-orm";
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import { GetVersion } from "../../lib";
+import { sendVerificationEmail, sendConfirmationEmail } from "../utils/emailService";
+import { randomBytes } from "crypto";
 
 const auth = new Hono();
 
@@ -52,6 +54,9 @@ auth.post("/register", async (c) => {
     // Hash the password before storing it in the database
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Generate a verification token
+    const verificationToken = randomBytes(32).toString("hex");
+
     // Insert new user into the database
     await db.insert(userTable).values({
       name: name,
@@ -59,19 +64,19 @@ auth.post("/register", async (c) => {
       passwordHash: hashedPassword,
       phone: phone || null,
       role: role || 'user',
+      verificationToken,
+      isEmailVerified: false
     });
     // Get the newly created user
     const newUser = (await db.select().from(userTable).where(eq(userTable.email, email)).limit(1))[0];
     
     // If the user is registering as an expert, create an expert profile
-    console.log("User role:", role);
     if (role === 'expert') {
-      console.log("Creating expert profile for user:", newUser.id);
       await db.insert(expertProfileTable).values({
         userId: newUser.id,
         specialization: expertProfile?.specialization || '',
         bio: expertProfile?.bio || '',
-        hourlyRate: expertProfile?.hourlyRate?.toString() || '0', // Convert to string for decimal type
+        hourlyRate: expertProfile?.hourlyRate?.toString() || '0',
         availability: {
           monday: Array(24).fill(false),
           tuesday: Array(24).fill(false),
@@ -83,24 +88,11 @@ auth.post("/register", async (c) => {
         }
       });
     }
-    
-    // Generate a JWT token for the newly registered user
-    const token = jwt.sign(
-      { id: newUser.id, role: newUser.role },
-      process.env.JWT_SECRET!,
-      { expiresIn: "7d" }
-    );
 
-    // Return token and user information (excluding password hash)
-    return c.json({
-      token,
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role
-      }
-    });
+    // Send verification email
+    await sendVerificationEmail(email, name, verificationToken);
+
+    return c.json({ message: "Registration successful. Please check your email to verify your account." });
   } catch (error) {
     console.error("Registration error:", error);
     return c.json({ error: "Server error during registration" }, 500);
@@ -115,29 +107,23 @@ auth.post("/register", async (c) => {
  * Response: { token: string, user: { id, name, email, role } } | { error: string }
  */
 auth.post("/login", async (c) => {
-  // Parse the request body
   const { email, password } = await c.req.json() as { email: string, password: string };
-
-  // Find the user in the database by email
   const user = await db
     .select()
     .from(userTable)
     .where(eq(userTable.email, email as string))
     .limit(1);
-
-  // Validate user existence and password correctness
   if (!user.length || !(await bcrypt.compare(password, user[0].passwordHash))) {
     return c.json({ error: "Invalid credentials" }, 401);
   }
-
-  // Generate a JWT token for authentication
+  if (!user[0].isEmailVerified) {
+    return c.json({ error: "EMAIL_NOT_VERIFIED" }, 403);
+  }
   const token = jwt.sign(
     { id: user[0].id, role: user[0].role },
     process.env.JWT_SECRET!,
     { expiresIn: "7d"}
   );
-  
-  // Return token and user information (excluding password hash)
   return c.json({
     token,
     user: {
@@ -240,6 +226,27 @@ auth.post("/reset-password", async (c) => {
     .where(eq(userTable.id, userId));
 
   return c.json({ message: "Password reset successfully" });
+});
+
+/**
+ * Email verification endpoint
+ * Verifies a user's email address using the verification token.
+ * Endpoint: GET /verify-email?token=...
+ */
+auth.get("/verify-email", async (c) => {
+  const token = c.req.query("token");
+  if (!token) {
+    return c.json({ error: "Missing verification token" }, 400);
+  }
+  const user = await db.select().from(userTable).where(eq(userTable.verificationToken, token)).limit(1);
+  if (!user.length) {
+    return c.json({ error: "Invalid or expired verification token" }, 400);
+  }
+  await db.update(userTable)
+    .set({ isEmailVerified: true, verificationToken: null })
+    .where(eq(userTable.id, user[0].id));
+  await sendConfirmationEmail(user[0].email, user[0].name);
+  return c.json({ message: "Email verified successfully. You can now log in." });
 });
 
 export default auth;

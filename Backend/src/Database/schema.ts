@@ -1,5 +1,4 @@
 import { pgTable, uuid, varchar, text, json, timestamp, decimal, pgEnum, numeric, boolean } from "drizzle-orm/pg-core";
-import { view } from "drizzle-orm/sqlite-core";
 
 export const roleEnum = pgEnum("role", ["user", "admin", "agency", "expert"]);
 export const statusEnum = pgEnum("status", ["available", "sold","pending"]);
