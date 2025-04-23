@@ -1,7 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from 'react';
+import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import AgencyLayout from '../../layout';
+
+// Dynamic import of LocationPicker component to avoid SSR issues with Leaflet
+const LocationPicker = dynamic(
+  () => import('@/components/ui/LocationPicker'),
+  { ssr: false, loading: () => <p>Loading map...</p> }
+);
+
+// MapLoader component to handle the LocationPicker
+const MapLoader = ({ onLocationSelect }: { onLocationSelect: (location: { x: number; y: number; address: string }) => void }) => {
+  return <LocationPicker onLocationSelect={onLocationSelect} />;
+};
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Upload, Plus, X, Minus } from 'lucide-react';
@@ -32,6 +44,7 @@ export default function AddProperty() {
     area: '',
     features: [] as string[],
     customFeatures: [] as string[],
+    coordinates: { x: 0, y: 0 } // Store map coordinates
   });
   
   // Image state
@@ -244,7 +257,7 @@ export default function AddProperty() {
         title: formData.title,
         description: formData.description,
         details: {
-          price: `$${formData.price}`,
+          price: `${formData.price}`,
           location: formData.location,
           type: formData.type,
           bedrooms: formData.bedrooms,
@@ -252,6 +265,7 @@ export default function AddProperty() {
           area: parseInt(formData.area),
           features: allFeatures,
           images: imageBase64Array, // Include base64 images directly
+          coords: formData.coordinates, // Include map coordinates
         },
         status: 'pending', // Properties added by agencies start as pending until approved
       };
@@ -346,6 +360,8 @@ export default function AddProperty() {
                 </div>
               </div>
               
+
+              
               {/* Property Details */}
               <div className="space-y-4 md:col-span-2">
                 <h2 className="text-xl font-semibold">Property Details</h2>
@@ -366,20 +382,7 @@ export default function AddProperty() {
                     )}
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Location *</label>
-                    <input
-                      type="text"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleChange}
-                      className={`w-full p-2 border rounded-md ${errors.location ? "border-red-500" : ""}`}
-                      placeholder="e.g. New York, NY"
-                    />
-                    {errors.location && (
-                      <p className="text-red-500 text-xs mt-1">{errors.location}</p>
-                    )}
-                  </div>
+                  
                   
                   <div>
                     <label className="block text-sm font-medium mb-1">Property Type</label>
@@ -577,7 +580,23 @@ export default function AddProperty() {
                 </div>
               </div>
             </div>
-            
+            <div className='w-full h-[100vh]'>
+                    {/* Location Map Picker */}
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium mb-1">Select Location on Map</label>
+                      <div className="mt-2">
+                        <MapLoader 
+                          onLocationSelect={(location) => {
+                            setFormData({
+                              ...formData,
+                              location: location.address || formData.location,
+                              coordinates: { x: location.x, y: location.y }
+                            });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
             <div className="flex justify-end space-x-4">
               <Link href="/agency/properties">
                 <Button type="button" variant="outline">Cancel</Button>
@@ -591,6 +610,7 @@ export default function AddProperty() {
               </Button>
             </div>
           </form>
+          
         </Card>
       </div>
     </AgencyLayout>
