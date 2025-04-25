@@ -3,7 +3,7 @@ import './banner-four-animations.css';
 
 const BannerFour = () => {
     return (
-        <section className="banner-four relative z-10 py-12 sm:py-16 md:py-24 lg:py-36 w-full mb-16 sm:mb-24 md:mb-32">
+        <section className="banner-four relative z-10 py-12 sm:py-16 md:py-24 lg:py-36 w-full mb-16 sm:mb-0 md:-mb-20">
             {/* Main image */}
             <div className="banner-four__thumb absolute right-0 top-0 z-[-1] h-[40vh] sm:h-[60vh] md:h-[70vh] lg:h-[800px] overflow-hidden max-w-[70%] sm:max-w-[90%] block opacity-70 sm:opacity-100">
                 <img src="assets/images/thumbs/banner-four-image.png" alt="Banner" className="h-[80%] object-contain"/>

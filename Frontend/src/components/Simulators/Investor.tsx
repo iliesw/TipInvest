@@ -88,7 +88,6 @@ function MetricSerction() {
       Rapport:string,
     }[]
   >([]);
-
   useEffect(() => {
     const intervalId = setInterval(() => {
       const sto: any = [];
@@ -96,10 +95,12 @@ function MetricSerction() {
         sto.push(e.get());
       });
       setData(sto);
-      setChartData(CalculateData())
     }, 500);
-    return () => clearInterval(intervalId); // Cleanup function
-  }, []); // Empty dependency array ensures this runs only once on mount
+    return () => clearInterval(intervalId);
+  }, [store]);
+  useEffect(() => {
+    setChartData(CalculateData());
+  }, [Data]);
 
   const GetNext6Months = () => {
     const currentDate = new Date();
@@ -132,13 +133,13 @@ function MetricSerction() {
 
     // Initialize RevChart with months and desktop revenue set to 0
     for (let i = 0; i < months.length; i++) {
-      RevChart.push({ month: months[i], desktop: 0 });
+      RevChart.push({ month: months[i], desktop: 0.0 });
     }
 
     // Loop through each data entry (each property)
     for (let i = 0; i < Data.length; i++) {
       // Monthly rental income is the primary revenue source
-      const monthlyRent = Data[i].MonthlyRent || Data[i].Monthly || 0;
+      const monthlyRent = Data[i].LoanAmount; 
       
       for (let t = 0; t < RevChart.length; t++) {
         // Calculate revenue with a small annual appreciation (3%)
@@ -298,7 +299,6 @@ function MetricSerction() {
 
   return (
     <div className="flex gap-[10px] mt-5 flex-row w-full">
-      {/* <p>{JSON.stringify(Data)}</p> */}
       {chartData.map((item, index) => (
         <Metric key={index} data={item} />
       ))}
@@ -1199,7 +1199,7 @@ print({orientation: 'portrait'})
         )}
       </div>
 
-      {/* {$P.length == 0 ? <div></div> : <MetricSerction />} */}
+      {$P.length == 0 ? <div></div> : <MetricSerction />}
       <br />
       <div className="overflow-y-auto h-full w-full">
         <PropertiesSection />
