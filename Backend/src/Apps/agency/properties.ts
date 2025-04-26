@@ -169,14 +169,14 @@ const uploadImage = async ({
   const imageId = crypto.randomUUID();
   
   // Save to database
+  // Batch insert instead of individual inserts
   await db
     .insert(imagesTable)
     .values({
       id: imageId,
       realestateId: RealestateID,
-      imageData: compressedBase64, // Store base64 string
-    })
-    .returning();
+      imageData: compressedBase64,
+    });
   return imageId;
 };
 

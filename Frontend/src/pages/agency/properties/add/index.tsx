@@ -273,7 +273,7 @@ export default function AddProperty() {
       // Submit property data with images included
       const response = await useFetch.post('/agency/properties', propertyData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
