@@ -3,9 +3,10 @@ import { db } from "../../Database";
 import { realestateTable } from "../../Database/schema";
 import { eq } from "drizzle-orm";
 import { agencyAuth } from "../../Middleware/agencyAuth";
+import { cors } from "hono/cors";
 
 const agencyDashboard = new Hono();
-
+agencyDashboard.use('*', cors({ origin: '*' }));
 // Apply agency authentication middleware to all routes
 agencyDashboard.use("*", agencyAuth);
 
