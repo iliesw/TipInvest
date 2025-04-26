@@ -13,7 +13,11 @@ import { GetVersion } from "../lib";
 const app = new Hono();
 
 // Enable CORS for all routes
-app.use('*', cors({ origin: '*' }));
+app.use('*', cors({
+    origin: '*',
+    allowHeaders: ['Content-Type', 'Authorization'],
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  }));
 
 app.get('/', (c) => c.text('Server Up' + GetVersion()));
 
