@@ -4,8 +4,14 @@ import { imagesTable, realestateTable } from "../../Database/schema";
 import { eq, and } from "drizzle-orm";
 import { agencyAuth } from "../../Middleware/agencyAuth";
 import sharp = require("sharp");
+import { cors } from "hono/cors";
 
 const agencyProperties = new Hono();
+agencyProperties.use('*', cors({
+  origin: '*',
+  allowHeaders: ['Content-Type', 'Authorization'],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
 
 // Apply agency authentication middleware to all routes
 agencyProperties.use("*", agencyAuth);
