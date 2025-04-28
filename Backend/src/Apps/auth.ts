@@ -27,7 +27,7 @@ auth.post("/register", async (c) => {
       email: string, 
       password: string,
       phone?: string,
-      role?: 'user' | 'agency' | 'expert',
+      role?: 'client' | 'agency' | 'expert',
       expertProfile?: {
         specialization: string,
         bio: string,
@@ -56,14 +56,14 @@ auth.post("/register", async (c) => {
 
     // Generate a verification token
     const verificationToken = randomBytes(32).toString("hex");
-
+    console.log(role)
     // Insert new user into the database
     await db.insert(userTable).values({
       name: name,
       email: email,
       passwordHash: hashedPassword,
       phone: phone || null,
-      role: role || 'user',
+      role: role,
       verificationToken,
       isEmailVerified: false
     });
@@ -247,6 +247,26 @@ auth.get("/verify-email", async (c) => {
     .where(eq(userTable.id, user[0].id));
   await sendConfirmationEmail(user[0].email, user[0].name);
   return c.json({ message: "Email verified successfully. You can now log in." });
+});
+
+/**
+ * Gets the account type from a token.
+ * Endpoint: GET /accountType
+ * Query Params: { token: string }
+ * Response: { accountType: string }
+ */
+auth.get("/accountType", async (c) => {
+  const token = c.req.query("token");
+  if (!token) {
+    return c.json({ error: "Missing token" }, 400);
+  }
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as { id: string; role: string };
+    return c.json({ accountType: payload.role });
+  } catch (error) {
+    return c.json({ error: "Invalid token" }, 401);
+  }
 });
 
 export default auth;

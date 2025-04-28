@@ -26,7 +26,7 @@ user.get("/me", async (c) => {
   }
 
   // Remove sensitive fields
-  const { passwordHash, createdAt, updatedAt, role, ...safeUserData } = userData[0];
+  const { passwordHash, createdAt, updatedAt,  ...safeUserData } = userData[0];
 
   return c.json(safeUserData);
 });

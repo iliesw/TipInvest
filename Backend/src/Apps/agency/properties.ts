@@ -5,12 +5,15 @@ import { eq, and } from "drizzle-orm";
 import { agencyAuth } from "../../Middleware/agencyAuth";
 import sharp = require("sharp");
 import { cors } from "hono/cors";
+import { createTempFile, uploadFile } from "../../utils/s3";
 
 const agencyProperties = new Hono();
 agencyProperties.use('*', cors({
   origin: '*',
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  maxAge: 86400, // 24 hours cache for CORS preflight
+  credentials: true,
 }));
 
 // Apply agency authentication middleware to all routes
@@ -20,6 +23,7 @@ agencyProperties.use("*", agencyAuth);
  * Get all properties owned by the agency
  */
 agencyProperties.get("/", async (c) => {
+  c.header('Cache-Control', 'public, max-age=300'); // 5 minutes cache
   try {
     const agency = c.get("agency");
     
@@ -55,6 +59,7 @@ agencyProperties.get("/", async (c) => {
  * Get a specific property by ID (only if owned by the agency)
  */
 agencyProperties.get("/:id", async (c) => {
+  c.header('Cache-Control', 'public, max-age=300'); // 5 minutes cache
   try {
     const agency = c.get("agency");
     const propertyId = c.req.param("id");
@@ -147,7 +152,6 @@ agencyProperties.post("/", async (c) => {
  */
 const uploadImage = async ({
   Data,
-  RealestateID,
 }: {
   Data: string;
   RealestateID: string;
@@ -156,28 +160,29 @@ const uploadImage = async ({
   Data = Data.replace(base64HeaderRegex, "");
   const imageBuffer = Buffer.from(Data, "base64");
 
-  // Compress the image
+  // Optimize image processing with better compression and caching
   const compressedBuffer = await sharp(imageBuffer)
-    .resize(1000) 
-    .jpeg({ quality: 85 }) 
+    .resize(1600,900, {
+      fit: 'inside',
+      withoutEnlargement: true
+    })
+    .jpeg({ 
+      quality: 85 ,
+      progressive: true,  // Better loading experience
+      mozjpeg: true,     // Better compression
+      optimizeScans: true // Further optimization
+    })
     .toBuffer();
 
-  const compressedBase64 = `data:image/jpeg;base64,${compressedBuffer.toString(
-    "base64"
-  )}`;
-  // generate unique id for image
-  const imageId = crypto.randomUUID();
-  
-  // Save to database
-  // Batch insert instead of individual inserts
-  await db
-    .insert(imagesTable)
-    .values({
-      id: imageId,
-      realestateId: RealestateID,
-      imageData: compressedBase64,
-    });
-  return imageId;
+  const compressedBase64 = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
+  // Batch insert with better error handling
+  try {
+    const url = await uploadFile(compressedBuffer);
+    return url;
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    throw new Error("Failed to upload image");
+  }
 };
 
 /**
@@ -384,6 +389,7 @@ agencyProperties.post("/:id/images", async (c) => {
  * Get image by ID
  */
 agencyProperties.get("/image/:id", async (c) => {
+  c.header('Cache-Control', 'public, max-age=604800'); // 7 days cache for images
   try {
     const imageId = c.req.param("id");
     const image = await db

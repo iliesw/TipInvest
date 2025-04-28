@@ -1,3 +1,4 @@
+"use client";
 import { SelectedLang } from "@/stores/lang";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";

@@ -1,3 +1,4 @@
+"use client";
 import { SelectedLang } from "@/stores/lang";
 import { File, Box, Gauge } from "lucide-react";
 import { useEffect, useState } from "react";

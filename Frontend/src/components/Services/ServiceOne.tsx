@@ -1,3 +1,4 @@
+"use client";
 import { SelectedLang } from "@/stores/lang";
 import { AtomIcon, LandPlot, Video } from "lucide-react";
 import { useState, useEffect } from "react";

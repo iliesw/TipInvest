@@ -1,5 +1,7 @@
+"use client";
+
 import { FaFacebook, FaLinkedin, FaYoutube } from "react-icons/fa";
-import Logo from "../Shared/Logo";
+import Logo from "../Logo";
 import { SelectedLang } from "@/stores/lang";
 import { useEffect, useState } from "react";
 
