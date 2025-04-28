@@ -1,3 +1,5 @@
+
+"use client";
 import { SelectedLang } from "@/stores/lang";
 import { useEffect, useState } from "react";
 type Lang = "fr" | "us";

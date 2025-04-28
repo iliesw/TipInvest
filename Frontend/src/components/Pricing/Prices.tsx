@@ -1,3 +1,4 @@
+"use client";
 import { DoorOpen, PencilRuler, Sparkles } from "lucide-react";
 import { SelectedLang } from "@/stores/lang";
 import { useEffect, useState } from "react";

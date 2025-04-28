@@ -11,6 +11,8 @@ agencyProperties.use('*', cors({
   origin: '*',
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  maxAge: 86400, // 24 hours cache for CORS preflight
+  credentials: true,
 }));
 
 // Apply agency authentication middleware to all routes
@@ -20,6 +22,7 @@ agencyProperties.use("*", agencyAuth);
  * Get all properties owned by the agency
  */
 agencyProperties.get("/", async (c) => {
+  c.header('Cache-Control', 'public, max-age=300'); // 5 minutes cache
   try {
     const agency = c.get("agency");
     
@@ -55,6 +58,7 @@ agencyProperties.get("/", async (c) => {
  * Get a specific property by ID (only if owned by the agency)
  */
 agencyProperties.get("/:id", async (c) => {
+  c.header('Cache-Control', 'public, max-age=300'); // 5 minutes cache
   try {
     const agency = c.get("agency");
     const propertyId = c.req.param("id");
@@ -156,28 +160,37 @@ const uploadImage = async ({
   Data = Data.replace(base64HeaderRegex, "");
   const imageBuffer = Buffer.from(Data, "base64");
 
-  // Compress the image
+  // Optimize image processing with better compression and caching
   const compressedBuffer = await sharp(imageBuffer)
-    .resize(1000) 
-    .jpeg({ quality: 85 }) 
+    .resize(800, 600, {
+      fit: 'inside',
+      withoutEnlargement: true
+    })
+    .jpeg({ 
+      quality: 70,
+      progressive: true,  // Better loading experience
+      mozjpeg: true,     // Better compression
+      optimizeScans: true // Further optimization
+    })
     .toBuffer();
 
-  const compressedBase64 = `data:image/jpeg;base64,${compressedBuffer.toString(
-    "base64"
-  )}`;
-  // generate unique id for image
+  const compressedBase64 = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
   const imageId = crypto.randomUUID();
   
-  // Save to database
-  // Batch insert instead of individual inserts
-  await db
-    .insert(imagesTable)
-    .values({
-      id: imageId,
-      realestateId: RealestateID,
-      imageData: compressedBase64,
-    });
-  return imageId;
+  // Batch insert with better error handling
+  try {
+    await db
+      .insert(imagesTable)
+      .values({
+        id: imageId,
+        realestateId: RealestateID,
+        imageData: compressedBase64,
+      });
+    return imageId;
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    throw new Error("Failed to upload image");
+  }
 };
 
 /**
@@ -384,6 +397,7 @@ agencyProperties.post("/:id/images", async (c) => {
  * Get image by ID
  */
 agencyProperties.get("/image/:id", async (c) => {
+  c.header('Cache-Control', 'public, max-age=604800'); // 7 days cache for images
   try {
     const imageId = c.req.param("id");
     const image = await db

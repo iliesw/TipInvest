@@ -1,3 +1,4 @@
+"use client";
 import SimPlus from "@/components/Services/SimPlus";
 
 export default function Example() {

@@ -1,4 +1,7 @@
+"use client"
+
 /* eslint-disable @next/next/no-img-element */
+
 import { SelectedLang } from "@/stores/lang";
 import { useEffect, useState } from "react";
 import Sim from "./Sim";

@@ -18,7 +18,7 @@ client.use(
 // Check if the user has the client/user role
 client.use("*", async (c, next) => {
   const payload = c.get("jwtPayload");
-  if (payload.role !== "user") {
+  if (payload.role !== "client") {
     return c.json({ error: "Unauthorized. Client access required." }, 403);
   }
   await next();

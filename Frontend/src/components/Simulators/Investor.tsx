@@ -635,10 +635,10 @@ function PropertyDiv({ data }: { data: any }) {
   // Rest of the component remains the same...
   return (
     <div
-      className="rounded-lg hover:bg-gray-200 transition w-full bg-gray-100 gap-4 relative overflow-hidden flex flex-col md:flex-row items-start p-4 md:p-6 m-0 justify-between border min-h-96"
+      className="rounded-lg hover:bg-gray-200 transition w-full bg-gray-100 gap-4 relative overflow-hidden flex flex-col md:flex-row items-start p-4 md:p-6 m-0 justify-between border   "
       style={{ borderRadius: "10px" }}
     >
-      <span className="w-full flex-col flex justify-between h-full md:w-1/2 lg:w-3/5">
+      <div className="w-full flex-col flex justify-between h-full md:w-1/2 lg:w-3/5">
         <div
           className="w-full absolute h-full top-0 left-0 opacity-35"
           style={{
@@ -681,7 +681,7 @@ function PropertyDiv({ data }: { data: any }) {
             </h1>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row gap-5 justify-between w-full items-start md:items-end relative">
+        <div className="flex flex-col mt-16 md:flex-row gap-5 justify-between w-full items-start md:items-end relative">
           <div className="flex flex-col gap-2 w-full md:w-3/5">
             {OverviewData.length > 0 ? (
               <div className="bg-[#ffffffd0] rounded-xl p-2 sm:p-3 text-sm flex flex-col">
@@ -859,8 +859,8 @@ function PropertyDiv({ data }: { data: any }) {
             </div>
           </div>
         </div>
-      </span>
-      <span className="w-full relative h-full mt-4 md:mt-0 md:w-1/2 lg:w-2/5">
+      </div>
+      <div className="w-full relative h-full mt-4 md:mt-0 md:w-1/2 lg:w-2/5">
         {(
           <div className="bg-white flex flex-col justify-between rounded-xl p-3 sm:p-4 shadow-sm border w-full h-full">
             <h3 className="text-base sm:text-lg font-bold mb-2 sm:mb-3">
@@ -996,7 +996,7 @@ function PropertyDiv({ data }: { data: any }) {
             </div>
           </div>
         )}
-      </span>
+      </div>
     </div>
   );
 }
@@ -1013,11 +1013,7 @@ function PropertiesSection() {
   return (
     <div
       id="printable"
-      className={`w-full gap-3 h-full ${
-        $P.length == 0
-          ? "items-center justify-center flex flex-col"
-          : "grid grid-cols-1"
-      }  `}
+      className={`w-full gap-3 h-full flex flex-col`}
     >
       {$P.map((item, index) => {
         return <PropertyDiv key={index} data={item} />;

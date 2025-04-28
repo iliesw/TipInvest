@@ -1,6 +1,6 @@
 import { pgTable, uuid, varchar, text, json, timestamp, decimal, pgEnum, numeric, boolean } from "drizzle-orm/pg-core";
 
-export const roleEnum = pgEnum("role", ["user", "admin", "agency", "expert"]);
+export const roleEnum = pgEnum("role", ["client", "admin", "agency", "expert"]);
 export const statusEnum = pgEnum("status", ["available", "sold","pending"]);
 export const meetingStatusEnum = pgEnum("meeting_status", ["scheduled", "completed", "cancelled"]);
 
@@ -9,7 +9,7 @@ export const userTable = pgTable("USER", {
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  role: roleEnum("role").default("user"),
+  role: roleEnum("role").default("client"),
   isEmailVerified: boolean("is_email_verified").default(false),
   verificationToken: varchar("verification_token", { length: 255 }),
   createdAt: timestamp("created_at",{ mode: 'date', precision: 3 }).defaultNow(),
@@ -43,7 +43,7 @@ export const imagesTable = pgTable("IMAGES", {
 })
 
 export const pageViews = pgTable("Views", {
-  page: text("page").notNull(),
+  page: text("page").notNull().primaryKey(),
   views: numeric("views").default('0'),
 });
 

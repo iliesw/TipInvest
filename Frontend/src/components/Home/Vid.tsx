@@ -1,3 +1,4 @@
+"use client";
 import { Play } from "lucide-react"
 import { useState, useRef } from "react"
 
