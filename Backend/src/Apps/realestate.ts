@@ -55,10 +55,7 @@ realEstate.get("/:id", async (c) => {
     .where(eq(realestateTable.id, id));
   if (!listing.length) return c.json({ error: "Listing not found" }, 404);
 
-  const images = await db
-    .select()
-    .from(imagesTable)
-    .where(eq(imagesTable.realestateId, id));
+
     
   // Get agency information
   const agency = await db
@@ -78,7 +75,6 @@ realEstate.get("/:id", async (c) => {
 
   return c.json({ 
     ...listing[0], 
-    images: images.map((img) => img.imageData),
     agency: agency.length ? agency[0] : null
   });
 });

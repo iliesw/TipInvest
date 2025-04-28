@@ -1,13 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
-import React,{ useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Bed, Bath, Home, Phone, ChevronLeft, ChevronRight, X, Maximize, Wifi, Thermometer, Building, Warehouse, Trees, Car, Lock, Dumbbell, Waves, Mountain, Flower2, Tv, Snowflake, PawPrint } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import useFetch from "@/lib/fetch";
-import { usePathname, useRouter } from "next/navigation";
+import React from "react";
+import { usePathname } from "next/navigation";
 
 interface Property {
   id: number;
@@ -29,18 +30,17 @@ interface Property {
     parkingSpaces: number;
     features: string[];
   };
-  images: string[];
+ 
   agency?: {
     id: string;
     name: string;
     email: string;
   };
 }
-
+// @ts-ignore
 export default function PropertyDetail() {
-  const routeeer = usePathname();
-  const id = routeeer.split("/").pop();
-  const router = useRouter();
+  const router = usePathname();
+  const id = router.split("/").pop();
   const [property, setProperty] = useState<Property>();
   const [activeImage, setActiveImage] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -64,8 +64,9 @@ export default function PropertyDetail() {
           setProperty(data);
           console.log(data);
         })
+        
     }
-  }, [id, ]);
+  }, [id]);
 
   return ( (property == null) ?
       (<>
@@ -78,14 +79,7 @@ export default function PropertyDetail() {
     (<>
       <div className="w-full mx-auto">
         {/* Back Button */}
-        <Button 
-          variant="outline" 
-          className="mb-6 border-none shadow-none"
-          onClick={() => router.push('/client/market')}
-        >
-          <ArrowLeft className="mr-2" size={16} />
-          Back to Marketplace
-        </Button>
+        
 
         {/* Property Title and Location */}
         <div className="mb-6">
@@ -102,7 +96,7 @@ export default function PropertyDetail() {
             <div className="relative aspect-video w-full overflow-hidden rounded-lg group">
               <motion.img 
                 src={property.details.images[activeImage]} 
-                alt={`${property.title} - Image ${activeImage + 1}`}
+                alt={`${property.details.images[activeImage]}`}
                 className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
                 onClick={() => setIsFullscreen(true)}
                 initial={{ opacity: 0 }}
@@ -164,7 +158,7 @@ export default function PropertyDetail() {
               >
                 <img 
                   src={image} 
-                  alt={`${property.title} - Thumbnail ${index + 1}`}
+                  alt={`${image}`}
                   className="w-full h-full object-cover"
                 />
                 {index === activeImage && (
@@ -201,14 +195,14 @@ export default function PropertyDetail() {
                   className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 hover:bg-white/20 text-white z-10"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setActiveImage((prev) => (prev === 0 ? property.images.length - 1 : prev - 1));
+                    setActiveImage((prev) => (prev === 0 ? property.details.images.length - 1 : prev - 1));
                   }}
                 >
                   <ChevronLeft size={24} />
                 </Button>
                 
                 <motion.img 
-                  src={property.images[activeImage]} 
+                  src={property.details.images[activeImage]} 
                   alt={`${property.title} - Image ${activeImage + 1}`}
                   className="max-h-[90vh] max-w-full object-contain"
                   key={`fullscreen-${activeImage}`}
@@ -225,14 +219,14 @@ export default function PropertyDetail() {
                   className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 hover:bg-white/20 text-white z-10"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setActiveImage((prev) => (prev === property.images.length - 1 ? 0 : prev + 1));
+                    setActiveImage((prev) => (prev === property.details.images.length - 1 ? 0 : prev + 1));
                   }}
                 >
                   <ChevronRight size={24} />
                 </Button>
                 
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/10 text-white text-sm px-3 py-1 rounded-full">
-                  {activeImage + 1} / {property.images.length}
+                  {activeImage + 1} / {property.details.images.length}
                 </div>
               </div>
             </motion.div>

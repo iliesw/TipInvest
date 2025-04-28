@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client"
 import Spinner from "@/components/Shared/ui/Spinner";
 import { JaaSMeeting } from "@jitsi/react-sdk";
-import { useRouter } from "next/router";
 import useFetch from "@/lib/fetch";
-import { useEffect, useState } from "react";
+import React ,{ useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function MeetingRoom() {
-  const router = useRouter();
-  const { id } = router.query;
+  const router = usePathname();
+  const id = router.split("/").pop();
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -30,11 +31,12 @@ export default function MeetingRoom() {
           email: data.email,
         });
       });
-  });
+  },[]);
 
   return (
-    <>
+    <div className="w-full h-full rounded-sm overflow-hidden">
       <JaaSMeeting
+      
         appId={"vpaas-magic-cookie-50199e020f3b4042b6099437c379fd1b"}
         roomName={"Meeting#" + id}
         configOverwrite={{
@@ -56,6 +58,6 @@ export default function MeetingRoom() {
           iframeRef.style.width = "100%";
         }}
       />
-    </>
+    </div>
   );
 }

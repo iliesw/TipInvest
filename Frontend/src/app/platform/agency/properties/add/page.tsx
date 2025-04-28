@@ -289,9 +289,9 @@ export default function AddProperty() {
       });
       
       // Redirect after a short delay
-      setTimeout(() => {
-        router.push('/agency/properties');
-      }, 2000);
+      // setTimeout(() => {
+      //   router.push('/agency/properties');
+      // }, 2000);
       
     } catch (error) {
       console.error('Error submitting property:', error);

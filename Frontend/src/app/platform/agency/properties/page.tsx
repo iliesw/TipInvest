@@ -110,11 +110,11 @@ export default function AgencyProperties() {
   };
 
   const handleEdit = (id: string) => {
-    router.push(`/agency/properties/edit/${id}`);
+    // router.push(`/platform/agency/properties/edit/${id}`);
   };
 
   const handleView = (id: string) => {
-    router.push(`/client/property/${id}`);
+    router.push(`/platform/agency/properties/${id}`);
   };
   
   return (
@@ -130,7 +130,12 @@ export default function AgencyProperties() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">My Properties</h1>
-          
+          <Link href="/platform/agency/properties/add">
+                <button className="inline-flex items-center px-4 py-2 text-white bg-black rounded-md text-sm">
+                  <Plus size={16} className="mr-2" />
+                  Add Your First Property
+                </button>
+              </Link>
         </div>
         
         {/* Search and Filters */}
@@ -241,8 +246,11 @@ export default function AgencyProperties() {
                       </td>
                     </tr>
                   ))}
+                  
                 </tbody>
+                
               </table>
+              
             </div>
           ) : (
             <div className="p-8 flex flex-col w-full justify-center items-center">

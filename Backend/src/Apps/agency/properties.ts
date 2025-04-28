@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { agencyAuth } from "../../Middleware/agencyAuth";
 import sharp = require("sharp");
 import { cors } from "hono/cors";
+import { createTempFile, uploadFile } from "../../utils/s3";
 
 const agencyProperties = new Hono();
 agencyProperties.use('*', cors({
@@ -151,7 +152,6 @@ agencyProperties.post("/", async (c) => {
  */
 const uploadImage = async ({
   Data,
-  RealestateID,
 }: {
   Data: string;
   RealestateID: string;
@@ -162,12 +162,12 @@ const uploadImage = async ({
 
   // Optimize image processing with better compression and caching
   const compressedBuffer = await sharp(imageBuffer)
-    .resize(800, 600, {
+    .resize(1600,900, {
       fit: 'inside',
       withoutEnlargement: true
     })
     .jpeg({ 
-      quality: 70,
+      quality: 85 ,
       progressive: true,  // Better loading experience
       mozjpeg: true,     // Better compression
       optimizeScans: true // Further optimization
@@ -175,18 +175,10 @@ const uploadImage = async ({
     .toBuffer();
 
   const compressedBase64 = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
-  const imageId = crypto.randomUUID();
-  
   // Batch insert with better error handling
   try {
-    await db
-      .insert(imagesTable)
-      .values({
-        id: imageId,
-        realestateId: RealestateID,
-        imageData: compressedBase64,
-      });
-    return imageId;
+    const url = await uploadFile(compressedBuffer);
+    return url;
   } catch (error) {
     console.error("Error uploading image:", error);
     throw new Error("Failed to upload image");

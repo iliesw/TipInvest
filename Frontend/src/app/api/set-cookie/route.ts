@@ -20,22 +20,13 @@ export async function POST(req: NextRequest) {
   response.headers.set(
     "Set-Cookie",
     serialize("TOKENAUTH", token, {
-      httpOnly: true, // Prevent access from JavaScript
-      secure: process.env.NODE_ENV === "production", // Secure in HTTPS
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       path: "/",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 7 * 24 * 60 * 60,
     })
   );
 
   return response;
 }
-
-export const saveToken = async (token: string) => {
-  localStorage.setItem("TOKENAUTH", token);
-  await fetch("/api/set-cookie", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
-  });
-};

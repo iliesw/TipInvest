@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Calendar, Clock, Loader2, Search, Video, X } from 'lucide-react';
 import { decodeToken } from '@/lib/auth';
 import useFetch from '@/lib/fetch';
+import Link from 'next/link';
 
 interface Meeting {
   client: any;
@@ -98,6 +99,7 @@ export default function ExpertMeetings() {
   };
 
   const isWithinOneHour = (scheduledTime: string) => {
+    return true; // Disable for now
     const meetingTime = new Date(scheduledTime);
     const now = new Date();
     const hoursDifference = (meetingTime.getTime() - now.getTime()) / (1000 * 60 * 60);
@@ -219,8 +221,8 @@ export default function ExpertMeetings() {
                           )}
                         </button>
                         
-                        <a 
-                          href={`/expert/meetings/${meeting.id}`}
+                        <Link 
+                          href={`/platform/expert/meetings/${meeting.id}`}
                           className={`px-3 py-1 ${isWithinOneHour(meeting.scheduledTime) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'} text-white rounded-md transition-colors inline-flex items-center group relative`}
                           onClick={(e) => !isWithinOneHour(meeting.scheduledTime) && e.preventDefault()}
                         >
@@ -231,18 +233,11 @@ export default function ExpertMeetings() {
                               Meeting will be joinable 1 hour before start time
                             </span>
                           )}
-                        </a>
+                        </Link>
                       </>
                     )}
                     
-                    {meeting.status === 'completed' && (
-                      <a 
-                        href={`/expert/meetings/${meeting.id}`}
-                        className="px-3 py-1 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 transition-colors inline-flex items-center"
-                      >
-                        View Details
-                      </a>
-                    )}
+                   
                   </div>
                 </div>
               </Card>

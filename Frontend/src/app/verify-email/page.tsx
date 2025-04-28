@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import useFetch, { Server } from '@/lib/fetch';
-import { saveToken } from '@/app/api/set-cookie';
+
 import { CircleDashedIcon, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 
 export default function VerifyEmail() {
@@ -37,7 +37,6 @@ export default function VerifyEmail() {
         setMessage(data.message || 'Email verified successfully!');
   
         if (data.token) {
-          await saveToken(data.token);
           localStorage.setItem('TOKENAUTH', data.token);
         }
       } else {

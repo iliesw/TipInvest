@@ -1,18 +1,11 @@
 "use client";
 import {
   Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   SquareTerminal,
   Store,
   LifeBuoy,
-  Calendar,
-  Clock,
   MapPin,
   Bed,
   Bath,
@@ -25,24 +18,13 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import useFetch from "@/lib/fetch";
 
-interface Meeting {
-  id: string;
-  scheduledTime: string;
-  duration: number;
-  status: string;
-  topic: string;
-  expert: {
-    id: string;
-    name: string;
-    specialization: string;
-  } | null;
-}
+
 
 interface Property {
   id: string;
   title: string;
-  images: string[];
   details: {
+    images: string[];
     location: string;
     price: string;
     bedrooms: number;
@@ -52,7 +34,6 @@ interface Property {
 }
 
 export default function ClientView() {
-  const [upcomingMeetings, setUpcomingMeetings] = useState<Meeting[]>([]);
   const [newProperties, setNewProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState({
     meetings: true,
@@ -62,28 +43,7 @@ export default function ClientView() {
   useEffect(() => {
     // Fetch user data when component mounts
       // Fetch upcoming meetings
-      useFetch
-        .get("/client/meetings")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.meetings) {
-            // Sort by date and take only upcoming meetings (max 3)
-            const upcoming = data.meetings
-              .filter((meeting: Meeting) => meeting.status === "scheduled")
-              .sort(
-                (a: Meeting, b: Meeting) =>
-                  new Date(a.scheduledTime).getTime() -
-                  new Date(b.scheduledTime).getTime()
-              )
-              .slice(0, 3);
-            setUpcomingMeetings(upcoming);
-          }
-          setLoading((prev) => ({ ...prev, meetings: false }));
-        })
-        .catch((err) => {
-          console.error("Error fetching meetings:", err);
-          setLoading((prev) => ({ ...prev, meetings: false }));
-        });
+      
 
       // Fetch new properties
       useFetch
@@ -124,7 +84,7 @@ export default function ClientView() {
       icon: <Store size={30} />,
       link: "/platform/client/market",
       color: "white",
-      image:"/assets/images/display/imageC.png"
+      image:"/assets/images/display/imageM.png"
 
     },
     {
@@ -138,16 +98,7 @@ export default function ClientView() {
     },
   ];
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+
 
   return (
     <motion.div
@@ -223,95 +174,7 @@ export default function ClientView() {
         </motion.div>
       </motion.div>
 
-      {/* Upcoming Meetings Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        className="mt-8"
-      >
-        <motion.div className="flex justify-between items-center mb-4">
-          {upcomingMeetings.length > 0 && (
-            <div>
-              <motion.h2
-                className="text-2xl font-bold"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                Upcoming Meetings
-              </motion.h2>
-              <motion.p
-                className="text-gray-500 mt-0 text-sm"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                Your scheduled consultations with real estate experts
-              </motion.p>
-            </div>
-          )}
-        </motion.div>
-
-        <motion.div
-          className="grid grid-cols-1 gap-4 md:grid-cols-3 mt-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-        >
-          {loading.meetings ? (
-            <div className="col-span-3 flex justify-center items-center h-40">
-              <Loader2 className="animate-spin"></Loader2>
-            </div>
-          ) : (
-            upcomingMeetings.length > 0 &&
-            upcomingMeetings.map((meeting, index) => (
-              <motion.div
-                key={meeting.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-                whileHover={{ transition: { duration: 0.2 } }}
-              >
-                <Card className="overflow-hidden transition-all hover:shadow-md">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Scheduled
-                      </span>
-                      <Clock className="h-4 w-4 text-gray-400" />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardTitle className="text-lg">{meeting.topic}</CardTitle>
-                    <div className="mt-2 text-sm text-gray-600">
-                      <div className="flex items-center mb-1">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        <span>{formatDate(meeting.scheduledTime)}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2" />
-                        <span>{meeting.duration} minutes</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="pt-0">
-                    <Link
-                      href={`/platform/client/meetings/${meeting.id}`}
-                      className="w-full"
-                    >
-                      <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white">
-                        View Details
-                      </Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              </motion.div>
-            ))
-          )}
-        </motion.div>
-      </motion.div>
-
+     
       {/* New Real Estate Listings Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -363,13 +226,13 @@ export default function ClientView() {
                 whileHover={{ transition: { duration: 0.2 } }}
               >
                 <Link
-                  href={`/client/property/${property.id}`}
+                  href={`/platform/client/market/${property.id}`}
                   className="block"
                 >
                   <Card className="overflow-hidden transition-all hover:shadow-none cursor-pointer border-none shadow-none h-full rounded-none">
                     <div className="relative aspect-[1/.6] w-full rounded-md overflow-hidden">
                       <img
-                        src={property.images[0] || "/placeholder-property.jpg"}
+                        src={property.details.images[0]}
                         alt={property.title}
                         className="w-full h-full rounded-lg object-cover  transition-transform duration-500"
                       />
@@ -407,13 +270,15 @@ export default function ClientView() {
 
                     <div className="pt-4 pb-6">
                       <div className="flex justify-between items-start mb-2">
-                        <div>
+                        <div className="w-1/2">
                           <h3 className="text-lg font-semibold">
                             {property.title}
                           </h3>
-                          <p className="flex items-center gap-1 text-gray-600 text-sm">
-                            <MapPin size={14} />
+                          <p className="flex  items-center gap-1 text-gray-600 text-sm">
+                            <MapPin size={14} className="min-w-5" />
+                            <span className="text-nowrap text-ellipsis overflow-hidden ">
                             {property.details.location}
+                            </span>
                           </p>
                         </div>
                         <div className="font-semibold text-lg flex flex-col justify-end items-end">

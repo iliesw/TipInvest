@@ -10,7 +10,6 @@ import { isShowing } from "@/stores/isAuthVisible";
 import { SelectedLang } from "@/stores/lang";
 import useFetch from "../lib/fetch";
 import { useRouter } from "next/navigation";
-import { saveToken } from "@/app/api/set-cookie/route";
 
 type Lang = "fr" | "us";
 
@@ -252,7 +251,7 @@ const LoginPage: React.FC = () => {
         }
 
         // Sinon, c'est une connexion réussie
-        saveToken(respData.token);
+        localStorage.setItem("TOKENAUTH", respData.token);
 
         // Check user role from token and redirect accordingly
         try {

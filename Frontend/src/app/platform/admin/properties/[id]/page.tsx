@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client"
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +34,8 @@ import {
 import Link from "next/link";
 import useFetch from "@/lib/fetch";
 import Notification from "@/components/ui/notification";
+import React from "react";
+import { usePathname } from "next/navigation";
 
 interface PropertyDetails {
   features: string[];
@@ -65,8 +67,8 @@ interface NotificationType {
 }
 
 export default function PropertyDetail() {
-  const router = useRouter();
-  const { id } = router.query;
+  const router = usePathname();
+  const id = router.split("/").pop();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
@@ -82,17 +84,7 @@ export default function PropertyDetail() {
     return Math.round(sqFt * 0.092903);
   };
 
-const FetchImages = async (images: string[]) => {
-  const R = [];
-  for (const i in images) {
-    const response = await useFetch.get(`/admin/realestate/image/${images[i]}`);
-    const data = await response.json();
-    if (data && data.imageData) {
-      R.push(data.imageData);
-    }
-  }
-  return R;
-};
+
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -105,13 +97,6 @@ const FetchImages = async (images: string[]) => {
 
         if (response.ok) {
           setProperty(data);
-          // Fetch images only once after property is set
-          if (data.details.images && data.details.images.length > 0) {
-            const imagePromises = await FetchImages(data.details.images);
-            console.log(imagePromises);
-            // set the images 
-            setProperty({ ...data, details: { ...data.details, images: imagePromises } });
-          }
         } else {
           throw new Error("Failed to fetch property details");
         }
@@ -245,7 +230,6 @@ const FetchImages = async (images: string[]) => {
             message: 'Property denied and removed successfully'
           });
           // Redirect back to properties list after denial
-          router.push('/admin/properties');
         } else {
           const data = await response.json();
           setNotification({
@@ -278,7 +262,7 @@ const FetchImages = async (images: string[]) => {
       <div className="space-y-6">
         {/* Header with back button and actions */}
         <div className="flex justify-between items-center">
-          <Link href="/admin/properties">
+          <Link href="/platform/admin/properties">
             <Button size="sm" className="mr-4 shadow-none">
               <ArrowLeft size={16} className="mr-2" />
               Back to Properties

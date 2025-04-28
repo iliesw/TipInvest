@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface Expert {
   id: string;
@@ -46,9 +47,9 @@ interface Expert {
 
 
 
-export default function ExpertDetail({ params }: { params: { id: string } }) {
-  // @ts-ignore
-  const { id } = React.use(params);
+export default function ExpertDetail() {
+  const router = usePathname();
+  const id = router.split("/").pop();
   const [expert, setExpert] = useState<Expert | null>(null);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -293,12 +294,12 @@ export default function ExpertDetail({ params }: { params: { id: string } }) {
                           {bookingMessage}
                         </p>
                         <div className="mt-4">
-                          <a
-                            href="/client/meetings"
+                          <Link
+                            href="/platform/client/meetings"
                             className="text-sm font-medium text-green-600 hover:text-green-500"
                           >
                             View your scheduled meetings
-                          </a>
+                          </Link>
                         </div>
                       </div>
                     </div>

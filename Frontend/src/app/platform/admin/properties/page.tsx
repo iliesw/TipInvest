@@ -274,7 +274,7 @@ export default function PropertiesList() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2 items-center">
-                          <Link href={`/admin/properties/${property.id}`}>
+                          <Link href={`/platform/admin/properties/${property.id}`}>
                             <button className="text-blue-600 hover:text-blue-900 flex flex-col items-center">
                               <Eye size={18} />
                             </button>
