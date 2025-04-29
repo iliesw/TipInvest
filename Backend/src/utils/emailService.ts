@@ -24,7 +24,7 @@ export const sendVerificationEmail = async (
 ): Promise<boolean> => {
   try {
     // Construire l'URL de vérification
-    const verificationUrl = `${"https://tipinvest-production-76d3.up.railway.app"}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${"https://tipsinvest.fr"}/verify-email?token=${verificationToken}`;
 
     // Options de l'email
     const mailOptions = {
@@ -87,10 +87,10 @@ export const sendConfirmationEmail = async (
             <p>Félicitations ! Votre adresse email a été vérifiée avec succès et votre compte est maintenant activé.</p>
             <p>Vous pouvez désormais accéder à toutes les fonctionnalités de TipInvest et commencer à explorer les opportunités d'investissement immobilier.</p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${"https://tipinvest-production-76d3.up.railway.app"}/client" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Accéder à mon compte</a>
+              <a href="${"https://tipsinvest.fr"}/client" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Accéder à mon compte</a>
             </div>
             <p>Cordialement,<br>L'équipe TipInvest</p>
-          </div>
+          </div> 
         </div>
       `,
     };

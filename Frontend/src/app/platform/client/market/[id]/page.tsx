@@ -81,7 +81,7 @@ export default function PropertyDetail() {
         <Button 
           variant="outline" 
           className="mb-6 border-none shadow-none"
-          onClick={() => router.push('/client/market')}
+          onClick={() => router.push('/platform/client/market')}
         >
           <ArrowLeft className="mr-2" size={16} />
           Back to Marketplace
