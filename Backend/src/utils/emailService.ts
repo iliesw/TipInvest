@@ -90,7 +90,7 @@ export const sendConfirmationEmail = async (
               <a href="${"https://tipsinvest.fr"}/client" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Accéder à mon compte</a>
             </div>
             <p>Cordialement,<br>L'équipe TipInvest</p>
-          </div>
+          </div> 
         </div>
       `,
     };
