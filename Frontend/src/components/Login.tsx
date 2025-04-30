@@ -446,6 +446,10 @@ const LoginPage: React.FC = () => {
                 )}
               </div>
             )}
+            { isLogin &&
+
+              <p className="text-sm">Forgot your password ? <a href="/reset-password" className="cursor-pointer text-lime-600">Reset it Here</a></p>
+            }
             <button
               className="w-full min-h-[40px] bg-black text-white rounded font-figtree text-sm flex items-center justify-center gap-2.5 cursor-pointer mt-2.5"
               onClick={submit}

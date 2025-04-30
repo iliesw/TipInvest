@@ -54,7 +54,7 @@ export const sendVerificationEmail = async (
 
     // Envoyer l'email
     const r = await transporter.sendMail(mailOptions);
-    console.log(r)
+    console.log(r);
     return true;
   } catch (error) {
     console.error("Erreur lors de lenvoi de l'email de vérification:", error);
@@ -99,6 +99,41 @@ export const sendConfirmationEmail = async (
     return true;
   } catch (error) {
     console.error("Erreur lors de l'envoi de l'email de confirmation:", error);
+    return false;
+  }
+};
+
+export const sendResetPasswordEmail = async (
+  to: string,
+  name: string,
+  resetToken: string
+) => {
+  try {
+    const mailOptions = {
+      from: '"TipInvest" <noreply@tipsinvest.fr>',
+      to,
+      subject: "Reset de votre mot de passe - TipInvest",
+      html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h1 style="color: #3b82f6;">TipInvest</h1>
+        </div>
+        <div>
+          <p>Bonjour ${name},</p>
+          <p>Vous avez demandé à réinitialiser votre mot de passe. Veuillez cliquer sur le lien ci-dessous pour le faire :</p>
+          <div style="text-align: center; margin: 30px 0;">
+            
+            <a href="${"https://tipsinvest.fr"}/reset-password/${resetToken}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Réinitialiser mon mot de passe</a>
+          </div>
+          <p>Ce lien expirera dans 24 heures.</p>
+        </div> 
+      </div>
+    `,
+    };
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error("Erreur lors de l'envoi de l'email:", error);
     return false;
   }
 };

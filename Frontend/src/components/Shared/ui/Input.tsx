@@ -73,6 +73,7 @@ type InputProps = {
   value?: string;
   // @ts-ignore
   onChange?: any;
+  className?: string;
 };
 
 export default function Input({
@@ -80,7 +81,8 @@ export default function Input({
   placeholder = "Your Password",
   passwordStrength = true,
   value = "",
-  onChange
+  onChange,
+  className = "",
 }: InputProps) {
   const [input, setInput] = useState<string>(value);
   const [hidden, setHidden] = useState<boolean>(true);
@@ -97,7 +99,7 @@ export default function Input({
   
   return (
     <div
-      className={`ainput ${type === "password" ? "password" : ""}`}
+      className={`ainput ${type === "password" ? "password" : ""} ${className}`}
       data-valid={valid}
       data-strength={passwordStrength}
     >
