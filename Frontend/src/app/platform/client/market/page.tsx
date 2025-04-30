@@ -203,7 +203,7 @@ export default function Market() {
               <option value="0-200000">Under $200,000</option>
               <option value="200000-400000">$200,000 - $400,000</option>
               <option value="400000-600000">$400,000 - $600,000</option>
-              <option value="600000-1000000">$600,000+</option>
+              <option value="600000-1000000000">$600,000+</option>
             </select>
           </div>
 
@@ -311,7 +311,7 @@ export default function Market() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        {properties.map((property, index) => (
+        {filteredProperties.map((property, index) => (
           <motion.div
             key={property.id}
             initial={{ opacity: 0, y: 20 }}
