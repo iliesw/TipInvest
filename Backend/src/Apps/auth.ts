@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import { GetVersion } from "../../lib";
-import { sendVerificationEmail, sendConfirmationEmail } from "../utils/emailService";
+import { sendVerificationEmail, sendConfirmationEmail, sendResetPasswordEmail } from "../utils/emailService";
 import { randomBytes } from "crypto";
 
 const auth = new Hono();
@@ -168,9 +168,9 @@ auth.get("/check-email", async (c) => {
  * Request Body: { email: string }
  * Response: { message: string }
  */
-auth.post("/forgot-password", async (c) => {
+auth.get("/forgot-password", async (c) => {
   // Parse the request body
-  const { email } = await c.req.json() as { email: string };
+  const email = c.req.query("email")
 
   // Check if the user exists in the database
   const user = await db
@@ -187,6 +187,8 @@ auth.post("/forgot-password", async (c) => {
   // Generate a password reset token (expires in 15 minutes)
   const resetToken = jwt.sign({ id: user[0].id }, process.env.JWT_SECRET!, { expiresIn: "15m" });
 
+  sendResetPasswordEmail(user[0].email, user[0].name, resetToken);
+  
   // In a real application, you would send the resetToken via email to the user.
   // console.log(`Password reset token for ${email}: ${resetToken}`);
 
