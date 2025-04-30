@@ -142,11 +142,11 @@ const Data = {
       url: "/platform/admin/properties",
       icon: Building,
     },
-    // {
-    //   title: "Analytics",
-    //   url: "/platform/admin/analytics",
-    //   icon: ChartArea,
-    // },
+    {
+      title: "Users",
+      url: "/platform/admin/users",
+      icon: Users,
+    },
   ],
   default: [],
 };

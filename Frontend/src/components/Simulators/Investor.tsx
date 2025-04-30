@@ -66,26 +66,29 @@ const chartConfig = (_label: string) => ({
 
 function MetricSerction() {
   const store = useStore(Properties);
-  const [chartData, setChartData] = useState<{
-    title:string,
-    icon:React.FC,
-    valueD:string,
-    value:number,
-    chartData:any
-  }[]>([]);
+  const [chartData, setChartData] = useState<
+    {
+      title: string;
+      icon: React.FC;
+      valueD: string;
+      value: number;
+      chartData: any;
+      prefix:string;
+    }[]
+  >([]);
   const [Data, setData] = useState<
     {
-      IntrestRate:number,
-      TotalCost:number,
-      MonthlyRent:number,
-      LoanAmount:number,
-      Duration:number,
-      Risk:number,
-      Quality:number,
-      Monthly:number,
-      MortgagePayment:number,
-      Gain:number,
-      Rapport:string,
+      IntrestRate: number;
+      TotalCost: number;
+      MonthlyRent: number;
+      LoanAmount: number;
+      Duration: number;
+      Risk: number;
+      Quality: number;
+      Monthly: number;
+      MortgagePayment: number;
+      Gain: number;
+      Rapport: string;
     }[]
   >([]);
   useEffect(() => {
@@ -131,31 +134,21 @@ function MetricSerction() {
     const RevChart = [];
     const months = GetNext6Months();
 
-    // Initialize RevChart with months and desktop revenue set to 0
-    for (let i = 0; i < months.length; i++) {
-      RevChart.push({ month: months[i], desktop: 0.0 });
-    }
-
     // Loop through each data entry (each property)
     for (let i = 0; i < Data.length; i++) {
       // Monthly rental income is the primary revenue source
-      const monthlyRent = Data[i].LoanAmount; 
-      
-      for (let t = 0; t < RevChart.length; t++) {
-        // Calculate revenue with a small annual appreciation (3%)
-        const annualAppreciation = 1.03; // 3% annual appreciation
-        const monthlyAppreciation = Math.pow(annualAppreciation, t/12);
-        const R = Math.floor(monthlyRent * monthlyAppreciation);
-        
-        // Add property value appreciation (unrealized gain)
-        const propertyAppreciation = Data[i].TotalCost * (Math.pow(1.02, t/12) - 1) / RevChart.length;
-        
-        RevChart[t].desktop += R + Math.floor(propertyAppreciation); // Accumulate value
-      }
+      RevT += Data[i].TotalCost;
     }
 
-    // Compute total revenue
-    RevT = RevChart.reduce((sum, entry) => sum + entry.desktop, 0);
+    const annualRate = 0.03;
+    const monthlyRate = (1 + annualRate) ** (1 / 12) - 1;
+
+    for (let i = 0; i < months.length; i++) {
+      RevChart.push({
+        month: months[i],
+        desktop: RevT * (1 + monthlyRate) ** i,
+      });
+    }
 
     return {
       RevT: RevT,
@@ -164,137 +157,86 @@ function MetricSerction() {
   };
 
   const GetCashFlow = () => {
-    const CashFlowChart = [];
+    let RevT = 0;
+    const RevChart = [];
     const months = GetNext6Months();
 
-    // Initialize CashFlowChart with months and net cash flow set to 0
-    for (let i = 0; i < months.length; i++) {
-      CashFlowChart.push({ month: months[i], desktop: 0 });
-    }
-
-    // Loop through each property in Data
+    // Loop through each data entry (each property)
     for (let i = 0; i < Data.length; i++) {
-      for (let t = 0; t < CashFlowChart.length; t++) {
-        // Rental income (assumed provided in Data)
-        const monthlyRent = Data[i].MonthlyRent || Data[i].Monthly || 0;
-
-        // Mortgage payment (principal + interest)
-        const mortgagePayment = Data[i].MortgagePayment || 0;
-        
-        // Property management fee (typically 8-10% of rental income)
-        const managementFee = monthlyRent * 0.08;
-        
-        // Property tax (estimated at 1% of property value annually)
-        const propertyTax = (Data[i].TotalCost * 0.01) / 12;
-        
-        // Maintenance and repairs (estimated at 1% of property value annually)
-        const maintenance = (Data[i].TotalCost * 0.01) / 12;
-        
-        // Insurance (estimated at 0.5% of property value annually)
-        const insurance = (Data[i].TotalCost * 0.005) / 12;
-        
-        // Vacancy allowance (estimated at 5% of rental income)
-        const vacancy = monthlyRent * 0.05;
-        
-        // Total expenses
-        const totalExpenses = mortgagePayment + managementFee + propertyTax + maintenance + insurance + vacancy;
-        
-        // Net Cash Flow = Income - Expenses
-        const netFlow = Math.floor(monthlyRent - totalExpenses);
-
-        // Accumulate in chart
-        CashFlowChart[t].desktop += netFlow;
-      }
+      // Monthly rental income is the primary revenue source
+      RevT += Data[i].MortgagePayment;
     }
 
-    // Compute total net cash flow over the months
-    const TotalCashFlow = CashFlowChart.reduce(
-      (sum, entry) => sum + entry.desktop,
-      0
-    );
+    const annualRate = 0.03;
+    const monthlyRate = (1 + annualRate) ** (1 / 12) - 1;
+
+    for (let i = 0; i < months.length; i++) {
+      RevChart.push({
+        month: months[i],
+        desktop: RevT * (1 + monthlyRate) ** i,
+      });
+    }
 
     return {
-      TotalCashFlow: TotalCashFlow,
-      CashFlowChart: CashFlowChart,
+      TotalCashFlow: RevT,
+      CashFlowChart: RevChart,
     };
   };
 
   const GetRiskAdjustedReturns = () => {
-    const RiskChart = [];
+    let RevT = 0;
+    const RevChart = [];
     const months = GetNext6Months();
 
-    // Initialize RiskChart with months and adjusted returns set to 0
-    for (let i = 0; i < months.length; i++) {
-      RiskChart.push({ month: months[i], desktop: 0 });
-    }
-
-    // Loop through each property in Data
+    // Loop through each data entry (each property)
     for (let i = 0; i < Data.length; i++) {
-      // Base expected return (annual) - combination of rental yield and appreciation
-      const rentalYield = ((Data[i].MonthlyRent || Data[i].Monthly || 0) * 12) / Data[i].TotalCost;
-      const expectedAppreciation = 0.03; // 3% annual appreciation
-      const baseReturn = rentalYield + expectedAppreciation;
-      
-      // Risk adjustment factor (higher risk = lower adjusted return)
-      const riskFactor = 1 - (Data[i].Risk / 10); // Adjust divisor from 20 to 10 for more pronounced risk impact
-      
-      // Quality adjustment factor (higher quality = higher adjusted return)
-      const qualityFactor = 1 + (Data[i].Quality / 20); // Quality on scale of 0-10
-      
-      // Calculate risk-adjusted annual return rate
-      const riskAdjustedAnnualRate = baseReturn * riskFactor * qualityFactor;
-      
-      for (let t = 0; t < RiskChart.length; t++) {
-        // Convert annual rate to monthly and calculate compounded growth
-        const monthlyRate = riskAdjustedAnnualRate / 12;
-        const monthsElapsed = t + 1;
-        
-        // Calculate risk-adjusted value growth
-        const adjustedValue = Math.floor(
-          Data[i].TotalCost * Math.pow(1 + monthlyRate, monthsElapsed)
-        );
-
-        // Accumulate adjusted return per month
-        RiskChart[t].desktop += adjustedValue;
-      }
+      // Monthly rental income is the primary revenue source
+      RevT += (Data[i].MortgagePayment * 120) / (Data[i].TotalCost);
     }
 
-    // Compute total risk-adjusted portfolio return
-    const TotalRiskAdjustedReturn = RiskChart.reduce(
-      (sum, entry) => sum + entry.desktop,
-      0
-    );
+    const annualRate = 0.09;
+    const monthlyRate = (1 + annualRate) ** (1 / 12) - 1;
+
+    for (let i = 0; i < months.length; i++) {
+      RevChart.push({
+        month: months[i],
+        desktop: RevT * (1 + monthlyRate) ** i,
+      });
+    }
 
     return {
-      TotalRiskAdjustedReturn: TotalRiskAdjustedReturn,
-      RiskChart: RiskChart,
+      TotalRiskAdjustedReturn: RevT,
+      RiskChart: RevChart,
     };
   };
 
   const CalculateData = () => {
-    return[
+    return [
       {
-        title: "Revenue",
+        title: "Total Investment Value",
         icon: ArrowDownUp,
         valueD: "Based on your investment",
         value: GetRev().RevT,
         chartData: GetRev().RevChart,
+        prefix:"$",
       },
       {
-        title: "Cash Flow",
+        title: "Total Monthly Rental Income rent",
         icon: ArrowDownUp,
         valueD: "Based on your investment",
         value: GetCashFlow().TotalCashFlow,
         chartData: GetCashFlow().CashFlowChart,
+        prefix:"$",
       },
       {
-        title: "Risk-Adjusted Return",
+        title: "Overall Gross Profitability",
         icon: ArrowDownUp,
         valueD: "Based on your investment",
         value: GetRiskAdjustedReturns().TotalRiskAdjustedReturn,
         chartData: GetRiskAdjustedReturns().RiskChart,
+        prefix:"%",
       },
-    ]
+    ];
   };
 
   return (
@@ -315,6 +257,7 @@ function Metric({
     valueD: string;
     value: number;
     chartData: any[];
+    prefix:string;
   };
 }) {
   return (
@@ -335,7 +278,7 @@ function Metric({
       </div>
       <div className="flex justify-between w-full items-end h-full relative gap-4 sm:gap-8">
         <div className="flex flex-col relative z-10">
-          <h1 className="text-3xl sm:text-5xl">{data.value}$</h1>
+          <h1 className="text-3xl sm:text-5xl">{data.value}{data.prefix}</h1>
           <p className="text-xs sm:text-sm opacity-60 my-2">{data.valueD}</p>
         </div>
         <div className="flex-grow">
@@ -500,68 +443,92 @@ function PropertyDiv({ data }: { data: any }) {
   useEffect(() => {
     // Property type factor - default to House if not specified
     const selectedPropertyType = "House"; // This would ideally come from user selection
-    const propertyTypeFactor = propertyTypes.find(type => type.name === selectedPropertyType)?.returnMultiplier || 1.0;
-    
+    const propertyTypeFactor =
+      propertyTypes.find((type) => type.name === selectedPropertyType)
+        ?.returnMultiplier || 1.0;
+
     // Base quality factors
     const durationFactor = Math.min(1, Duration / 60); // Longer duration is better (up to 5 years)
     const interestFactor = 1 - IntrestRate / 20; // Lower interest rate is better
-    
+
     // Rental yield factor (annual rent / property cost)
-    const rentalYieldFactor = TotalCost > 0 ? Math.min(1.5, ((MonthlyRent * 12) / TotalCost) * 5) : 0;
-    
+    const rentalYieldFactor =
+      TotalCost > 0 ? Math.min(1.5, ((MonthlyRent * 12) / TotalCost) * 5) : 0;
+
     // Loan-to-value ratio factor (lower is better for quality)
     const ltvRatio = TotalCost > 0 ? LoanAmount / TotalCost : 0;
-    const ltvFactor = 1 - (ltvRatio * 0.5); // Lower LTV means higher quality
-    
+    const ltvFactor = 1 - ltvRatio * 0.5; // Lower LTV means higher quality
+
     // Calculate quality score (0-10 scale) with weighted components
-    const qualityScore = (
-      durationFactor * 2 +
-      interestFactor * 2 +
-      rentalYieldFactor * 3 +
-      ltvFactor * 2 +
-      propertyTypeFactor
-    ) / 1.0; // Adjusted divisor to get a reasonable range
-    
+    const qualityScore =
+      (durationFactor * 2 +
+        interestFactor * 2 +
+        rentalYieldFactor * 3 +
+        ltvFactor * 2 +
+        propertyTypeFactor) /
+      1.0; // Adjusted divisor to get a reasonable range
+
     setQualityScore(Math.min(10, Math.max(1, Math.round(qualityScore))));
-  }, [propertyTypes, Duration, IntrestRate, TotalCost, MonthlyRent, LoanAmount]);
+  }, [
+    propertyTypes,
+    Duration,
+    IntrestRate,
+    TotalCost,
+    MonthlyRent,
+    LoanAmount,
+  ]);
 
   // Calculate risk level (0-10 scale)
   useEffect(() => {
     // Property type risk factor
     const selectedPropertyType = "House"; // This would ideally come from user selection
-    const propertyTypeRiskFactor = propertyTypes.find(type => type.name === selectedPropertyType)?.riskFactor || 0.7;
-    
+    const propertyTypeRiskFactor =
+      propertyTypes.find((type) => type.name === selectedPropertyType)
+        ?.riskFactor || 0.7;
+
     // Risk factors
     const durationRisk = Duration > 60 ? 0.6 : Duration > 24 ? 0.8 : 1.2; // Longer duration reduces risk
     const interestRisk = IntrestRate / 15; // Higher interest rate increases risk
-    
+
     // Loan-to-value ratio risk (higher ratio = higher risk)
     const ltvRatio = TotalCost > 0 ? LoanAmount / TotalCost : 0;
     const ltvRisk = ltvRatio * 5; // Higher LTV means higher risk
-    
+
     // Debt service coverage ratio (DSCR) - lower is riskier
     const annualRent = MonthlyRent * 12;
     const annualMortgage = MortgagePayment * 12;
     const dscr = annualMortgage > 0 ? annualRent / annualMortgage : 3; // Default to low risk if no mortgage
     const dscrRisk = dscr < 1 ? 3 : dscr < 1.25 ? 2 : dscr < 1.5 ? 1 : 0.5;
-    
+
     // Calculate risk score (0-10 scale) with weighted components
-    const calculatedRiskScore = (
-      durationRisk * 1.5 +
-      interestRisk * 2 +
-      ltvRisk * 2 +
-      dscrRisk * 3 +
-      propertyTypeRiskFactor * 1.5
-    ) / 1.0; // Adjusted divisor to get a reasonable range
-    
+    const calculatedRiskScore =
+      (durationRisk * 1.5 +
+        interestRisk * 2 +
+        ltvRisk * 2 +
+        dscrRisk * 3 +
+        propertyTypeRiskFactor * 1.5) /
+      1.0; // Adjusted divisor to get a reasonable range
+
     // Ensure risk score is within 1-10 range and is a whole number
-    const newRiskScore = Math.min(10, Math.max(1, Math.round(calculatedRiskScore)));
-    
+    const newRiskScore = Math.min(
+      10,
+      Math.max(1, Math.round(calculatedRiskScore))
+    );
+
     // Only update if the risk score has actually changed
     if (newRiskScore !== riskScore) {
       setRiskScore(newRiskScore);
     }
-  }, [Duration, IntrestRate, TotalCost, LoanAmount, MonthlyRent, MortgagePayment, propertyTypes, riskScore]);
+  }, [
+    Duration,
+    IntrestRate,
+    TotalCost,
+    LoanAmount,
+    MonthlyRent,
+    MortgagePayment,
+    propertyTypes,
+    riskScore,
+  ]);
 
   useEffect(() => {
     if (
@@ -592,7 +559,6 @@ function PropertyDiv({ data }: { data: any }) {
       SetMortgagePayment(0);
     }
   }, [IntrestRate, Duration, LoanAmount]);
-
 
   const [gain, setGain] = useState(0);
   useEffect(() => {
@@ -861,7 +827,7 @@ function PropertyDiv({ data }: { data: any }) {
         </div>
       </div>
       <div className="w-full relative h-full mt-4 md:mt-0 md:w-1/2 lg:w-2/5">
-        {(
+        {
           <div className="bg-white flex flex-col justify-between rounded-xl p-3 sm:p-4 shadow-sm border w-full h-full">
             <h3 className="text-base sm:text-lg font-bold mb-2 sm:mb-3">
               Bank Comparison
@@ -891,8 +857,7 @@ function PropertyDiv({ data }: { data: any }) {
                       bank.interestRate / 100.0 / 12.0;
                     const numberOfPayments = Duration;
                     // Use LoanAmount instead of Capital for mortgage calculation
-                    const loanAmountToUse =
-                      LoanAmount > 0 ? LoanAmount : 0;
+                    const loanAmountToUse = LoanAmount > 0 ? LoanAmount : 0;
                     const numerator =
                       loanAmountToUse *
                       monthlyInterestRate *
@@ -901,38 +866,48 @@ function PropertyDiv({ data }: { data: any }) {
                       Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1;
                     const baseMonthlyPayment =
                       denominator === 0 ? 0 : numerator / denominator;
-                    const monthlyPayment = Math.floor(
-                      baseMonthlyPayment 
-                    );
+                    const monthlyPayment = Math.floor(baseMonthlyPayment);
                     const totalPayment = monthlyPayment * Duration;
 
                     // Calculate quality score for this bank
                     // Duration factor - longer duration is better (up to 5 years)
                     const durationFactor = Math.min(1, Duration / 60);
-                    
+
                     // Interest factor - lower interest rate is better
                     const interestFactor = 1 - bank.interestRate / 20;
-                    
+
                     // Rental yield factor - higher yield is better
-                    const rentalYieldFactor = TotalCost > 0 ? Math.min(1.5, ((MonthlyRent * 12) / TotalCost) * 5) : 0;
-                    
+                    const rentalYieldFactor =
+                      TotalCost > 0
+                        ? Math.min(1.5, ((MonthlyRent * 12) / TotalCost) * 5)
+                        : 0;
+
                     // Loan-to-value ratio factor - lower LTV is better for quality
                     const ltvRatio = TotalCost > 0 ? LoanAmount / TotalCost : 0;
-                    const ltvFactor = 1 - (ltvRatio * 0.5);
-                    
+                    const ltvFactor = 1 - ltvRatio * 0.5;
+
                     // Debt service coverage ratio - higher is better
-                    const monthlyPaymentForDscr = monthlyPayment > 0 ? monthlyPayment : 1;
+                    const monthlyPaymentForDscr =
+                      monthlyPayment > 0 ? monthlyPayment : 1;
                     const dscr = MonthlyRent / monthlyPaymentForDscr;
-                    const dscrFactor = dscr >= 1.5 ? 1.2 : dscr >= 1.25 ? 1.0 : dscr >= 1.0 ? 0.8 : 0.5;
-                    
+                    const dscrFactor =
+                      dscr >= 1.5
+                        ? 1.2
+                        : dscr >= 1.25
+                        ? 1.0
+                        : dscr >= 1.0
+                        ? 0.8
+                        : 0.5;
+
                     // Calculate weighted quality score
                     const qualityScore =
-                      (durationFactor * 1.5 +     // 15% weight
-                       interestFactor * 2.5 +     // 25% weight
-                       rentalYieldFactor * 2.5 +  // 25% weight
-                       ltvFactor * 2.0 +         // 20% weight
-                       dscrFactor * 1.5) / 1.0;   // 15% weight
-                       
+                      (durationFactor * 1.5 + // 15% weight
+                        interestFactor * 2.5 + // 25% weight
+                        rentalYieldFactor * 2.5 + // 25% weight
+                        ltvFactor * 2.0 + // 20% weight
+                        dscrFactor * 1.5) /
+                      1.0; // 15% weight
+
                     const bankQualityScore = Math.min(
                       10,
                       Math.max(1, Math.round(qualityScore))
@@ -995,7 +970,7 @@ function PropertyDiv({ data }: { data: any }) {
               </p>
             </div>
           </div>
-        )}
+        }
       </div>
     </div>
   );
@@ -1011,10 +986,7 @@ function PropertiesSection() {
   const $P = useStore(Properties);
 
   return (
-    <div
-      id="printable"
-      className={`w-full gap-3 h-full flex flex-col`}
-    >
+    <div id="printable" className={`w-full gap-3 h-full flex flex-col`}>
       {$P.map((item, index) => {
         return <PropertyDiv key={index} data={item} />;
       })}
