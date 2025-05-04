@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { db } from "../../Database/index";
-import { expertProfileTable, userTable } from "../../Database/schema";
-import { eq } from "drizzle-orm";
+import { expertProfileTable, userTable, CommentsTable, meetingTable } from "../../Database/schema";
+import { eq, avg, count } from "drizzle-orm";
 
 const experts = new Hono();
 
@@ -40,7 +40,7 @@ experts.get("/", async (c) => {
  * Get a specific expert's profile by ID
  * 
  * Endpoint: GET /:id
- * Response: { expert: ExpertProfile & { user: User } } | { error: string }
+ * Response: { expert: ExpertProfile & { user: User, reviews: Review[], rating: number } } | { error: string }
  */
 experts.get("/:id", async (c) => {
   try {
@@ -51,10 +51,7 @@ experts.get("/:id", async (c) => {
       .select()
       .from(expertProfileTable)
       .leftJoin(userTable, eq(expertProfileTable.userId, userTable.id))
-      .where(eq(expertProfileTable.id, expertId))
-     
-
-    console.log(expertWithProfile);
+      .where(eq(expertProfileTable.id, expertId));
 
     if (!expertWithProfile.length) {
       return c.json({ error: "Expert not found" }, 404);
@@ -62,12 +59,56 @@ experts.get("/:id", async (c) => {
 
     const { EXPERT_PROFILE, USER } = expertWithProfile[0];
 
+    // Fetch reviews for this expert
+    const reviews = await db
+      .select()
+      .from(CommentsTable)
+      .where(eq(CommentsTable.expertID, expertId));
+
+    // Get client names for each review
+    const reviewsWithClientNames = await Promise.all(
+      reviews.map(async (review) => {
+        const client = await db
+          .select({
+            name: userTable.name
+          })
+          .from(userTable)
+          .where(eq(userTable.id, review.clientID))
+          .limit(1);
+
+        return {
+          ...review,
+          clientName: client.length ? client[0].name : "Anonymous"
+        };
+      })
+    );
+
+    // Calculate average rating
+    const ratingResult = await db
+      .select({ averageRating: avg(CommentsTable.rating) })
+      .from(CommentsTable)
+      .where(eq(CommentsTable.expertID, expertId));
+
+    const averageRating = ratingResult[0]?.averageRating || 0;
+    
+    // Count completed meetings for this expert
+    const completedMeetingsResult = await db
+      .select({ count: count() })
+      .from(meetingTable)
+      .where(eq(meetingTable.expertId, expertId))
+      .where(eq(meetingTable.status, "completed"));
+      
+    const completedMeetingsCount = completedMeetingsResult[0]?.count || 0;
+
     // Transform the data to include only necessary user information
     const expert = {
       ...EXPERT_PROFILE,
       name: USER.name,
       email: USER.email,
-      avatar: USER.avatar
+      avatar: USER.avatar,
+      reviews: reviewsWithClientNames,
+      rating: typeof averageRating === 'number' ? Number(averageRating.toFixed(1)) : 0,
+      completedMeetingsCount: Number(completedMeetingsCount)
     };
 
     return c.json({ expert });

@@ -1,3 +1,5 @@
+import { isNotNull } from "drizzle-orm";
+import { date } from "drizzle-orm/mysql-core";
 import { pgTable, uuid, varchar, text, json, timestamp, decimal, pgEnum, numeric, boolean } from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum("role", ["client", "admin", "agency", "expert"]);
@@ -36,10 +38,20 @@ export const transactionTable = pgTable("TRANSACTIONS", {
   transactionDate: timestamp("transaction_date").defaultNow(),
 });
 
+
 export const imagesTable = pgTable("IMAGES", {
   id: uuid("id").defaultRandom().primaryKey(),
   realestateId: uuid("realestate_id").notNull(),
   imageData: text("image_data").notNull(),
+})
+
+export const CommentsTable = pgTable("Comments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  clientID : uuid("user_id").notNull(),
+  expertID : uuid("expert_id").notNull(),
+  comment: text().notNull(),
+  rating: numeric("rating").notNull(),
+  date : timestamp().defaultNow()
 })
 
 export const pageViews = pgTable("Views", {
@@ -67,8 +79,5 @@ export const meetingTable = pgTable("MEETING", {
   duration: numeric("duration").notNull(), // in minutes
   status: meetingStatusEnum("status").default("scheduled"),
   topic: varchar("topic", { length: 255 }),
-  notes: text("notes"),
-  meetingLink: varchar("meeting_link", { length: 255 }),
   createdAt: timestamp("created_at", { mode: 'date', precision: 3 }).defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: 'date', precision: 3 }).defaultNow().$onUpdate(() => new Date()),
 })

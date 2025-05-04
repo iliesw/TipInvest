@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 import { jwt } from "hono/jwt";
+import { cors } from "hono/cors";
 import meetings from "./meetings";
 import expert from "./experts";
+import reviews from "./reviews";
 import { GetVersion } from "../../../lib";
 
 const client = new Hono();
@@ -30,5 +32,6 @@ client.get("/", (c) => c.json({ status: "Client API alive " + GetVersion() }));
 client.route("/meetings", meetings);
 // Route to client expert management
 client.route("/experts", expert);
+client.route("/reviews", reviews);
 
 export default client;

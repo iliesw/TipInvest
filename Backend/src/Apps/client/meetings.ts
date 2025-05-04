@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { db } from "../../Database/index";
-import { meetingTable, expertProfileTable, userTable } from "../../Database/schema";
+import { meetingTable, expertProfileTable, userTable, CommentsTable } from "../../Database/schema";
 import { eq, and, gte } from "drizzle-orm";
 
 const meetings = new Hono();
@@ -28,7 +28,6 @@ console.log(id);
         duration: meetingTable.duration,
         status: meetingTable.status,
         topic: meetingTable.topic,
-        meetingLink: meetingTable.meetingLink,
         expertId: meetingTable.expertId,
       })
       .from(meetingTable)
@@ -249,5 +248,37 @@ meetings.put("/:id/cancel", async (c) => {
     return c.json({ error: "Server error while cancelling meeting" }, 500);
   }
 });
+
+
+meetings.post("/rate", async (c) => {
+  const { id,rating,review } = await c.req.json();
+  // Find the meeting
+  const meeting = await db
+   .select()
+   .from(meetingTable)
+   .where(eq(meetingTable.id, id))
+   .limit(1);
+
+  if (!meeting.length) {
+    return c.json({ error: "Meeting not found" }, 404);
+  }
+  // Update the meeting status
+  await db
+  .update(meetingTable)
+  .set({
+    status: "completed",
+  })
+
+  await db.insert(CommentsTable).values({
+    id: id,
+    expertID: meeting[0].expertId,
+    clientID: meeting[0].clientId,
+    comment: review,
+    rating: rating,
+  });
+
+  return c.json({ status: true });
+
+})
 
 export default meetings;

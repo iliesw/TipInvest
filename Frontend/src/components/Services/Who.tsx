@@ -1,6 +1,6 @@
 export default function Who() {
     return (
-        <div className="w-full max-w-3xl mx-auto flex flex-col space-y-8 px-4 py-16 sm:py-24 md:py-32">
+        <div className="w-full sm:w-2/3 mx-auto flex flex-col space-y-8 px-4 py-16 sm:py-24 md:py-32">
             <h1 className="text-5xl font-bold  text-gray-800 mb-6">
                 Qui sommes-nous ?
             </h1>

@@ -12,6 +12,7 @@ import {
   User,
   Building2,
   Loader2,
+  Check,
 } from "lucide-react";
 import { decodeToken } from "@/lib/auth";
 import useFetch from "@/lib/fetch";
@@ -26,6 +27,17 @@ import { format } from "date-fns";
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ReviewsSection from "./ReviewsSection";
+
+interface Review {
+  id: string;
+  clientID: string;
+  expertID: string;
+  comment: string;
+  rating: number;
+  date: string;
+  clientName?: string;
+}
 
 interface Expert {
   id: string;
@@ -34,6 +46,8 @@ interface Expert {
   bio: string;
   hourlyRate: number;
   rating: number;
+  reviews: Review[];
+  completedMeetingsCount?: number;
   availability: {
     monday: boolean[];
     tuesday: boolean[];
@@ -217,7 +231,14 @@ export default function ExpertDetail() {
                       </span>
                     </div>
 
-                    <div className="flex items-center">
+                    <div className="flex items-center bg-green-50 px-3 py-1 rounded-full mt-2">
+                      <Check className="h-5 w-5 text-green-500 mr-1" />
+                      <span className="font-medium text-green-600">
+                        {expert.completedMeetingsCount || 0} completed sessions
+                      </span>
+                    </div>
+
+                    <div className="flex items-center mt-2">
                       <span className="text-gray-700">
                         <span className="font-black text-lg">
                           $ {expert.hourlyRate} / hr
@@ -446,7 +467,9 @@ export default function ExpertDetail() {
                 )}
               </Card>
             </div>
+            {expert && <ReviewsSection expertId={expert.id} />}
           </div>
+          
         ) : (
           <Card className="p-6 text-center">
             <p className="text-gray-500">Expert not found.</p>
